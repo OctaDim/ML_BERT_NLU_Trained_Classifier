@@ -41,7 +41,7 @@ if __name__ == "__main__":
         learning_rate=BERT_OPTIONS.BERT_TRAIN_LEARNING_RATE)
     print()
 
-    print("Результаты предсказаний после первоначального обучения модели:")
+    print("Результаты предсказаний после ПЕРВОНАЧАЛЬНОГО обучения модели:")
     for cur_phrase in test_phrases_yes_no:
         category = bert_model_instance.predict(cur_phrase)
         category = f"{category} " if len(category) == 2 else category
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         learning_rate=BERT_OPTIONS.BERT_TRAIN_LEARNING_RATE)
     print()
 
-    print("Результаты предсказаний после дополнительного обучения модели:")
+    print("Результаты предсказаний после ДОПОЛНИТЕЛЬНОГО обучения модели:")
     for cur_phrase in test_phrases_yes_no:
         category = bert_model_instance.predict(cur_phrase)
         category = f"{category} " if len(category) == 2 else category

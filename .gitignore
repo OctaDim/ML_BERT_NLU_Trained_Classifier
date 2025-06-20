@@ -129,9 +129,7 @@ celerybeat.pid
 .venv
 .venv*
 env/
-venv/
-venv27/
-.venv27/
+venv*/
 .venv*/
 ENV/
 env.bak/
@@ -232,6 +230,12 @@ zNotes*/
 
 actions_results
 ___*.*
+___temp/
+___temporary/
+___Temp/
+___Temporary/
 
-
-/*vosk-models*/*
+stt_VOSK/models_vosk/*
+stt_WHISPER/models_whisper/*
+data_outgoing/*
+.configs.ini

@@ -19,7 +19,7 @@ def get_cur_external_ip_via_google_dns(log_ip: bool = True):
             cur_external_ip = cur_socket.getsockname()[0]
             # cur_socket.close()
             if log_ip:
-                print(f"Current EXTERNAL IP: {cur_external_ip}")
+                print(f"Current EXTERNAL IP: {cur_external_ip}\n")
             return cur_external_ip
     except Exception as error:
-        return f"Getting external IP [ERROR]: {error}"
+        return f"Getting external IP [ERROR]: {error}\n"
