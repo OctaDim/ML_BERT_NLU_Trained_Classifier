@@ -1,4 +1,3 @@
-# from transformers.optimization import AdamW
 from typing import List
 
 import torch
@@ -6,44 +5,61 @@ from torch.optim import AdamW
 from torch.utils.data import DataLoader, Dataset
 from transformers import BertForSequenceClassification, BertTokenizer
 
+from configs.settings import BERT_OPTIONS
+
 
 class BERTClassifierYesNo:
 
-    def __init__(
-            self,
-            model_name: str = "bert-base-multilingual-cased",
-            num_labels: int = 2,
-            max_len: int = 64,
-            cache_dir: str = None,
-    ):
+    def __init__(self,
+                 labels: dict[str: int],
+                 model_name: str = "bert-base-multilingual-cased",
+                 # num_labels: int = 2,
+                 max_len: int = 64,
+                 cache_dir: str = None, ):
         """Инициализация модели ML_BERT для классификации 'да'/'нет'.
         model_name: str: Название предобученной модели (по умолчанию 'bert-base-multilingual-cased').
         num_labels: int: Количество классов (2 для 'да'/'нет').
         max_len: int: Максимальная длина токенизированного текста.
         cache_dir: str: Директория куда будет скачиваться (кэшироваться) модель при первой инициализации
         """
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        self.labels = labels
+        self.num_labels = len(labels)
+        self.max_len = max_len
+
+        cuda_avail_flag = torch.cuda.is_available()
+        self.device = torch.device("cuda" if cuda_avail_flag else "cpu")
         self.tokenizer = BertTokenizer.from_pretrained(
-            pretrained_model_name_or_path=model_name,
-            cache_dir=cache_dir,
+            pretrained_model_name_or_path=model_name,  # orig
+            cache_dir=cache_dir,  # extra
+            force_download=False,
+            local_files_only=True,  # try
+            # local_files_only=False,
+            token=None,
+            revision="main",
+            trust_remote_code=False,
         )
 
         self.model = BertForSequenceClassification.from_pretrained(
-            pretrained_model_name_or_path=model_name,
-            num_labels=num_labels,
+            pretrained_model_name_or_path=model_name,  # org
+            cache_dir=cache_dir,  # extra
+            config=None,
+            ignore_mismatched_sizes=False,
+            force_download=False,
+            local_files_only=True,  # try
+            # local_files_only=False,
+            token=None,
+            revision="main",
+            use_safetensors=None,
+            weights_only=True,
+            num_labels=self.num_labels,
         ).to(self.device)
 
-        self.max_len = max_len
-        self.labels = {0: "нет", 1: "да"}
-
-    def train(
-            self,
-            texts: List[str],
-            labels: List[int],
-            batch_size: int = 8,
-            epochs: int = 15,
-            learning_rate: float = 5e-5,
-    ):
+    def train(self, texts: List[str],
+              labels: List[int],
+              batch_size: int = 8,
+              max_epochs: int = 15,
+              learning_rate: float = 5e-5):
         """Дообучение модели на своих данных.
         texts (List[str]): Список текстов для обучения.
         labels (List[int]): Список меток (0 = 'нет', 1 = 'да').
@@ -53,53 +69,82 @@ class BERTClassifierYesNo:
         """
         dataset = self._create_dataset(texts, labels)
         dataloader = DataLoader(
-            dataset=dataset,
-            batch_size=batch_size,
-            shuffle=True,
+            dataset=dataset,  # org
+            batch_size=batch_size,  # org
+            shuffle=True,  # org
+            sampler=None,
+            batch_sampler=None,
+            num_workers=0,
+            collate_fn=None,
+            pin_memory=False,
+            drop_last=False,
+            timeout=0,
+            worker_init_fn=None,
+            multiprocessing_context=None,
+            generator=None,
+            prefetch_factor=None,
+            persistent_workers=False,
+            pin_memory_device="",
+            in_order=True,
         )
 
         optimizer = AdamW(
-            params=self.model.parameters(),
-            lr=learning_rate,
+            params=self.model.parameters(),  # org
+            lr=learning_rate,  # org
+            betas=(0.9, 0.999),
+            eps=1e-8,
+            weight_decay=1e-2,
+            amsgrad=False,
+            maximize=False,
+            foreach=None,
+            capturable=False,
+            differentiable=False,
+            fused=None,
         )
 
         self.model.train()
-        for epoch in range(epochs):
+        cont_100perc_counter = 0
+        for cur_epoch in range(max_epochs):
             total_loss = 0
             for batch in dataloader:
                 input_ids = batch["input_ids"].to(self.device)
                 attention_mask = batch["attention_mask"].to(self.device)
                 labels = batch["label"].to(self.device)
 
-                outputs = self.model(
-                    input_ids=input_ids,
-                    attention_mask=attention_mask,
-                    labels=labels,
-                )
+                outputs = self.model(input_ids=input_ids,
+                                     attention_mask=attention_mask,
+                                     labels=labels, )
                 loss = outputs.loss
                 loss.backward()
                 optimizer.step()
                 optimizer.zero_grad()
                 total_loss += loss.item()
 
-            print(f"Эпоха {epoch + 1}, Loss: {total_loss / len(dataloader):.4f}")
+            cur_perc_res = round((1 - total_loss / len(dataloader)) * 100)
+            if cont_100perc_counter > 0 and cur_perc_res == 100:
+                cont_100perc_counter += 1
+            elif cont_100perc_counter == 0 and cur_perc_res == 100:
+                cont_100perc_counter = 1
+            else:
+                cont_100perc_counter = 0
+
+            limit_100perc_epochs = BERT_OPTIONS.CONTIN_100PERC_EPOCHS
+            print(f"Эпоха обучения: {cur_epoch + 1} "
+                  f"[верные ответы: {cur_perc_res}%] " 
+                  f"{cont_100perc_counter}/{limit_100perc_epochs}")
+
+            if cont_100perc_counter == limit_100perc_epochs:
+                return
 
     def predict(self, text: str) -> str:
-        """Предсказание метки ('да'/'нет') для текста.
-
-        Args:
-            text (str): Входной текст.
-
-        Returns:
-            str: 'да' или 'нет'.
-        """
-        encoding = self.tokenizer(
-            text,
-            truncation=True,
-            padding="max_length",
-            max_length=self.max_len,
-            return_tensors="pt",
-        )
+        """Предсказание метки ('да'/'нет') для текста
+        Args: text (str): Входной текст
+        Returns: str: 'да' или 'нет'"""
+        encoding = self.tokenizer(text,
+                                  truncation=True,
+                                  padding="max_length",
+                                  max_length=self.max_len,
+                                  return_tensors="pt", )
         input_ids = encoding["input_ids"].to(self.device)
         attention_mask = encoding["attention_mask"].to(self.device)
 
@@ -129,13 +174,11 @@ class BERTClassifierYesNo:
             def __getitem__(self, idx):
                 text = self.texts[idx]
                 label = self.labels[idx]
-                encoding = self.tokenizer(
-                    text,
-                    truncation=True,
-                    padding="max_length",
-                    max_length=self.max_len,
-                    return_tensors="pt",
-                )
+                encoding = self.tokenizer(text,
+                                          truncation=True,
+                                          padding="max_length",
+                                          max_length=self.max_len,
+                                          return_tensors="pt", )
                 return {
                     "input_ids": encoding["input_ids"].flatten(),
                     "attention_mask": encoding["attention_mask"].flatten(),
