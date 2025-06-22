@@ -237,5 +237,7 @@ ___Temporary/
 
 stt_VOSK/models_vosk/*
 stt_WHISPER/models_whisper/*
+ML_BERT/models_bert/*
 data_outgoing/*
 .configs.ini
+main_extra_train_backup.py
