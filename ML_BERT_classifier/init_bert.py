@@ -1,4 +1,6 @@
-from ML_BERT_classifier.classifier_bert import ClassifierBERT
+from typing import Dict
+
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BASE_DIR, BERT_OPTIONS, BERT_TRAIN_OPTIONS
 from train_data_sets.labels_categories import labels
@@ -48,10 +50,10 @@ class SimpleSingletonBERT:
                           exec_time_logging=True,
                           new_line_after=True,
                           note="BERT Model initialization time")
-def initialise_bert_model(labels_categories_dict: dict[int: str],
+def initialise_bert_model(labels_categories_dict: Dict[int, str],
                           model_name: str,
                           model_cache_dir: str,
-                          token_max_len: int,
+                          token_str_max_len: int,
                           use_singleton=True,
                           use_hard_singleton=True) -> ClassifierBERT:
     green_clr = CONSOLE_COLORS.BRIGHT_GREEN
@@ -59,17 +61,28 @@ def initialise_bert_model(labels_categories_dict: dict[int: str],
     print(f"Model Name: {green_clr}{model_name}{reset_clr}\n"
           f"Model Cached Dir: {green_clr}{model_cache_dir}{reset_clr}")
 
-    bert_init_data = {"labels": labels_categories_dict,
-                      "model_name": model_name,
-                      "cache_dir": model_cache_dir,
-                      "max_len": token_max_len}
+    # TODO: Use common data with unpacking instead of params for creating model bellow
+    # bert_init_data = {"labels": labels_categories_dict,
+    #                   "model_name": model_name,
+    #                   "cache_dir": model_cache_dir,
+    #                   "max_len": token_str_max_len}
+
     if use_singleton:
         if use_hard_singleton:
-            model = HardSingletonBERT(**bert_init_data)
+            model = HardSingletonBERT(labels=labels_categories_dict,
+                                      model_name=model_name,
+                                      cache_dir=model_cache_dir,
+                                      max_len=token_str_max_len)
         else:
-            model = SimpleSingletonBERT(**bert_init_data)
+            model = SimpleSingletonBERT(labels=labels_categories_dict,
+                                        model_name=model_name,
+                                        cache_dir=model_cache_dir,
+                                        max_len=token_str_max_len)
     else:
-        model = ClassifierBERT(**bert_init_data)
+        model = ClassifierBERT(labels=labels_categories_dict,
+                               model_name=model_name,
+                               cache_dir=model_cache_dir,
+                               max_len=token_str_max_len)
     return model
 
 
@@ -81,6 +94,6 @@ if BERT_OPTIONS.BERT_MODEL_INIT:
         labels_categories_dict=labels,
         model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
         model_cache_dir=BERT_OPTIONS.BERT_MODELS_DOWNLOAD_PATH,
-        token_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_MAX_LENGTH,
+        token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
         use_singleton=True,
         use_hard_singleton=True)
