@@ -7,22 +7,23 @@ from fastapi.responses import JSONResponse
 from ML_BERT_classifier.init_bert import bert_model_instance
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS, BERT_TRAIN_OPTIONS
-from fast_api.app_bert.scheme_bert import IncomeData
+from fast_api.app_bert_categorise.scheme_bert import IncomeDataBert
 from test_phrases.test_phrases import test_phrases
 from train_data_sets.labels_categories import labels
 from train_data_sets.train_data_sets import common_train_dataset
 
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
-router_bert_model = APIRouter(prefix=f"/{bert_base_url_name}", tags=["BERT"])
+router_bert_categorise = APIRouter(prefix=f"/{bert_base_url_name}",
+                                   tags=["BERT"])
 
 
-@router_bert_model.post(path="/categorise/", response_model=None)
+@router_bert_categorise.post(path="/categorise/", response_model=None)
 async def bert_categorise_text_as_class(
-        income_data: IncomeData,
+        income_data: IncomeDataBert,
         # TODO: username: Annotated[str, Depends(verify_auth_data)],
 ) -> Union[JSONResponse, HTTPException]:
-    print(f"\n{'#' * 95}")
+    print(f"\n{'#' * 100}")
     text_phrase = income_data.text_phrase
     if not text_phrase:
         log_text = (f"Empty text-phrase not allowed [ERROR]: "
@@ -40,8 +41,6 @@ async def bert_categorise_text_as_class(
         #                              log_wav_path=True,
         #                              log_wav_duration=True)
         # phrase = await asyncio.to_thread(prepared_sync_func)  # Executing prepared func
-
-
 
         # ##############################################################
         # ##############################################################
@@ -82,11 +81,26 @@ async def bert_categorise_text_as_class(
         print(f"train_phrases: {train_phrases}\n"
               f"train_labels: {train_labels}\n")
 
+        print("Создание тренировочного дата-сета:")
+        bert_model_instance.create_train_dataset(
+            texts_list=train_phrases,
+            labels_list=train_labels,
+            truncation=BERT_TRAIN_OPTIONS.BERT_TOKEN_TRUNCATION,
+            padding=BERT_TRAIN_OPTIONS.BERT_TOKEN_PADDING,
+            return_tensors=BERT_TRAIN_OPTIONS.BERT_RETURN_TENSOR)
+        print()
+
+        if not bert_model_instance.train_dataset:
+            log_text = (f"TrainDataset [ERROR]: "
+                        f"execute method .create_train_dataset() first")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=log_text)
+
         print("Дообучение модели:")
         bert_model_instance.train(
-            texts=train_phrases,
-            labels=train_labels,
-            max_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
+            max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
+            max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
             batch_size=BERT_TRAIN_OPTIONS.BERT_TRAIN_BATCH_SUZE,
             learning_rate=BERT_TRAIN_OPTIONS.BERT_TRAIN_LEARNING_RATE)
         print()
@@ -126,9 +140,9 @@ async def bert_categorise_text_as_class(
         json_response = JSONResponse(
             content={"message": "BERT text-phrase categorised: [OK]",
                      # TODO: "username": username,
-                     "model init": BERT_TRAIN_OPTIONS.BERT_MODEL_INIT,
+                     "model init": BERT_OPTIONS.BERT_MODEL_INIT,
                      "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
-                     "model path": BERT_TRAIN_OPTIONS.BERT_MODELS_DOWNLOAD_PATH,
+                     "model path": BERT_OPTIONS.BERT_MODELS_DOWNLOAD_PATH,
                      "categorising time": categorising_time,
                      "determined_category": determined_category,
                      "text-phrase": text_phrase},

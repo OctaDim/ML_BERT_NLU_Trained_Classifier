@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class IncomeData(BaseModel):
+class IncomeDataBert(BaseModel):
     text_phrase: str
