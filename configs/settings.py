@@ -3,6 +3,7 @@ import sys
 from configparser import ConfigParser
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal, Union
 
 from dotenv import load_dotenv
 
@@ -71,8 +72,20 @@ class BERT_OPTIONS:
 
 @dataclass
 class BERT_TRAIN_OPTIONS:
+    """BERT_TOKEN_PADDING note
+    str: "max_length" - add symbols till BERT_TOKEN_STR_MAX_LENGTH
+    str: "longest" - add symbols till the longest text in the batch
+    False/None - padding is not used
+    BERT_RETURN_TENSOR note:
+    str: "pt" - returns PyTorch tensors (Necessary for this project)
+    str: "tf" - returns TensorFlow tensors
+    str: "np" - returns NumPy arrays
+    None - returns lists"""
     BERT_TRAIN_MAX_EPOCHS_NUMBER: int = 50
     CONTINUOUS_100PERC_EPOCHS: int = 5
     BERT_TRAIN_BATCH_SUZE: int = 8
     BERT_TRAIN_LEARNING_RATE: int = 5e-5
-    BERT_TOKEN_MAX_LENGTH: int = 64
+    BERT_TOKEN_STR_MAX_LENGTH: int = 64
+    BERT_TOKEN_TRUNCATION: bool = False
+    BERT_TOKEN_PADDING: Union[Literal["max_length", "longest"], False, None] = "max_length"
+    BERT_RETURN_TENSOR: Union[Literal["pt", "tf", "np"], None] = "pt"
