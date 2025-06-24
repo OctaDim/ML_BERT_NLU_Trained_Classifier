@@ -3,13 +3,15 @@ from fastapi import FastAPI
 
 from configs.settings import (
     API_HOST, API_PORT)
-from fast_api.app_bert.router_bert import router_bert_model
+from fast_api.app_bert_categorise.router_bert import router_bert_categorise
 from fast_api.app_root_url.router_main import router_root_url
+from fast_api.app_test.router_test import router_bert_test
 
 
 routers_list = [
     router_root_url,
-    router_bert_model,
+    router_bert_categorise,
+    router_bert_test,
 ]
 
 
