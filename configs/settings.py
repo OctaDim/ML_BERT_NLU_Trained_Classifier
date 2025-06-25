@@ -16,12 +16,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 full_path = os.path.join(BASE_DIR, ".env")
 normal_env_path = os.path.normpath(full_path)
 env = load_dotenv(normal_env_path)  # for future
+API_TEST_USERNAME = os.getenv("API_TEST_USERNAME")
+API_TEST_PASSWORD = os.getenv("API_TEST_PASSWORD")
 
-
-# API_HOST: str = os.getenv("API_HOST")
-# API_PORT: int = int(os.getenv("API_PORT"))
-# API_USERNAME = os.getenv("API_USERNAME")
-# API_PASSWORD = os.getenv("API_PASSWORD")
 
 @dataclass
 class API_CONFIG_NAMES:
@@ -66,7 +63,9 @@ class BERT_MODEL_NAMES:
 class BERT_OPTIONS:
     BERT_MODEL_INIT: bool = True
     BERT_ACTIVE_MODEL_NAME: str = BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED
-    BERT_MODELS_DOWNLOAD_PATH: str = "ML_BERT_classifier/models_bert"
+    BERT_MODELS_DOWNLOAD_PATH: str = "ML_BERT_classifier/model_bert_pretrained"
+    BERT_TRAINED_MODELS_SAVE_PATH: str = "ML_BERT_classifier/models_bert_trained"
+    BERT_TRAINED_MODELS_SAVE_DIR_PREFIX: str = "trd_bert"
     BERT_API_URL_BASE_NAME: str = "bert"
 
 
@@ -81,7 +80,7 @@ class BERT_TRAIN_OPTIONS:
     str: "tf" - returns TensorFlow tensors
     str: "np" - returns NumPy arrays
     None - returns lists"""
-    BERT_TRAIN_MAX_EPOCHS_NUMBER: int = 50
+    BERT_TRAIN_MAX_EPOCHS_NUMBER: int = 3
     CONTINUOUS_100PERC_EPOCHS: int = 5
     BERT_TRAIN_BATCH_SUZE: int = 8
     BERT_TRAIN_LEARNING_RATE: int = 5e-5
