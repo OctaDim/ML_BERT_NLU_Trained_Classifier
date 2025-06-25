@@ -1,37 +1,12 @@
+import os
 from typing import Dict, List, Literal, Union
 
 import torch
 from torch.optim import AdamW
-from torch.utils.data import DataLoader, Dataset, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset
 from transformers import BertForSequenceClassification, BertTokenizer
 
 from configs.console_colors import CONSOLE_COLORS
-
-
-# class TrainDataset(Dataset):
-#     """Create training data-set"""
-#
-#     def __init__(self, texts, labels, tokenizer, max_len):
-#         self.texts = texts
-#         self.labels = labels
-#         self.tokenizer = tokenizer
-#         self.max_len = max_len
-#
-#     def __len__(self):
-#         return len(self.texts)
-#
-#     def __getitem__(self, idx):
-#         text = self.texts[idx]
-#         label = self.labels[idx]
-#         encoding = self.tokenizer(text,
-#                                   truncation=True,
-#                                   padding="max_length",
-#                                   max_length=self.max_len,
-#                                   return_tensors="pt")
-#         dataset_data = {"input_ids": encoding["input_ids"].flatten(),
-#                         "attention_mask": encoding["attention_mask"].flatten(),
-#                         "label": torch.tensor(label, dtype=torch.long)}
-#         return dataset_data
 
 
 class ClassifierBERT:
@@ -42,14 +17,15 @@ class ClassifierBERT:
                  cache_dir: str = None,
                  max_len: int = 64):
         """ BERT Model classifier to classify text phrases by sense categories.
-        labels: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}
+        labels_categories: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}
         model_name: str: Pretrained model name, 'bert-base-multilingual-cased' by default
         cache_dir: str: Pretrained model download directory when init, if differs from default one
         max_len: int: Max length in symbols of the token string, more will be cut"""
 
         self.labels = labels
         self.max_len = max_len
-        self.train_dataset = None
+        # self.train_dataset = None
+        self.last_saved_model_path = None
 
         device_name = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = torch.device(device_name)
@@ -82,6 +58,26 @@ class ClassifierBERT:
             num_labels=len(labels),
         ).to(self.device)  # Transfer pretrained model to the cur device cpu or gpu
 
+    def predict(self, text: str) -> str:
+        """Predict class (category, label) for given text or phrase
+        text: str: Income any text or phrase to predict category for it
+        Returns: str: Returns predicted category label"""
+        encoding = self.tokenizer(text,
+                                  truncation=False,
+                                  padding="max_length",
+                                  max_length=self.max_len,
+                                  return_tensors="pt")
+        input_ids = encoding["input_ids"].to(self.device)
+        attention_mask = encoding["attention_mask"].to(self.device)
+
+        with torch.no_grad():
+            outputs = self.model(input_ids=input_ids,
+                                 attention_mask=attention_mask)
+            logits = outputs.logits
+            prediction = torch.argmax(logits, dim=1).item()
+
+        return self.labels[prediction]
+
     def create_train_dataset(
             self,
             texts_list: List[str],
@@ -90,8 +86,8 @@ class ClassifierBERT:
             padding: Union[Literal["max_length", "longest"], False, None] = "max_length",
             return_tensors: Union[Literal["pt", "tf", "np"], None] = "pt"
     ) -> TensorDataset:
-        """:param texts_list: list: texts in corresponding labels order
-        :param labels_list: list: right labels in corresponding texts order
+        """:param texts_list: list: texts in corresponding labels_categories order
+        :param labels_list: list: right labels_categories in corresponding texts order
         :param truncation: bool: truncate text or not to self.max_len
         :param padding: "max_length" padding to the length of self.max_len,
         "longest" padding to the max length text of the batch,
@@ -100,16 +96,16 @@ class ClassifierBERT:
         "tf" returns TensorFlow tensors, "np" returns NumPy arrays,
         None returns lists"""
 
-        # train_dataset_obj = TrainDataset(texts=texts,
-        #                                  labels=labels,
-        #                                  tokenizer=self.tokenizer,
-        #                                  max_len=self.max_len)
-        # return train_dataset_obj
+        print(f"texts_list: {texts_list}\n"
+              f"labels_list: {labels_list}\n"
+              f"truncation: {truncation}\n"
+              f"padding: {padding}\n"
+              f"return_tensors: {return_tensors}\n")
 
         input_ids = []
         attention_masks = []
-        for text in texts_list:
-            encoding = self.tokenizer(text,
+        for cur_text in texts_list:
+            encoding = self.tokenizer(cur_text,
                                       truncation=truncation,
                                       padding=padding,
                                       max_length=self.max_len,
@@ -123,12 +119,11 @@ class ClassifierBERT:
 
         tensor_dataset = TensorDataset(
             input_ids, attention_masks, labels)
-
-        self.train_dataset = tensor_dataset
+        # self.train_dataset = tensor_dataset
         return tensor_dataset
 
     def train(self,
-              train_dataset: Union[TensorDataset, None] = None,
+              train_dataset: TensorDataset,
               max_training_epochs: int = 50,
               max_cont_100perc_epochs: int = 5,
               batch_size: int = 8,
@@ -141,15 +136,20 @@ class ClassifierBERT:
         :param batch_size: int: Batch size, depends on memory size (8, 16, 32, ...)
         :param learning_rate: float: Learning speed. The slower, the more accurate
         """
+        print(f"train_dataset: {train_dataset}\n"
+              f"max_training_epochs: {max_training_epochs}\n"
+              f"max_cont_100perc_epochs: {max_cont_100perc_epochs}\n"
+              f"batch_size: {batch_size}\n"
+              f"learning_rate: {learning_rate}\n")
 
-        if not train_dataset and not self.train_dataset:
+        if not train_dataset:
             print(f"TrainDataset [ERROR]: execute method .create_train_dataset() "
                   f"before calling method .train(): "
-                  f"train_dataset: {train_dataset}, "
-                  f"self.train_dataset: {self.train_dataset}")
+                  f"train_dataset: {train_dataset}")
             return
 
-        dataset = train_dataset if train_dataset else self.train_dataset
+        dataset = train_dataset
+        # dataset = train_dataset if train_dataset else self.train_dataset
         dataloader = DataLoader(dataset=dataset,  # org
                                 batch_size=batch_size,  # org
                                 shuffle=True,  # org
@@ -191,11 +191,6 @@ class ClassifierBERT:
                 attention_mask = batch[1].to(self.device)
                 labels = batch[2].to(self.device)
 
-                # If class TrainDataset(Dataset) is used
-                # input_ids = batch["input_ids"].to(self.device)
-                # attention_mask = batch["attention_mask"].to(self.device)
-                # labels = batch["label"].to(self.device)
-
                 outputs = self.model(input_ids=input_ids,
                                      attention_mask=attention_mask,
                                      labels=labels)
@@ -206,10 +201,8 @@ class ClassifierBERT:
                 total_loss += loss.item()
 
             cur_perc_res = round((1 - total_loss / len(dataloader)) * 100)
-            if cont_100perc_epochs_counter > 0 and cur_perc_res == 100:
+            if cur_perc_res == 100:
                 cont_100perc_epochs_counter += 1
-            elif cont_100perc_epochs_counter == 0 and cur_perc_res == 100:
-                cont_100perc_epochs_counter = 1
             else:
                 cont_100perc_epochs_counter = 0
             print(f"Training Epoch: {cur_train_epoch_idx + 1} "
@@ -219,22 +212,43 @@ class ClassifierBERT:
             if cont_100perc_epochs_counter == max_cont_100perc_epochs:
                 return
 
-    def predict(self, text: str) -> str:
-        """Predict class (category, label) for given text or phrase
-        text: str: Income any text or phrase to predict category for it
-        Returns: str: Returns predicted category label"""
-        encoding = self.tokenizer(text,
-                                  truncation=False,
-                                  padding="max_length",
-                                  max_length=self.max_len,
-                                  return_tensors="pt")
-        input_ids = encoding["input_ids"].to(self.device)
-        attention_mask = encoding["attention_mask"].to(self.device)
+    def save_model(self, dir_full_path: str) -> None:
+        """Save model and tokeniser"""
 
-        with torch.no_grad():
-            outputs = self.model(input_ids=input_ids,
-                                 attention_mask=attention_mask)
-            logits = outputs.logits
-            prediction = torch.argmax(logits, dim=1).item()
+        if not dir_full_path:
+            print(f"Model save dir path not defined [ERROR]: "
+                  f"dir_full_path: {dir_full_path}")
 
-        return self.labels[prediction]
+        try:
+            os.makedirs(dir_full_path, exist_ok=True)
+            self.model.save_pretrained(dir_full_path)
+            self.tokenizer.save_pretrained(dir_full_path)
+            self.last_saved_model_path = dir_full_path
+        except Exception as error:
+            print(f"BERT Model saving [ERROR]: error: {error}")
+
+    def load_model(self, dir_full_path: str = None) -> None:
+        """Load model and tokeniser saved earlier"""
+        if dir_full_path:
+            model_path = dir_full_path
+        else:
+            model_path = self.last_saved_model_path
+
+        if not model_path:
+            print(f"Model load dir path not defined [ERROR]: "
+                  f"dir_full_path: {dir_full_path}, "
+                  f"self.last_trained_model_path {self.last_saved_model_path}")
+            return
+
+        if not os.path.exists(model_path):
+            print(f"Model load dir path not exists [ERROR]: "
+                  f"dir_full_path: {dir_full_path}, "
+                  f"self.last_trained_model_path {self.last_saved_model_path}")
+            return
+
+        try:
+            self.model = BertForSequenceClassification.from_pretrained(
+                model_path).to(self.device)
+            self.tokenizer = BertTokenizer.from_pretrained(model_path)
+        except Exception as error:
+            print(f"BERT Model loading [ERROR]: error: {error}")
