@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
 
-class AuthDataTest(BaseModel):
-    username: str = "temp_username"
-    password: str = "temp_password"
+class AuthDataBert(BaseModel):
+    username: str = "temp_zxc"
+    password: str = "temp_123"
