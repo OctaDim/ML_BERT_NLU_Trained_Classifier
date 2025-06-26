@@ -1,4 +1,4 @@
-common_train_dataset = {
+test_train_dataset = {
     # CANCEL (0)
     "ага, как же": 0,
     "да, но нет": 0,
