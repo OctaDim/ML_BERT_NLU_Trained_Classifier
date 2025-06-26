@@ -3,7 +3,8 @@ from typing import Dict
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BASE_DIR, BERT_OPTIONS, BERT_TRAIN_OPTIONS
-from train_data_sets.test_train_data import test_labels_categories
+from train_data_sets.test_train_data.test_labels_categories import (
+    test_labels_categories)
 from utils_common.exec_time_decorator import execution_time_decorator
 from utils_common.normalized_path import get_full_dir_normal_path
 
