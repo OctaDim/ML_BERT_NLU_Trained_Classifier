@@ -63,9 +63,9 @@ class BERT_MODEL_NAMES:
 class BERT_OPTIONS:
     BERT_MODEL_INIT: bool = True
     BERT_ACTIVE_MODEL_NAME: str = BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED
-    BERT_MODELS_DOWNLOAD_PATH: str = "ML_BERT_classifier/model_bert_pretrained"
-    BERT_TRAINED_MODELS_SAVE_PATH: str = "ML_BERT_classifier/models_bert_trained"
-    BERT_TRAINED_MODELS_SAVE_DIR_PREFIX: str = "trd_bert"
+    BERT_MODELS_DOWNLOAD_PATH: str = "ML_BERT_classifier/model_bert_init_pretrained"
+    BERT_TRAINED_MODELS_SAVE_PATH: str = "ML_BERT_classifier/models_bert_product_trained"
+    BERT_TRAINED_MODELS_SAVE_DIR_PREFIX: str = "trained_bert"
     BERT_API_URL_BASE_NAME: str = "bert"
 
 
