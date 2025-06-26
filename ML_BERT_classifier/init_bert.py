@@ -3,7 +3,7 @@ from typing import Dict
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BASE_DIR, BERT_OPTIONS, BERT_TRAIN_OPTIONS
-from train_data_sets.labels_categories import labels_categories
+from train_data_sets.test_train_data import test_labels_categories
 from utils_common.exec_time_decorator import execution_time_decorator
 from utils_common.normalized_path import get_full_dir_normal_path
 
@@ -62,7 +62,7 @@ def initialise_bert_model(labels_categories_dict: Dict[int, str],
           f"Model Cached Dir: {green_clr}{model_cache_dir}{reset_clr}")
 
     # TODO: Use common data with unpacking instead of params for creating model bellow
-    # bert_init_data = {"labels_categories": labels_categories_dict,
+    # bert_init_data = {"test_train_data": labels_categories_dict,
     #                   "model_name": model_name,
     #                   "cache_dir": model_cache_dir,
     #                   "max_len": token_str_max_len}
@@ -91,7 +91,7 @@ if BERT_OPTIONS.BERT_MODEL_INIT:
         [BASE_DIR, BERT_OPTIONS.BERT_MODELS_DOWNLOAD_PATH])
 
     bert_model_instance = initialise_bert_model(
-        labels_categories_dict=labels_categories,
+        labels_categories_dict=test_labels_categories,
         model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
         model_cache_dir=BERT_OPTIONS.BERT_MODELS_DOWNLOAD_PATH,
         token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,

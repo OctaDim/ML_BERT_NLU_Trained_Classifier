@@ -17,7 +17,7 @@ class ClassifierBERT:
                  cache_dir: str = None,
                  max_len: int = 64):
         """ BERT Model classifier to classify text phrases by sense categories.
-        labels_categories: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}
+        test_train_data: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}
         model_name: str: Pretrained model name, 'bert-base-multilingual-cased' by default
         cache_dir: str: Pretrained model download directory when init, if differs from default one
         max_len: int: Max length in symbols of the token string, more will be cut"""
@@ -86,8 +86,8 @@ class ClassifierBERT:
             padding: Union[Literal["max_length", "longest"], False, None] = "max_length",
             return_tensors: Union[Literal["pt", "tf", "np"], None] = "pt"
     ) -> TensorDataset:
-        """:param texts_list: list: texts in corresponding labels_categories order
-        :param labels_list: list: right labels_categories in corresponding texts order
+        """:param texts_list: list: texts in corresponding test_train_data order
+        :param labels_list: list: right test_train_data in corresponding texts order
         :param truncation: bool: truncate text or not to self.max_len
         :param padding: "max_length" padding to the length of self.max_len,
         "longest" padding to the max length text of the batch,
@@ -205,8 +205,8 @@ class ClassifierBERT:
                 cont_100perc_epochs_counter += 1
             else:
                 cont_100perc_epochs_counter = 0
-            print(f"Training Epoch: {cur_train_epoch_idx + 1} "
-                  f"[Right Categories: {cur_perc_res}%] "
+            print(f"Training epoch: {cur_train_epoch_idx + 1} "
+                  f"[Right categories: {cur_perc_res}%] "
                   f"{cont_100perc_epochs_counter}/{max_cont_100perc_epochs}")
 
             if cont_100perc_epochs_counter == max_cont_100perc_epochs:
