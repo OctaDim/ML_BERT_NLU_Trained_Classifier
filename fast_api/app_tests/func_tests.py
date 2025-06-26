@@ -1,12 +1,12 @@
 from ML_BERT_classifier.init_bert import bert_model_instance
 from configs.console_colors import CONSOLE_COLORS
 from test_phrases.test_phrases import test_phrases
-from train_data_sets.labels_categories import labels_categories
+from train_data_sets.test_train_data import test_labels_categories
 
 
 def test_group_prediction():
     print("#" * 100)
-    all_categories_lens = [len(cat) for cat in labels_categories.values()]
+    all_categories_lens = [len(cat) for cat in test_labels_categories.values()]
     categories_max_len = max(all_categories_lens)
     all_phrases_tot = len(test_phrases)
 
@@ -19,7 +19,7 @@ def test_group_prediction():
     for cur_text, cur_test_label in test_phrases.items():
         counter += 1
         predicted_category = bert_model_instance.predict(cur_text)
-        if predicted_category == labels_categories.get(cur_test_label):
+        if predicted_category == test_labels_categories.get(cur_test_label):
             result_str = f"{green_color}[OK]{reset_color}"
             right_categories_tot += 1
         else:
