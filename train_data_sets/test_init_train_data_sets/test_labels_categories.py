@@ -1,4 +1,4 @@
-test_labels_categories = {
+labels_categories = {
     0: "отказ",
     1: "желание",
     2: "грубый мат",
