@@ -3,7 +3,8 @@ from typing import Dict
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BASE_DIR, BERT_OPTIONS, BERT_TRAIN_OPTIONS
-from train_test_data_sets.train_test_labels_categories import test_labels_categories
+from train_data_sets.test_init_train_data_sets.test_labels_categories import (
+    labels_categories)
 from utils_common.exec_time_decorator import execution_time_decorator
 from utils_common.normalized_path import get_full_dir_normal_path
 
@@ -88,12 +89,12 @@ def initialise_bert_model(labels_categories_dict: Dict[int, str],
 
 if BERT_OPTIONS.BERT_MODEL_INIT:
     bert_model_path = get_full_dir_normal_path(
-        [BASE_DIR, BERT_OPTIONS.BERT_MODELS_DOWNLOAD_PATH])
+        [BASE_DIR, BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH])
 
-    bert_model_instance = initialise_bert_model(
-        labels_categories_dict=test_labels_categories,
+    bert_model_inst = initialise_bert_model(
+        labels_categories_dict=labels_categories,
         model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
-        model_cache_dir=BERT_OPTIONS.BERT_MODELS_DOWNLOAD_PATH,
+        model_cache_dir=BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
         token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
         use_singleton=True,
         use_hard_singleton=True)

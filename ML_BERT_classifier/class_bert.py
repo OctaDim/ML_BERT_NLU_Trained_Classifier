@@ -24,8 +24,8 @@ class ClassifierBERT:
 
         self.labels = labels
         self.max_len = max_len
-        # self.train_dataset = None
-        self.last_saved_model_path = None
+        self.last_saved_model_dir = None
+        self.last_saved_dataset_dir = None
 
         device_name = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = torch.device(device_name)
@@ -223,7 +223,7 @@ class ClassifierBERT:
             os.makedirs(dir_full_path, exist_ok=True)
             self.model.save_pretrained(dir_full_path)
             self.tokenizer.save_pretrained(dir_full_path)
-            self.last_saved_model_path = dir_full_path
+            self.last_saved_model_dir = dir_full_path
         except Exception as error:
             print(f"BERT Model saving [ERROR]: error: {error}")
 
@@ -232,18 +232,18 @@ class ClassifierBERT:
         if dir_full_path:
             model_path = dir_full_path
         else:
-            model_path = self.last_saved_model_path
+            model_path = self.last_saved_model_dir
 
         if not model_path:
             print(f"Model load dir path not defined [ERROR]: "
                   f"dir_full_path: {dir_full_path}, "
-                  f"self.last_trained_model_path {self.last_saved_model_path}")
+                  f"self.last_trained_model_path {self.last_saved_model_dir}")
             return
 
         if not os.path.exists(model_path):
             print(f"Model load dir path not exists [ERROR]: "
                   f"dir_full_path: {dir_full_path}, "
-                  f"self.last_trained_model_path {self.last_saved_model_path}")
+                  f"self.last_trained_model_path {self.last_saved_model_dir}")
             return
 
         try:
