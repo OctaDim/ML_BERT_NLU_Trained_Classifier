@@ -3,14 +3,14 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
-from ML_BERT_classifier.init_bert import bert_model_instance
+from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.settings import (
     BERT_MODEL_NAMES, BERT_OPTIONS, BERT_TRAIN_OPTIONS)
 from fast_api.app_auth.funcs_auth import verify_test_username_password
 from fast_api.app_tests.func_tests import test_group_prediction
 from fast_api.app_tests.schemes_test import AuthDataTest
-from train_test_data_sets.train_test_texts_labels import (
-    test_texts_labels)
+from train_data_sets.test_init_train_data_sets.test_texts_labels import (
+    texts_labels)
 
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
@@ -29,12 +29,12 @@ async def bert_test_train_categorise(auth_data: AuthDataTest):
 
         print("Preparing training data set:")
         train_dataset_unique = {}
-        for cur_test_phrase, cur_test_label in test_texts_labels.items():
+        for cur_test_phrase, cur_test_label in texts_labels.items():
             train_dataset_unique[cur_test_phrase] = cur_test_label
         train_phrases = list(train_dataset_unique.keys())
         train_labels = list(train_dataset_unique.values())
 
-        new_train_dataset = bert_model_instance.create_train_dataset(
+        new_train_dataset = bert_model_inst.create_train_dataset(
             texts_list=train_phrases,
             labels_list=train_labels,
             truncation=BERT_TRAIN_OPTIONS.BERT_TOKEN_TRUNCATION,
@@ -52,7 +52,7 @@ async def bert_test_train_categorise(auth_data: AuthDataTest):
 
         print("Model training:")
         datetime_start = datetime.now()
-        bert_model_instance.train(
+        bert_model_inst.train(
             train_dataset=new_train_dataset,
             max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
             max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
@@ -70,7 +70,7 @@ async def bert_test_train_categorise(auth_data: AuthDataTest):
                      "username": auth_data.username,
                      "model init": BERT_OPTIONS.BERT_MODEL_INIT,
                      "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
-                     "model path": BERT_OPTIONS.BERT_MODELS_DOWNLOAD_PATH,
+                     "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
                      "training time": training_time},
             status_code=status.HTTP_200_OK)
 

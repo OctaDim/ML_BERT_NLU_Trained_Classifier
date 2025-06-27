@@ -5,8 +5,8 @@ from fastapi import HTTPException, status
 from configs.settings import API_PASSWORD, API_TEST_PASSWORD, API_TEST_USERNAME, API_USERNAME
 
 
-def verify_product_username_password(username: str, password: str
-                                     ) -> Union[bool, HTTPException]:
+def verify_prod_username_password(username: str, password: str
+                                  ) -> Union[bool, HTTPException]:
     if username != API_USERNAME or password != API_PASSWORD:
         log_text = (f"Wrong test username or test password [ERROR]:"
                     f"username: {username}, password: ***")

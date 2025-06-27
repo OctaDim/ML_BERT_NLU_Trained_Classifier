@@ -1,19 +1,17 @@
 # import asyncio
+# from functools import partial
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
-from ML_BERT_classifier.init_bert import bert_model_instance
+from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_MODEL_NAMES, BERT_OPTIONS, BERT_TRAIN_OPTIONS)
-from fast_api.app_auth.funcs_auth import verify_product_username_password
+from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_train_model.scheme_bert_train_model import TrainingData
-
-
-# from functools import partial
 
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
@@ -26,8 +24,8 @@ router_bert_train_model = APIRouter(prefix=f"/{bert_base_url_name}",
                               response_model=None)
 async def bert_train_model(auth_data: AuthDataBert,
                            train_data: TrainingData):
-    verify_product_username_password(username=auth_data.username,
-                                     password=auth_data.password)
+    verify_prod_username_password(username=auth_data.username,
+                                  password=auth_data.password)
 
     # save_after_train_flag = train_data.save_after_train  # TODO: For future
 
@@ -43,7 +41,7 @@ async def bert_train_model(auth_data: AuthDataBert,
         print(f"train_labels: {train_labels}")
 
         print("\nStart training BERT model:")
-        new_train_dataset = bert_model_instance.create_train_dataset(
+        new_train_dataset = bert_model_inst.create_train_dataset(
             texts_list=train_phrases,
             labels_list=train_labels,
             truncation=BERT_TRAIN_OPTIONS.BERT_TOKEN_TRUNCATION,
@@ -63,7 +61,7 @@ async def bert_train_model(auth_data: AuthDataBert,
 
         print("\nModel training:")
         datetime_start = datetime.now()
-        bert_model_instance.train(
+        bert_model_inst.train(
             train_dataset=new_train_dataset,
             max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
             max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
@@ -78,7 +76,7 @@ async def bert_train_model(auth_data: AuthDataBert,
                      "username": auth_data.username,
                      "model init": BERT_OPTIONS.BERT_MODEL_INIT,
                      "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
-                     "model path": BERT_OPTIONS.BERT_MODELS_DOWNLOAD_PATH,
+                     "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
                      "creating data-set time": creating_dataset_time,
                      "training model time": training_time},
             status_code=status.HTTP_200_OK)

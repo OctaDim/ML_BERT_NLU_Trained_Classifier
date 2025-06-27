@@ -32,7 +32,7 @@ async def bert_test_categorise(auth_data: AuthDataTest):
                      "username": auth_data.username,
                      "model init": BERT_OPTIONS.BERT_MODEL_INIT,
                      "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
-                     "model path": BERT_OPTIONS.BERT_MODELS_DOWNLOAD_PATH,
+                     "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
                      "group prediction time": prediction_time},
             status_code=status.HTTP_200_OK)
 
