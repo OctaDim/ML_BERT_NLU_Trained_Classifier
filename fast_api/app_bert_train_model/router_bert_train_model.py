@@ -11,7 +11,6 @@ from configs.settings import (
 from fast_api.app_auth.funcs_auth import verify_product_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_train_model.scheme_bert_train_model import TrainingData
-from train_data_sets.test_train_data.test_train_data_sets import test_train_dataset
 
 
 # from functools import partial

@@ -1,4 +1,4 @@
-test_train_dataset = {
+test_texts_labels = {
     # CANCEL (0)
     "ага, как же": 0,
     "да, но нет": 0,

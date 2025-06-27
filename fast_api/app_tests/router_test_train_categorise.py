@@ -9,7 +9,8 @@ from configs.settings import (
 from fast_api.app_auth.funcs_auth import verify_test_username_password
 from fast_api.app_tests.func_tests import test_group_prediction
 from fast_api.app_tests.schemes_test import AuthDataTest
-from train_data_sets.test_train_data.test_train_data_sets import test_train_dataset
+from train_test_data_sets.train_test_texts_labels import (
+    test_texts_labels)
 
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
@@ -28,7 +29,7 @@ async def bert_test_train_categorise(auth_data: AuthDataTest):
 
         print("Preparing training data set:")
         train_dataset_unique = {}
-        for cur_test_phrase, cur_test_label in test_train_dataset.items():
+        for cur_test_phrase, cur_test_label in test_texts_labels.items():
             train_dataset_unique[cur_test_phrase] = cur_test_label
         train_phrases = list(train_dataset_unique.keys())
         train_labels = list(train_dataset_unique.values())

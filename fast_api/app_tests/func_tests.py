@@ -1,7 +1,8 @@
 from ML_BERT_classifier.init_bert import bert_model_instance
 from configs.console_colors import CONSOLE_COLORS
 from test_phrases.test_phrases import test_phrases
-from train_data_sets.test_train_data import test_labels_categories
+from train_test_data_sets.train_test_labels_categories import (
+    test_labels_categories)
 
 
 def test_group_prediction():
