@@ -2,10 +2,11 @@ import uvicorn
 from fastapi import FastAPI
 
 from configs.settings import API_HOST, API_PORT
-from fast_api.app_bert_get_categories_list.router_bert_get_categories_list import router_bert_get_categories_list
+from fast_api.app_add_text_category.router_add_text_category import router_bert_add_text_category
+from fast_api.app_bert_get_all_categories.router_bert_get_all_categories import router_bert_get_all_categories
 from fast_api.app_bert_load_model.router_bert_load_model import router_bert_load_model
 from fast_api.app_bert_save_model.router_bert_save_model import router_bert_save_model
-from fast_api.app_predict.router_predict_single_text import router_bert_predict_single_text
+from fast_api.app_predict_text.router_predict_single_text import router_bert_predict_single_text
 from fast_api.app_root_url.router_main import router_root_url
 from fast_api.app_bert_train_model.router_bert_train_model import router_bert_train_model
 from fast_api.app_tests.router_test_categorise import router_test_categorise
@@ -24,7 +25,8 @@ routers_list = [
     router_bert_train_model,
     router_bert_save_model,
     router_bert_load_model,
-    router_bert_get_categories_list,
+    router_bert_get_all_categories,
+    router_bert_add_text_category,
 
 ]
 

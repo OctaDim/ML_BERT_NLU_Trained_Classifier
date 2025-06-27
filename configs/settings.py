@@ -61,16 +61,22 @@ class BERT_MODEL_NAMES:
 
 @dataclass
 class BERT_OPTIONS:
+    # API
+    BERT_API_URL_BASE_NAME: str = "bert"
+    # INITIAL MODEL
     BERT_MODEL_INIT: bool = True
     BERT_ACTIVE_MODEL_NAME: str = BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED
-    BERT_MODELS_DOWNLOAD_PATH: str = "ML_BERT_classifier/model_bert_init_pretrained"
-    BERT_TRAINED_MODELS_SAVE_PATH: str = "ML_BERT_classifier/models_bert_product_trained"
-    BERT_LABELS_CATEGORIES_CSV_PATH: str = "train_product_data_sets/product_labels_categories"
-    BERT_LABELS_CATEGORIES_CSV_NAME: str = "train_labels_categories.csv"
-    BERT_TRAIN_DATA_CSV_PATH: str = "train_product_data_sets/product_texts_labels"
-    BERT_TRAIN_DATA_CSV_NAME: str = "train_texts_labels.csv"
+    BERT_INITIAL_MODEL_DOWNLOAD_PATH: str = "ML_BERT_classifier/model_bert_init_pretrained"
+    # TRAINED MODELS
+    BERT_TRAINED_MODELS_BASE_PATH: str = "ML_BERT_classifier/models_bert_product_trained"
     BERT_TRAINED_MODELS_SAVE_DIR_PREFIX: str = "trained_bert"
-    BERT_API_URL_BASE_NAME: str = "bert"
+    # DATASETS CSV
+    BERT_INITIAL_DATASET_CSV_PATH: str = "train_data_sets/product_init_train_dataset"
+    BERT_NEW_DATASETS_CSV_BASE_PATH: str = "train_data_sets/product_new_train_datasets"
+    BERT_LABEL_CATEGORY_CSV_NAME: str = "prod_labels_categories.csv"
+    BERT_TEXT_LABEL_CSV_NAME: str = "prod_texts_labels.csv"
+    BERT_OVERWRITE_DATASET_CSV: bool = False
+    BERT_NEW_DATASET_CSV_DIR_PREFIX: str = "updated"
 
 
 @dataclass
