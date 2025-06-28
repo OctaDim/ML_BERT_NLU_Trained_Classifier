@@ -66,13 +66,13 @@ class BERT_OPTIONS:
     # INITIAL MODEL
     BERT_MODEL_INIT: bool = True
     BERT_ACTIVE_MODEL_NAME: str = BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED
-    BERT_INITIAL_MODEL_DOWNLOAD_PATH: str = "ML_BERT_classifier/model_bert_init_pretrained"
+    BERT_INITIAL_MODEL_DOWNLOAD_PATH: str = "ML_BERT_models/model_bert_init_pretrained"
     # TRAINED MODELS
-    BERT_TRAINED_MODELS_BASE_PATH: str = "ML_BERT_classifier/models_bert_product_trained"
+    BERT_TRAINED_MODELS_BASE_PATH: str = "ML_BERT_models/models_bert_product_trained"
     BERT_TRAINED_MODELS_SAVE_DIR_PREFIX: str = "trained_bert"
     # DATASETS CSV
-    BERT_INITIAL_DATASET_CSV_PATH: str = "train_data_sets/product_init_train_dataset"
-    BERT_NEW_DATASETS_CSV_BASE_PATH: str = "train_data_sets/product_new_train_datasets"
+    BERT_INITIAL_DATASET_CSV_PATH: str = "ML_BERT_train_datasets/product_init_train_dataset"
+    BERT_NEW_DATASETS_CSV_BASE_PATH: str = "ML_BERT_train_datasets/product_new_train_datasets"
     BERT_LABEL_CATEGORY_CSV_NAME: str = "prod_labels_categories.csv"
     BERT_TEXT_LABEL_CSV_NAME: str = "prod_texts_labels.csv"
     BERT_OVERWRITE_DATASET_CSV: bool = False

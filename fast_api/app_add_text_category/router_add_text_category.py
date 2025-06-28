@@ -49,12 +49,25 @@ async def bert_add_text_category(auth_data: AuthDataBert,
     update_text = update_text.strip().lower()
     update_category = update_category.strip().lower()
 
+    dataset_path_file_saved = ""  # TODO: Path from file or MongoDB here
+
     if bert_model_inst.last_saved_dataset_dir:
         prev_dataset_dir_path = bert_model_inst.last_saved_dataset_dir
+    elif dataset_path_file_saved:
+        prev_dataset_dir_path = dataset_path_file_saved
     else:
         initial_dataset_dir = BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH
         prev_dataset_dir_path = get_full_dir_normal_path(
             [BASE_DIR, initial_dataset_dir])
+
+    if not all([os.path.exists(prev_dataset_dir_path),
+                os.path.isdir(prev_dataset_dir_path)]):
+        log_text = (f"Data-set initial or saved dir path not found [ERROR]: "
+                    f"prev_dataset_dir_path: {prev_dataset_dir_path}")
+        print(log_text)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=log_text)
 
     try:
         print("\nAdding new text-category pair:")

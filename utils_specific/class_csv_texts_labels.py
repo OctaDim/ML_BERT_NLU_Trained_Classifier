@@ -18,7 +18,7 @@ class CsvTextLabel:
             text = cur_row.get("text", "").strip().lower()
             label = cur_row.get("label", "").strip().lower()
             if text and label is not None:
-                train_data_set[text] = label
+                train_data_set[text] = int(label)
             else:
                 date_time = cur_row.get("date_time", "")
                 print(f"Current row skipped, empty field value [ERROR]: "
@@ -26,24 +26,15 @@ class CsvTextLabel:
                       f"date_time: {date_time}\n")
         return train_data_set
 
-    def get_text_label_datasets(self) -> dict[str: list, str: list]:
-        labels_list = []
-        texts_list = []
-        self.csv_file_obj.seek(0)
-        csv_dict_reader = csv.DictReader(self.csv_file_obj)
-        for cur_row in csv_dict_reader:
-            text = cur_row.get("text", "").strip().lower()
-            label = cur_row.get("label", "").strip().lower()
-            if text and label:
-                texts_list.append(text)
-                labels_list.append(label)
-            else:
-                date_time = cur_row.get("date_time", "")
-                print(f"Current row skipped, empty field value [ERROR]: "
-                      f"text: {text}, label: {label}, "
-                      f"date_time: {date_time}\n")
-        train_datasets = {"texts": texts_list, "labels": labels_list}
-        return train_datasets
+    def get_texts_list_unique(self) -> list[str]:
+        text_lab_unique_dict: dict = self.get_text_label_dict()
+        texts_list = list(text_lab_unique_dict.keys())
+        return texts_list
+
+    def get_labels_list_unique(self) -> list[int]:
+        text_lab_unique_dict: dict = self.get_text_label_dict()
+        labels_list = [int(lab) for lab in text_lab_unique_dict.values()]
+        return labels_list
 
     def add_new_text_label_row(
             self, new_text: str, new_label: int) -> bool:

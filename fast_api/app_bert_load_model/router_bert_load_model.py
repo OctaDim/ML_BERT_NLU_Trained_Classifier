@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, status
@@ -5,7 +6,7 @@ from fastapi.responses import JSONResponse
 
 from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
-from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS
+from configs.settings import BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_load_model.scheme_bert_load_model import LoadModelDataBert
@@ -25,10 +26,27 @@ async def bert_load_model(auth_data: AuthDataBert,
                                   password=auth_data.password)
 
     print("#" * 100)
+    model_path_file_saved = ""  # TODO: Path from file or MongoDB here
+
     if load_model_data.model_load_dir_path:
         model_load_path = load_model_data.model_load_dir_path
-    else:
+    elif bert_model_inst.last_saved_model_dir:
         model_load_path = bert_model_inst.last_saved_model_dir
+    elif model_path_file_saved:
+        model_load_path = model_path_file_saved
+    else:
+        initial_model_dir = BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH
+        model_load_path = get_full_dir_normal_path(
+            [BASE_DIR, initial_model_dir])
+
+    if not all([os.path.exists(model_load_path),
+                os.path.isdir(model_load_path)]):
+        log_text = (f"BERT Model load dir path not found [ERROR]: "
+                    f"model_load_path: {model_load_path}")
+        print(log_text)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=log_text)
 
     if not model_load_path:
         log_text = (f"BERT Model load dir path not defined [ERROR]: "
@@ -41,11 +59,18 @@ async def bert_load_model(auth_data: AuthDataBert,
         print(log_text)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=log_text)
+
     try:
         normal_model_load_path = get_full_dir_normal_path([model_load_path, ])
 
         datetime_start = datetime.now()
-        bert_model_inst.load_model(dir_full_path=normal_model_load_path)
+        error_log = bert_model_inst.load_model(
+            dir_full_path=normal_model_load_path)
+        if error_log:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=error_log)
+
         model_load_time = (datetime.now() - datetime_start).total_seconds()
         model_load_time = round(model_load_time, 1)
 

@@ -212,12 +212,14 @@ class ClassifierBERT:
             if cont_100perc_epochs_counter == max_cont_100perc_epochs:
                 return
 
-    def save_model(self, dir_full_path: str) -> None:
+    def save_model(self, dir_full_path: str) -> None | str:
         """Save model and tokeniser"""
 
         if not dir_full_path:
-            print(f"Model save dir path not defined [ERROR]: "
-                  f"dir_full_path: {dir_full_path}")
+            error_log = (f"Model save dir path not defined [ERROR]: "
+                         f"dir_full_path: {dir_full_path}")
+            print(error_log)
+            return error_log
 
         try:
             os.makedirs(dir_full_path, exist_ok=True)
@@ -227,7 +229,7 @@ class ClassifierBERT:
         except Exception as error:
             print(f"BERT Model saving [ERROR]: error: {error}")
 
-    def load_model(self, dir_full_path: str = None) -> None:
+    def load_model(self, dir_full_path: str = None) -> str | None:
         """Load model and tokeniser saved earlier"""
         if dir_full_path:
             model_path = dir_full_path
@@ -235,16 +237,20 @@ class ClassifierBERT:
             model_path = self.last_saved_model_dir
 
         if not model_path:
-            print(f"Model load dir path not defined [ERROR]: "
-                  f"dir_full_path: {dir_full_path}, "
-                  f"self.last_trained_model_path {self.last_saved_model_dir}")
-            return
+            error_log = (f"Model load dir path not defined [ERROR]: "
+                         f"dir_full_path: {dir_full_path}, "
+                         f"self.last_trained_model_path "
+                         f"{self.last_saved_model_dir}")
+            print(error_log)
+            return error_log
 
         if not os.path.exists(model_path):
-            print(f"Model load dir path not exists [ERROR]: "
-                  f"dir_full_path: {dir_full_path}, "
-                  f"self.last_trained_model_path {self.last_saved_model_dir}")
-            return
+            error_log = (f"Model load dir path not exists [ERROR]: "
+                         f"dir_full_path: {dir_full_path}, "
+                         f"self.last_trained_model_path "
+                         f"{self.last_saved_model_dir}")
+            print(error_log)
+            return error_log
 
         try:
             self.model = BertForSequenceClassification.from_pretrained(

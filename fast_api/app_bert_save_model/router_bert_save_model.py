@@ -60,7 +60,13 @@ async def bert_save_model(auth_data: AuthDataBert,
                             detail=log_text)
     try:
         datetime_start = datetime.now()
-        bert_model_inst.save_model(dir_full_path=model_save_path)
+        error_log = bert_model_inst.save_model(
+            dir_full_path=model_save_path)
+        if error_log:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=error_log)
+
         model_saving_time = (datetime.now() - datetime_start).total_seconds()
         model_saving_time = round(model_saving_time, 1)
 

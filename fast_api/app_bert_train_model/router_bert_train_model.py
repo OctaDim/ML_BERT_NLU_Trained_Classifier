@@ -1,5 +1,6 @@
 # import asyncio
 # from functools import partial
+import os
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, status
@@ -8,10 +9,12 @@ from fastapi.responses import JSONResponse
 from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
-    BERT_MODEL_NAMES, BERT_OPTIONS, BERT_TRAIN_OPTIONS)
+    BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, BERT_TRAIN_OPTIONS)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_train_model.scheme_bert_train_model import TrainingData
+from utils_common.normalized_path import get_full_dir_normal_path, get_full_file_normal_path
+from utils_specific.class_csv_texts_labels import CsvTextLabel
 
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
@@ -27,22 +30,37 @@ async def bert_train_model(auth_data: AuthDataBert,
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
-    # save_after_train_flag = train_data.save_after_train  # TODO: For future
+    # TODO: save_after_train_flag = train_data.save_after_train
+
+    if bert_model_inst.last_saved_dataset_dir:
+        train_dataset_dir = bert_model_inst.last_saved_dataset_dir
+    else:
+        initial_dataset_dir = BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH
+        train_dataset_dir = get_full_dir_normal_path(
+            [BASE_DIR, initial_dataset_dir])
+        if not (os.path.exists(train_dataset_dir)
+                and os.path.isdir(train_dataset_dir)):
+            train_dataset_dir = bert_model_inst.last_saved_dataset_dir
 
     try:
         print("\nPreparing training data set:")
-        datetime_start = datetime.now()
-        train_dataset_unique = {}
-        for cur_test_phrase, cur_test_label in test_train_dataset.items():
-            train_dataset_unique[cur_test_phrase] = cur_test_label
-        train_phrases = list(train_dataset_unique.keys())
-        train_labels = list(train_dataset_unique.values())
-        print(f"train_phrases: {train_phrases}")
-        print(f"train_labels: {train_labels}")
+        train_text_lav_csv_path = get_full_file_normal_path(
+            all_dir_str_parts=[train_dataset_dir],
+            file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_NAME)
+        print(f"train_text_lav_csv_path: {train_text_lav_csv_path}")
 
+        with open(file=train_text_lav_csv_path,
+                  mode="r", encoding="utf-8") as train_csv_file:
+            csf_text_lab = CsvTextLabel(train_csv_file)
+            train_texts = csf_text_lab.get_texts_list_unique()
+            train_labels = csf_text_lab.get_labels_list_unique()
+            print(f"train_texts [{len(train_texts)}]: {train_texts}")
+            print(f"train_labels [{len(train_labels)}]: {train_labels}")
+
+        datetime_start = datetime.now()
         print("\nStart training BERT model:")
         new_train_dataset = bert_model_inst.create_train_dataset(
-            texts_list=train_phrases,
+            texts_list=train_texts,
             labels_list=train_labels,
             truncation=BERT_TRAIN_OPTIONS.BERT_TOKEN_TRUNCATION,
             padding=BERT_TRAIN_OPTIONS.BERT_TOKEN_PADDING,
@@ -77,6 +95,7 @@ async def bert_train_model(auth_data: AuthDataBert,
                      "model init": BERT_OPTIONS.BERT_MODEL_INIT,
                      "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
                      "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
+                     "data-set path": train_text_lav_csv_path,
                      "creating data-set time": creating_dataset_time,
                      "training model time": training_time},
             status_code=status.HTTP_200_OK)
@@ -86,8 +105,9 @@ async def bert_train_model(auth_data: AuthDataBert,
         print(f"BERT response.body: {json_response.body}\n"
               f"BERT response.status_code: {json_response.status_code}\n"
               f"username: {auth_data.username}\n"
-              f"creating data-set time: {creating_dataset_time}\n"
-              f"training model time: {blue_color}{training_time}{reset_color}\n")
+              f"data-set path: {train_text_lav_csv_path}\n"
+              f"creating dataset time: {creating_dataset_time}\n"
+              f"training time: {blue_color}{training_time}{reset_color}\n")
         return json_response
     except Exception as error:
         log_text = f"BERT router [ERROR]: error: {error}"

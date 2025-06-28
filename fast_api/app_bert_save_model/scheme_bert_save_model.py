@@ -7,5 +7,5 @@ class SaveModelDataBert(BaseModel):
     BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH from settings.py is used"""
     model_save_dir_path: str = ""
     # model_save_dir_path: str = BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH
-    # model_save_dir_path: str = r"C:\Users\dexp\Projects\ML_BERT_NLU_Training_Classifier\ML_BERT_classifier\models_bert_product_trained\trained_bert_manually_defined_save_dir"
-    # model_save_dir_path: str = "C:\\Users\\dexp\\Projects\\ML_BERT_NLU_Training_Classifier\\ML_BERT_classifier\\models_bert_product_trained\\trained_bert_manually_defined_save_dir"
+    # model_save_dir_path: str = r"C:\Users\dexp\Projects\ML_BERT_NLU_Training_Classifier\ML_BERT_models\models_bert_product_trained\trained_bert_manually_defined_save_dir"
+    # model_save_dir_path: str = "C:\\Users\\dexp\\Projects\\ML_BERT_NLU_Training_Classifier\\ML_BERT_models\\models_bert_product_trained\\trained_bert_manually_defined_save_dir"

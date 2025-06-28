@@ -13,6 +13,3 @@ with open(csv_normal_file_path, mode="r", encoding="utf-8") as csv_file:
     csf_bert = CsvTextLabel(csv_file_obj=csv_file)
     text_dict = csf_bert.get_text_label_dict()
     print(text_dict)
-
-    text_lab_dict = csf_bert.get_text_label_datasets()
-    print(text_lab_dict)
