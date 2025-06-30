@@ -49,12 +49,31 @@ async def bert_add_text_category(auth_data: AuthDataBert,
     update_text = update_text.strip().lower()
     update_category = update_category.strip().lower()
 
-    dataset_path_file_saved = ""  # TODO: Path from file or MongoDB here
+    last_saved_dataset_ini_dir = None
+    last_saved_dataset_ini_path = None
+
+    try:
+        last_saved_dataset_ini_path = get_full_file_normal_path(
+            all_dir_str_parts=[BASE_DIR],
+            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FPATH)
+
+        if os.path.isfile(last_saved_dataset_ini_path):
+            with open(file=last_saved_dataset_ini_path,
+                      mode="r", encoding="utf-8") as dataset_ini_file:
+                dataset_ini_file.seek(0)
+                dataset_file_saved_path = dataset_ini_file.read()
+        else:
+            dataset_file_saved_path = None
+    except Exception as error:
+        dataset_file_saved_path = None  # not necessary, for reliability
+        print(f"Read last model saved ini file [ERROR]: error: {error}, "
+              f"last_saved_dataset_ini_dir: {last_saved_dataset_ini_dir}, "
+              f"last_saved_dataset_ini_path: {last_saved_dataset_ini_path}")
 
     if bert_model_inst.last_saved_dataset_dir:
         prev_dataset_dir_path = bert_model_inst.last_saved_dataset_dir
-    elif dataset_path_file_saved:
-        prev_dataset_dir_path = dataset_path_file_saved
+    elif dataset_file_saved_path:
+        prev_dataset_dir_path = dataset_file_saved_path
     else:
         initial_dataset_dir = BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH
         prev_dataset_dir_path = get_full_dir_normal_path(
@@ -180,6 +199,17 @@ async def bert_add_text_category(auth_data: AuthDataBert,
                     new_text=update_text,
                     new_label=cur_label)
             bert_model_inst.last_saved_dataset_dir = new_dataset_dir_path
+
+        last_saved_dataset_ini_fpath = get_full_file_normal_path(
+            all_dir_str_parts=[BASE_DIR],
+            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FPATH)
+        last_saved_dataset_ini_dir = os.path.dirname(
+            last_saved_dataset_ini_fpath)
+        os.makedirs(name=last_saved_dataset_ini_dir, exist_ok=True)
+
+        with open(file=last_saved_dataset_ini_fpath,
+                  mode="w", encoding="utf-8") as dataset_ini_file:
+            dataset_ini_file.write(new_dataset_dir_path)
 
         adding_time = (datetime.now() - datetime_start).total_seconds()
         adding_time = round(adding_time, 1)
