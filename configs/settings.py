@@ -77,6 +77,9 @@ class BERT_OPTIONS:
     BERT_TEXT_LABEL_CSV_NAME: str = "prod_texts_labels.csv"
     BERT_OVERWRITE_DATASET_CSV: bool = False
     BERT_NEW_DATASET_CSV_DIR_PREFIX: str = "updated"
+    # MODEL AND CSV SAVE PATHS INI FILES
+    BERT_LAST_SAVED_MODEL_INI_FPATH: str = "configs/last_saved_model_dir_path.ini"
+    BERT_LAST_SAVED_DATASET_INI_FPATH: str = "configs/last_saved_dataset_dir_path.ini"
 
 
 @dataclass
