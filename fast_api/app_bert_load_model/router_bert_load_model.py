@@ -26,22 +26,22 @@ async def bert_load_model(auth_data: AuthDataBert,
                                   password=auth_data.password)
 
     print("#" * 100)
-    last_saved_model_ini_fpath = None
+    last_saved_model_ini_fpath = ""
     try:
         last_saved_model_ini_fpath = get_full_file_normal_path(
             all_dir_str_parts=[BASE_DIR],
-            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_MODEL_INI_FPATH)
+            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_MODEL_INI_FILE_PATH)
         if os.path.isfile(last_saved_model_ini_fpath):
             with open(file=last_saved_model_ini_fpath,
                       mode="r", encoding="utf-8") as model_ini_file:
                 model_ini_file.seek(0)
                 last_saved_model_dir_path = model_ini_file.readline()
                 if not os.path.isdir(last_saved_model_dir_path):
-                    last_saved_model_dir_path = None
+                    last_saved_model_dir_path = ""
         else:
-            last_saved_model_dir_path = None
+            last_saved_model_dir_path = ""
     except Exception as error:
-        last_saved_model_dir_path = None  # not necessary, for reliability
+        last_saved_model_dir_path = ""  # not necessary, for reliability
         print(f"Read last model saved ini file [ERROR]: error: {error}, "
               f"last_saved_model_ini_fpath: {last_saved_model_ini_fpath}, "
               f"last_saved_model_dir_path: {last_saved_model_dir_path}")
@@ -53,23 +53,17 @@ async def bert_load_model(auth_data: AuthDataBert,
     elif last_saved_model_dir_path:
         model_load_path = last_saved_model_dir_path
     else:
-        initial_model_dir = BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH
-        model_load_path = get_full_dir_normal_path(
-            [BASE_DIR, initial_model_dir])
-
-    if not all([os.path.exists(model_load_path),
-                os.path.isdir(model_load_path)]):
-        log_text = (f"BERT Model load dir path not found [ERROR]: "
-                    f"model_load_path: {model_load_path}")
-        print(log_text)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=log_text)
+        # opt.1: No model path parameter or not called save_model() method error
+        model_load_path = ""
+        # opt.2: Load initial model without error
+        # initial_model_dir = BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH
+        # model_load_path = get_full_dir_normal_path(
+        #     [BASE_DIR, initial_model_dir])
 
     if not model_load_path:
         log_text = (f"BERT Model load dir path not defined [ERROR]: "
-                    f"as req param 'model_load_dir_path' "
-                    f"or method save_model() not called first\n"
+                    f"as request parameter 'model_load_dir_path' "
+                    f"or method save_model() not called before\n"
                     f"load_model_data.model_load_dir_path: "
                     f"{load_model_data.model_load_dir_path}, "
                     f"bert_model_instance.last_saved_model_path: "
@@ -77,6 +71,14 @@ async def bert_load_model(auth_data: AuthDataBert,
         print(log_text)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=log_text)
+
+    if not os.path.isdir(model_load_path):
+        log_text = (f"BERT Model load directory path not exists [ERROR]: "
+                    f"model_load_path: {model_load_path}")
+        print(log_text)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=log_text)
 
     try:
         normal_model_load_path = get_full_dir_normal_path([model_load_path, ])
