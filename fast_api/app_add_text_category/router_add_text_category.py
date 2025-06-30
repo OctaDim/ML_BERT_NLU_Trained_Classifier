@@ -49,13 +49,13 @@ async def bert_add_text_category(auth_data: AuthDataBert,
     update_text = update_text.strip().lower()
     update_category = update_category.strip().lower()
 
-    last_saved_dataset_ini_dir = None
-    last_saved_dataset_ini_path = None
+    last_saved_dataset_ini_dir = ""
+    last_saved_dataset_ini_path = ""
 
     try:
         last_saved_dataset_ini_path = get_full_file_normal_path(
             all_dir_str_parts=[BASE_DIR],
-            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FPATH)
+            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FILE_PATH)
 
         if os.path.isfile(last_saved_dataset_ini_path):
             with open(file=last_saved_dataset_ini_path,
@@ -63,9 +63,9 @@ async def bert_add_text_category(auth_data: AuthDataBert,
                 dataset_ini_file.seek(0)
                 dataset_file_saved_path = dataset_ini_file.read()
         else:
-            dataset_file_saved_path = None
+            dataset_file_saved_path = ""
     except Exception as error:
-        dataset_file_saved_path = None  # not necessary, for reliability
+        dataset_file_saved_path = ""  # not necessary, for reliability
         print(f"Read last model saved ini file [ERROR]: error: {error}, "
               f"last_saved_dataset_ini_dir: {last_saved_dataset_ini_dir}, "
               f"last_saved_dataset_ini_path: {last_saved_dataset_ini_path}")
@@ -93,7 +93,7 @@ async def bert_add_text_category(auth_data: AuthDataBert,
         datetime_start = datetime.now()
         prev_lab_cat_csv_path = get_full_file_normal_path(
             all_dir_str_parts=[prev_dataset_dir_path],
-            file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_NAME)
+            file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
 
         with open(file=prev_lab_cat_csv_path,
                   mode="r", encoding="utf-8") as prev_csv1_file:
@@ -117,7 +117,7 @@ async def bert_add_text_category(auth_data: AuthDataBert,
             next_label_value = max(lab_cat_dict.keys()) + 1
             lab_cat_dict[next_label_value] = update_category
 
-            if BERT_OPTIONS.BERT_OVERWRITE_DATASET_CSV:
+            if BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:
                 new_lab_cat_csv_path = prev_lab_cat_csv_path
                 with open(file=new_lab_cat_csv_path, mode="a",
                           encoding="utf-8", newline="") as prev_csv1_file:
@@ -129,7 +129,7 @@ async def bert_add_text_category(auth_data: AuthDataBert,
                 os.makedirs(name=new_dataset_dir_path, exist_ok=True)
                 new_lab_cat_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
-                    file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_NAME)
+                    file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
                 shutil.copy2(src=prev_lab_cat_csv_path,
                              dst=new_lab_cat_csv_path)
                 with open(file=new_lab_cat_csv_path, mode="a",
@@ -139,18 +139,18 @@ async def bert_add_text_category(auth_data: AuthDataBert,
                         new_label=next_label_value,
                         new_category=update_category)
         else:
-            if not BERT_OPTIONS.BERT_OVERWRITE_DATASET_CSV:
+            if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:
                 os.makedirs(new_dataset_dir_path)
                 new_lab_cat_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
-                    file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_NAME)
+                    file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
                 shutil.copy2(src=prev_lab_cat_csv_path,
                              dst=new_lab_cat_csv_path)
 
         print("\nAdding new text-label pair:")
         prev_text_lab_csv_path = get_full_file_normal_path(
             all_dir_str_parts=[prev_dataset_dir_path],
-            file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_NAME)
+            file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
 
         with open(file=prev_text_lab_csv_path,
                   mode="r", encoding="utf-8") as prev_csv2_file:
@@ -175,7 +175,7 @@ async def bert_add_text_category(auth_data: AuthDataBert,
         else:
             cur_label = next_label_value
 
-        if BERT_OPTIONS.BERT_OVERWRITE_DATASET_CSV:
+        if BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:
             new_text_lab_csv_path = prev_text_lab_csv_path
             with open(file=prev_text_lab_csv_path, mode="a",
                       encoding="utf-8", newline="") as prev_csv2_file:
@@ -187,7 +187,7 @@ async def bert_add_text_category(auth_data: AuthDataBert,
             os.makedirs(name=new_dataset_dir_path, exist_ok=True)
             new_text_lab_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[new_dataset_dir_path],
-                file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_NAME)
+                file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
 
             shutil.copy2(src=prev_text_lab_csv_path,
                          dst=new_text_lab_csv_path)
@@ -202,7 +202,7 @@ async def bert_add_text_category(auth_data: AuthDataBert,
 
         last_saved_dataset_ini_fpath = get_full_file_normal_path(
             all_dir_str_parts=[BASE_DIR],
-            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FPATH)
+            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FILE_PATH)
         last_saved_dataset_ini_dir = os.path.dirname(
             last_saved_dataset_ini_fpath)
         os.makedirs(name=last_saved_dataset_ini_dir, exist_ok=True)

@@ -72,14 +72,14 @@ class BERT_OPTIONS:
     BERT_TRAINED_MODELS_SAVE_DIR_PREFIX: str = "trained_bert"
     # DATASETS CSV
     BERT_INITIAL_DATASET_CSV_PATH: str = "ML_BERT_train_datasets/product_init_train_dataset"
-    BERT_NEW_DATASETS_CSV_BASE_PATH: str = "ML_BERT_train_datasets/product_new_train_datasets"
-    BERT_LABEL_CATEGORY_CSV_NAME: str = "prod_labels_categories.csv"
-    BERT_TEXT_LABEL_CSV_NAME: str = "prod_texts_labels.csv"
-    BERT_OVERWRITE_DATASET_CSV: bool = False
-    BERT_NEW_DATASET_CSV_DIR_PREFIX: str = "updated"
+    BERT_NEW_DATASETS_CSV_BASE_PATH: str = "ML_BERT_train_datasets/product_updated_train_datasets"
+    BERT_LABEL_CATEGORY_CSV_FILE_NAME: str = "prod_labels_categories.csv"
+    BERT_TEXT_LABEL_CSV_FILE_NAME: str = "prod_texts_labels.csv"
+    BERT_OVERWRITE_PREV_CSV_DATASET: bool = False
+    BERT_NEW_DATASET_CSV_DIR_PREFIX: str = "updated_dataset"
     # MODEL AND CSV SAVE PATHS INI FILES
-    BERT_LAST_SAVED_MODEL_INI_FPATH: str = "configs/last_saved_model_dir_path.ini"
-    BERT_LAST_SAVED_DATASET_INI_FPATH: str = "configs/last_saved_dataset_dir_path.ini"
+    BERT_LAST_SAVED_MODEL_INI_FILE_PATH: str = "configs_last_saved_model/last_saved_model_dir_path.ini"
+    BERT_LAST_SAVED_DATASET_INI_FILE_PATH: str = "configs_last_saved_dataset/last_saved_dataset_dir_path.ini"
 
 
 @dataclass
@@ -93,7 +93,7 @@ class BERT_TRAIN_OPTIONS:
     str: "tf" - returns TensorFlow tensors
     str: "np" - returns NumPy arrays
     None - returns lists"""
-    BERT_TRAIN_MAX_EPOCHS_NUMBER: int = 3
+    BERT_TRAIN_MAX_EPOCHS_NUMBER: int = 50
     CONTINUOUS_100PERC_EPOCHS: int = 5
     BERT_TRAIN_BATCH_SUZE: int = 8
     BERT_TRAIN_LEARNING_RATE: int = 5e-5
