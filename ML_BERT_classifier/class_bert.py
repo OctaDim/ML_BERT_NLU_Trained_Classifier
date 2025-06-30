@@ -227,7 +227,9 @@ class ClassifierBERT:
             self.tokenizer.save_pretrained(dir_full_path)
             self.last_saved_model_dir = dir_full_path
         except Exception as error:
-            print(f"BERT Model saving [ERROR]: error: {error}")
+            error_log = f"BERT Model saving [ERROR]: error: {error}"
+            print(error_log)
+            return error_log
 
     def load_model(self, dir_full_path: str = None) -> str | None:
         """Load model and tokeniser saved earlier"""
@@ -257,4 +259,6 @@ class ClassifierBERT:
                 model_path).to(self.device)
             self.tokenizer = BertTokenizer.from_pretrained(model_path)
         except Exception as error:
-            print(f"BERT Model loading [ERROR]: error: {error}")
+            error_log = f"BERT Model loading [ERROR]: error: {error}"
+            print(error_log)
+            return error_log
