@@ -1,12 +1,13 @@
 from typing import Dict
 
 from ML_BERT_classifier.class_bert import ClassifierBERT
-from configs.console_colors import CONSOLE_COLORS
-from configs.settings import BASE_DIR, BERT_OPTIONS, BERT_TRAIN_OPTIONS
 from ML_BERT_train_datasets.test_init_train_datasets.test_labels_categories import (
     labels_categories)
+from configs.console_colors import CONSOLE_COLORS
+from configs.settings import BERT_OPTIONS, BERT_TRAIN_OPTIONS
 from utils_common.exec_time_decorator import execution_time_decorator
-from utils_common.normalized_path import get_full_dir_normal_path
+from utils_specific.get_initial_model_dir_path import get_initial_model_dir_path
+from utils_specific.get_last_saved_model_dir import get_last_saved_model_dir_path
 
 
 class HardSingletonBERT(ClassifierBERT):
@@ -57,13 +58,13 @@ def initialise_bert_model(labels_categories_dict: Dict[int, str],
                           token_str_max_len: int,
                           use_singleton=True,
                           use_hard_singleton=True) -> ClassifierBERT:
-    green_clr = CONSOLE_COLORS.BRIGHT_GREEN
-    reset_clr = CONSOLE_COLORS.RESET
-    print(f"Model Name: {green_clr}{model_name}{reset_clr}\n"
-          f"Model Cached Dir: {green_clr}{model_cache_dir}{reset_clr}")
+    green_color = CONSOLE_COLORS.BRIGHT_GREEN
+    reset_color = CONSOLE_COLORS.RESET
+    print(f"Model Name: {green_color}{model_name}{reset_color}\n"
+          f"Model Cached Dir: {green_color}{model_cache_dir}{reset_color}")
 
     # TODO: Use common data with unpacking instead of params for creating model bellow
-    # bert_init_data = {"test_train_data": labels_categories_dict,
+    # bert_init_data = {"labels": labels_categories_dict,
     #                   "model_name": model_name,
     #                   "cache_dir": model_cache_dir,
     #                   "max_len": token_str_max_len}
@@ -88,13 +89,48 @@ def initialise_bert_model(labels_categories_dict: Dict[int, str],
 
 
 if BERT_OPTIONS.BERT_MODEL_INIT:
-    bert_model_path = get_full_dir_normal_path(
-        [BASE_DIR, BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH])
+    blue_color = CONSOLE_COLORS.BRIGHT_BLUE
+    yellow_color = CONSOLE_COLORS.BRIGHT_YELLOW
+    reset_color = CONSOLE_COLORS.RESET
 
-    bert_model_inst = initialise_bert_model(
-        labels_categories_dict=labels_categories,
-        model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
-        model_cache_dir=BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
-        token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
-        use_singleton=True,
-        use_hard_singleton=True)
+    last_saved_model_dir_path = get_last_saved_model_dir_path()
+    initial_model_dir_path = get_initial_model_dir_path()
+    load_error_log = ""
+
+    if last_saved_model_dir_path and initial_model_dir_path:
+        bert_model_inst = initialise_bert_model(
+            labels_categories_dict=labels_categories,
+            model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
+            model_cache_dir=get_initial_model_dir_path(),
+            token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
+            use_singleton=True,
+            use_hard_singleton=True)
+
+        load_error_log = bert_model_inst.load_model(
+            dir_full_path=last_saved_model_dir_path)
+        if not load_error_log:
+            print(f"Last Saved BERT Model initialised and loaded [OK]\n"
+                  f"last_saved_model_dir_path: "
+                  f"{blue_color}{last_saved_model_dir_path}{reset_color}\n"
+                  f"initial_model_dir_path: {initial_model_dir_path}\n")
+        else:
+            print(f"Last Saved BERT Model load [ERROR]: error: {load_error_log}\n"
+                  f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
+                  f"initial_model_dir_path: {initial_model_dir_path}\n")
+    elif initial_model_dir_path:
+        bert_model_inst = initialise_bert_model(
+            labels_categories_dict=labels_categories,
+            model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
+            model_cache_dir=get_initial_model_dir_path(),
+            token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
+            use_singleton=True,
+            use_hard_singleton=True)
+        print(f"Pretrained Init BERT Model initialised [OK]\n"
+              f"initial_model_dir_path: "
+              f"{blue_color}{initial_model_dir_path}{reset_color}\n"
+              f"last_saved_model_dir_path: {last_saved_model_dir_path}\n")
+    else:
+        print(f"BERT Model initialise [ERROR]\n"
+              f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
+              f"initial_model_dir_path: {initial_model_dir_path}"
+              f"load_error_log: {load_error_log}\n")
