@@ -180,6 +180,7 @@ class ClassifierBERT:
                           differentiable=False,
                           fused=None)
 
+        print("\nModel training epochs process...")
         self.model.train()
         cont_100perc_epochs_counter = 0
 

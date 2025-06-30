@@ -4,7 +4,7 @@ from utils_specific.class_csv_texts_labels import CsvTextLabel
 
 
 text_labels_dir = BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH
-text_labels_file = BERT_OPTIONS.BERT_TEXT_LABEL_CSV_NAME
+text_labels_file = BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME
 csv_normal_file_path = get_full_file_normal_path(
     all_dir_str_parts=[BASE_DIR, text_labels_dir],
     file_name_with_ext=text_labels_file)

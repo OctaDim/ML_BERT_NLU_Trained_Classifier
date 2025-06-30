@@ -4,7 +4,7 @@ from utils_specific.class_csv_labels_categories import CsvLabelCategory
 
 
 labels_categories_dir = BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH
-labels_categories_file = BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_NAME
+labels_categories_file = BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME
 csv_normal_file_path = get_full_file_normal_path(
     all_dir_str_parts=[BASE_DIR, labels_categories_dir],
     file_name_with_ext=labels_categories_file)
