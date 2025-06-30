@@ -10,7 +10,7 @@ from configs.settings import BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_load_model.scheme_bert_load_model import LoadModelDataBert
-from utils_common.normalized_path import get_full_dir_normal_path
+from utils_common.normalized_path import get_full_dir_normal_path, get_full_file_normal_path
 
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
@@ -26,14 +26,32 @@ async def bert_load_model(auth_data: AuthDataBert,
                                   password=auth_data.password)
 
     print("#" * 100)
-    model_path_file_saved = ""  # TODO: Path from file or MongoDB here
+    last_saved_model_ini_fpath = None
+    try:
+        last_saved_model_ini_fpath = get_full_file_normal_path(
+            all_dir_str_parts=[BASE_DIR],
+            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_MODEL_INI_FPATH)
+        if os.path.isfile(last_saved_model_ini_fpath):
+            with open(file=last_saved_model_ini_fpath,
+                      mode="r", encoding="utf-8") as model_ini_file:
+                model_ini_file.seek(0)
+                last_saved_model_dir_path = model_ini_file.readline()
+                if not os.path.isdir(last_saved_model_dir_path):
+                    last_saved_model_dir_path = None
+        else:
+            last_saved_model_dir_path = None
+    except Exception as error:
+        last_saved_model_dir_path = None  # not necessary, for reliability
+        print(f"Read last model saved ini file [ERROR]: error: {error}, "
+              f"last_saved_model_ini_fpath: {last_saved_model_ini_fpath}, "
+              f"last_saved_model_dir_path: {last_saved_model_dir_path}")
 
     if load_model_data.model_load_dir_path:
         model_load_path = load_model_data.model_load_dir_path
     elif bert_model_inst.last_saved_model_dir:
         model_load_path = bert_model_inst.last_saved_model_dir
-    elif model_path_file_saved:
-        model_load_path = model_path_file_saved
+    elif last_saved_model_dir_path:
+        model_load_path = last_saved_model_dir_path
     else:
         initial_model_dir = BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH
         model_load_path = get_full_dir_normal_path(

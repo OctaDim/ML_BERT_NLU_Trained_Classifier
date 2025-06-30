@@ -1,3 +1,4 @@
+import os
 import random
 from datetime import datetime
 
@@ -10,7 +11,7 @@ from configs.settings import BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_save_model.scheme_bert_save_model import SaveModelDataBert
-from utils_common.normalized_path import get_full_dir_normal_path
+from utils_common.normalized_path import get_full_dir_normal_path, get_full_file_normal_path
 
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
@@ -62,10 +63,23 @@ async def bert_save_model(auth_data: AuthDataBert,
         datetime_start = datetime.now()
         error_log = bert_model_inst.save_model(
             dir_full_path=model_save_path)
+
         if error_log:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=error_log)
+
+        last_saved_model_ini_fpath = get_full_file_normal_path(
+            all_dir_str_parts=[BASE_DIR],
+            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_MODEL_INI_FPATH)
+
+        last_saved_model_ini_fdir = os.path.dirname(
+            last_saved_model_ini_fpath)
+        os.makedirs(name=last_saved_model_ini_fdir, exist_ok=True)
+
+        with open(file=last_saved_model_ini_fpath,
+                  mode="w", encoding="utf-8") as model_ini_file:
+            model_ini_file.write(model_save_path)
 
         model_saving_time = (datetime.now() - datetime_start).total_seconds()
         model_saving_time = round(model_saving_time, 1)
