@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+
+
 # from configs.settings import BERT_OPTIONS
 
 
@@ -9,3 +11,10 @@ class SaveModelDataBert(BaseModel):
     # model_save_dir_path: str = BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH
     # model_save_dir_path: str = r"C:\Users\dexp\Projects\ML_BERT_NLU_Training_Classifier\ML_BERT_models\models_bert_product_trained\trained_bert_manually_defined_save_dir"
     # model_save_dir_path: str = "C:\\Users\\dexp\\Projects\\ML_BERT_NLU_Training_Classifier\\ML_BERT_models\\models_bert_product_trained\\trained_bert_manually_defined_save_dir"
+
+
+class SaveModelAfterTrainBert(BaseModel):
+    trained_model_redirected_save_flag: bool = False  # Passed from @router_bert_train_model.post if redirected model saving
+    redirected_train_text_lab_csv_path: str = None  # Passed from @router_bert_train_model.post if redirected model saving
+    redirected_creating_dataset_time: float = None  # Passed from @router_bert_train_model.post if redirected model saving
+    redirected_training_time: str = None  # Passed from @router_bert_train_model.post if redirected model saving

@@ -10,7 +10,7 @@ from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
-from fast_api.app_bert_save_model.scheme_bert_save_model import SaveModelDataBert
+from fast_api.app_bert_save_model.scheme_bert_save_model import SaveModelAfterTrainBert, SaveModelDataBert
 from utils_common.normalized_path import get_full_dir_normal_path, get_full_file_normal_path
 
 
@@ -23,7 +23,8 @@ router_bert_save_model = APIRouter(prefix=f"/{bert_base_url_name}",
                              # TODO: Describe responses here
                              response_model=None)
 async def bert_save_model(auth_data: AuthDataBert,
-                          save_model_data: SaveModelDataBert):
+                          save_model_data: SaveModelDataBert,
+                          save_model_after_train_data: SaveModelAfterTrainBert):
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
@@ -71,7 +72,7 @@ async def bert_save_model(auth_data: AuthDataBert,
 
         last_saved_model_ini_fpath = get_full_file_normal_path(
             all_dir_str_parts=[BASE_DIR],
-            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_MODEL_INI_FPATH)
+            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_MODEL_INI_FILE_PATH)
 
         last_saved_model_ini_fdir = os.path.dirname(
             last_saved_model_ini_fpath)
@@ -95,8 +96,19 @@ async def bert_save_model(auth_data: AuthDataBert,
             f"Trained Model common save dir: {BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH}\n"
             f"Trained Model saved dir path: {blue_color}{model_save_path}{reset_color}\n"
             f"Trained Model saving time: {model_saving_time}\n")
-        print(log_text)
 
+        if save_model_after_train_data.trained_model_redirected_save_flag:
+            log_text = (
+                f"{log_text}"
+                f"redirected save flag: "
+                f"{save_model_after_train_data.trained_model_redirected_save_flag}\n"
+                f"train dataset path: "
+                f"{save_model_after_train_data.redirected_train_text_lab_csv_path}\n"
+                f"creating dataset time: "
+                f"{save_model_after_train_data.redirected_creating_dataset_time}\n"
+                f"training model time: "
+                f"{blue_color}{save_model_after_train_data.redirected_training_time}{reset_color}\n")
+        print(log_text)
         json_response = JSONResponse(
             content={"message": log_text},
             status_code=status.HTTP_200_OK)

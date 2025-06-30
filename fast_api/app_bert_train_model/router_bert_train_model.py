@@ -12,7 +12,10 @@ from configs.settings import (
     BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, BERT_TRAIN_OPTIONS)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
-from fast_api.app_bert_train_model.scheme_bert_train_model import TrainingData
+from fast_api.app_bert_save_model.router_bert_save_model import bert_save_model
+from fast_api.app_bert_save_model.scheme_bert_save_model import (
+    SaveModelAfterTrainBert, SaveModelDataBert)
+from fast_api.app_bert_train_model.scheme_bert_train_model import TrainModelDataBert
 from utils_common.normalized_path import get_full_dir_normal_path, get_full_file_normal_path
 from utils_specific.class_csv_texts_labels import CsvTextLabel
 
@@ -26,11 +29,9 @@ router_bert_train_model = APIRouter(prefix=f"/{bert_base_url_name}",
                               # TODO: Describe responses here
                               response_model=None)
 async def bert_train_model(auth_data: AuthDataBert,
-                           train_data: TrainingData):
+                           train_model_data: TrainModelDataBert):
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
-
-    # TODO: save_after_train_flag = train_data.save_after_train
 
     if bert_model_inst.last_saved_dataset_dir:
         train_dataset_dir = bert_model_inst.last_saved_dataset_dir
@@ -44,12 +45,12 @@ async def bert_train_model(auth_data: AuthDataBert,
 
     try:
         print("\nPreparing training data set:")
-        train_text_lav_csv_path = get_full_file_normal_path(
+        train_text_lab_csv_path = get_full_file_normal_path(
             all_dir_str_parts=[train_dataset_dir],
-            file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_NAME)
-        print(f"train_text_lav_csv_path: {train_text_lav_csv_path}")
+            file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
+        print(f"train_text_lab_csv_path: {train_text_lab_csv_path}")
 
-        with open(file=train_text_lav_csv_path,
+        with open(file=train_text_lab_csv_path,
                   mode="r", encoding="utf-8") as train_csv_file:
             csf_text_lab = CsvTextLabel(train_csv_file)
             train_texts = csf_text_lab.get_texts_list_unique()
@@ -86,8 +87,9 @@ async def bert_train_model(auth_data: AuthDataBert,
             batch_size=BERT_TRAIN_OPTIONS.BERT_TRAIN_BATCH_SUZE,
             learning_rate=BERT_TRAIN_OPTIONS.BERT_TRAIN_LEARNING_RATE)
         training_time = (datetime.now() - datetime_start).total_seconds()
-        training_time = round(training_time, 1)
-        # print()
+        hours, remainder = [int(el) for el in divmod(training_time, 3600)]
+        minutes, seconds = [int(el) for el in divmod(remainder, 60)]
+        training_time_str = f"{hours} hrs : {minutes} min : {seconds} sec"
 
         json_response = JSONResponse(
             content={"message": "BERT model training [OK]",
@@ -95,9 +97,9 @@ async def bert_train_model(auth_data: AuthDataBert,
                      "model init": BERT_OPTIONS.BERT_MODEL_INIT,
                      "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
                      "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
-                     "data-set path": train_text_lav_csv_path,
-                     "creating data-set time": creating_dataset_time,
-                     "training model time": training_time},
+                     "train dataset path": train_text_lab_csv_path,
+                     "creating dataset time": creating_dataset_time,
+                     "training model time": training_time_str},
             status_code=status.HTTP_200_OK)
 
         blue_color = CONSOLE_COLORS.BRIGHT_BLUE
@@ -105,10 +107,25 @@ async def bert_train_model(auth_data: AuthDataBert,
         print(f"BERT response.body: {json_response.body}\n"
               f"BERT response.status_code: {json_response.status_code}\n"
               f"username: {auth_data.username}\n"
-              f"data-set path: {train_text_lav_csv_path}\n"
+              f"train dataset path: {train_text_lab_csv_path}\n"
               f"creating dataset time: {creating_dataset_time}\n"
-              f"training time: {blue_color}{training_time}{reset_color}\n")
-        return json_response
+              f"training model time: {blue_color}{training_time_str}{reset_color}\n")
+
+        if train_model_data.save_model_after_train:
+            trained_model_save_dir_path = train_model_data.trained_model_save_dir_path
+            save_model_data_bert = SaveModelDataBert(
+                model_save_dir_path=trained_model_save_dir_path)
+            save_model_after_train_bert = SaveModelAfterTrainBert(
+                trained_model_redirected_save_flag=True,
+                redirected_train_text_lab_csv_path=train_text_lab_csv_path,
+                redirected_creating_dataset_time=creating_dataset_time,
+                redirected_training_time=training_time_str)
+            await bert_save_model(
+                auth_data=auth_data,
+                save_model_data=save_model_data_bert,
+                save_model_after_train_data=save_model_after_train_bert)
+        else:
+            return json_response
     except Exception as error:
         log_text = f"BERT router [ERROR]: error: {error}"
         print(log_text)
