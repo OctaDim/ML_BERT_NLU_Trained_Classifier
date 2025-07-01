@@ -8,7 +8,6 @@ class CsvTextLabel:
 
     def __init__(self, csv_file_obj: TextIO | TextIOWrapper):
         self.csv_file_obj = csv_file_obj
-        self.csv_dict_reader = csv.DictReader(csv_file_obj)
 
     def get_text_label_dict(self) -> dict[str: int]:
         train_data_set = {}
