@@ -3,6 +3,7 @@ from fastapi import FastAPI
 
 from configs.settings import API_HOST, API_PORT
 from fast_api.app_add_text_category.router_add_text_category import router_bert_add_text_category
+from fast_api.app_add_texts_categories_file.router_add_texts_categories_file import router_bert_add_text_category_file
 from fast_api.app_bert_get_all_categories.router_bert_get_all_categories import router_bert_get_all_categories
 from fast_api.app_bert_load_model.router_bert_load_model import router_bert_load_model
 from fast_api.app_bert_save_model.router_bert_save_model import router_bert_save_model
@@ -27,6 +28,7 @@ routers_list = [
     router_bert_load_model,
     router_bert_get_all_categories,
     router_bert_add_text_category,
+    router_bert_add_text_category_file,
 
 ]
 
