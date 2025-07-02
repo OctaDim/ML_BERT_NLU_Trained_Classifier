@@ -35,10 +35,18 @@ class CsvTextLabel:
         labels_list = [int(lab) for lab in text_lab_unique_dict.values()]
         return labels_list
 
-    def add_new_text_label_row(
+    def add_single_text_label_row(
             self, new_text: str, new_label: int) -> bool:
         csv_writer = csv.writer(self.csv_file_obj,
                                 quoting=csv.QUOTE_NONNUMERIC)
         date_time_str = str(datetime.now())
         csv_writer.writerow([date_time_str, new_label, new_text])
+        return True
+
+    def add_multi_text_label_rows(
+            self, update_text_label_data: list[list]) -> bool:
+        print(f"update_text_label_data: {update_text_label_data}")
+        csv_writer = csv.writer(self.csv_file_obj,
+                                quoting=csv.QUOTE_NONNUMERIC)
+        csv_writer.writerows(update_text_label_data)
         return True

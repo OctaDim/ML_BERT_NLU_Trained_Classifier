@@ -38,12 +38,20 @@ class CsvLabelCategory:
         sorted_categories = sorted(unique_categories)
         return sorted_categories
 
-    def add_new_label_category_row(
+    def add_single_label_category_row(
             self, new_label: str, new_category: str) -> bool:
         csv_writer = csv.writer(self.csv_file_obj,
                                 quoting=csv.QUOTE_NONNUMERIC)
         date_time_str = str(datetime.now())
         csv_writer.writerow([date_time_str, new_label, new_category])
+        return True
+
+    def add_multi_label_category_rows(
+            self, update_label_category_data: list[list]) -> bool:
+        print(f"update_label_category_data: {update_label_category_data}")
+        csv_writer = csv.writer(self.csv_file_obj,
+                                quoting=csv.QUOTE_NONNUMERIC)
+        csv_writer.writerows(update_label_category_data)
         return True
 
     def write_new_label_category_csv(
