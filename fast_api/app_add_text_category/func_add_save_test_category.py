@@ -15,8 +15,8 @@ from utils_specific.class_csv_texts_labels import CsvTextLabel
 from utils_specific.new_dataset_dir_path import get_new_dataset_dir_path
 
 
-def add_save_test_category(update_text: str,
-                           update_category: str) -> dict:
+def add_save_single_text_category(update_text: str,
+                                  update_category: str) -> dict:
     last_saved_dataset_ini_dir = ""
     last_saved_dataset_ini_path = ""
 
@@ -47,8 +47,7 @@ def add_save_test_category(update_text: str,
         prev_dataset_dir_path = get_full_dir_normal_path(
             [BASE_DIR, initial_dataset_dir])
 
-    if not all([os.path.exists(prev_dataset_dir_path),
-                os.path.isdir(prev_dataset_dir_path)]):
+    if not os.path.isdir(prev_dataset_dir_path):
         log_text = (f"Data-set initial or saved dir path not found [ERROR]: "
                     f"prev_dataset_dir_path: {prev_dataset_dir_path}")
         print(log_text)
@@ -57,40 +56,72 @@ def add_save_test_category(update_text: str,
             detail=log_text)
 
     try:
-        print("\nAdding new text-category pair:")
+        print("\nGetting previous label-category dictionary:")
         prev_lab_cat_csv_path = get_full_file_normal_path(
             all_dir_str_parts=[prev_dataset_dir_path],
             file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
 
         with open(file=prev_lab_cat_csv_path,
-                  mode="r", encoding="utf-8") as prev_csv1_file:
-            csf_lab_cat = CsvLabelCategory(prev_csv1_file)
-            lab_cat_dict = csf_lab_cat.get_label_category_dict()
+                  mode="r", encoding="utf-8") as prev_lab_cat_csv_f:
+            csf_lab_cat = CsvLabelCategory(prev_lab_cat_csv_f)
+            prev_lab_cat_dict = csf_lab_cat.get_label_category_dict()
 
-        if not lab_cat_dict:
+        if not prev_lab_cat_dict:
             log_text = (f"Empty or wrong label-category csv data [ERROR]: "
                         f"prev_lab_cat_csv_path: {prev_lab_cat_csv_path}, "
-                        f"lab_cat_dict: {lab_cat_dict}\n")
+                        f"prev_lab_cat_dict: {prev_lab_cat_dict}\n")
             print(log_text)
             raise HTTPException(
                 status_code=status.HTTP_406_NOT_ACCEPTABLE,
                 detail=log_text)
 
-        next_label_value = None
-        new_lab_cat_csv_path = None
+        print("Getting previous text-label dictionary:")
+        prev_text_lab_csv_path = get_full_file_normal_path(
+            all_dir_str_parts=[prev_dataset_dir_path],
+            file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
+
+        with open(file=prev_text_lab_csv_path,
+                  mode="r", encoding="utf-8") as prev_text_lab_csv_f:
+            csf_text_lab = CsvTextLabel(prev_text_lab_csv_f)
+            prev_text_lab_dict = csf_text_lab.get_text_label_dict()
+
+        if not prev_text_lab_dict:
+            log_text = (f"Empty or wrong text-label csv data [ERROR]: "
+                        f"prev_text_lab_csv_path: {prev_text_lab_csv_path}, "
+                        f"prev_text_lab_dict: {prev_text_lab_dict}\n")
+            print(log_text)
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail=log_text)
+
         new_dataset_dir_path = get_new_dataset_dir_path()
+        new_lab_cat_csv_path = None
 
-        if update_category not in lab_cat_dict.values():
-            next_label_value = max(lab_cat_dict.keys()) + 1
-            lab_cat_dict[next_label_value] = update_category
+        print("Single adding one label-category pair:")
+        next_label_value = None
+        if update_category not in prev_lab_cat_dict.values():
+            next_label_value = max(prev_lab_cat_dict.keys()) + 1
+            prev_lab_cat_dict[next_label_value] = update_category
 
+        print("Single adding one single text-label pair:")
+        cur_label = None
+        if not next_label_value:  # Old category and label
+            for label, category in prev_lab_cat_dict.items():
+                if category == update_category:
+                    cur_label = label
+                    break
+        else:  # New category and new label
+            cur_label = next_label_value
+
+        print("Single saving one label-category pair updated csv file:")
+        if next_label_value:  # New category to add added
             if BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:
                 new_lab_cat_csv_path = prev_lab_cat_csv_path
                 with open(file=new_lab_cat_csv_path, mode="a",
-                          encoding="utf-8", newline="") as prev_csv1_file:
-                    csv_lab_cat = CsvLabelCategory(prev_csv1_file)
-                    csv_lab_cat.add_new_label_category_row(
-                        new_label=next_label_value,
+                          encoding="utf-8", newline="") as prev_lab_cat_csv_f:
+                    csv_lab_cat = CsvLabelCategory(prev_lab_cat_csv_f)
+                    csv_lab_cat.add_single_label_category_row(
+                        new_label=cur_label,
                         new_category=update_category)
             else:
                 os.makedirs(name=new_dataset_dir_path, exist_ok=True)
@@ -100,10 +131,10 @@ def add_save_test_category(update_text: str,
                 shutil.copy2(src=prev_lab_cat_csv_path,
                              dst=new_lab_cat_csv_path)
                 with open(file=new_lab_cat_csv_path, mode="a",
-                          encoding="utf-8", newline="") as new_csv1_file:
-                    csv_lab_cat = CsvLabelCategory(new_csv1_file)
-                    csv_lab_cat.add_new_label_category_row(
-                        new_label=next_label_value,
+                          encoding="utf-8", newline="") as new_lab_cat_csv_f:
+                    csv_lab_cat = CsvLabelCategory(new_lab_cat_csv_f)
+                    csv_lab_cat.add_single_label_category_row(
+                        new_label=cur_label,
                         new_category=update_category)
         else:
             if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:
@@ -114,40 +145,13 @@ def add_save_test_category(update_text: str,
                 shutil.copy2(src=prev_lab_cat_csv_path,
                              dst=new_lab_cat_csv_path)
 
-        print("\nAdding new text-label pair:")
-        prev_text_lab_csv_path = get_full_file_normal_path(
-            all_dir_str_parts=[prev_dataset_dir_path],
-            file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
-
-        with open(file=prev_text_lab_csv_path,
-                  mode="r", encoding="utf-8") as prev_csv2_file:
-            csf_text_lab = CsvTextLabel(prev_csv2_file)
-            text_lab_dict = csf_text_lab.get_text_label_dict()
-
-        if not text_lab_dict:
-            log_text = (f"Empty or wrong text-label csv data [ERROR]: "
-                        f"prev_text_lab_csv_path: {prev_text_lab_csv_path}, "
-                        f"text_lab_dict: {text_lab_dict}\n")
-            print(log_text)
-            raise HTTPException(
-                status_code=status.HTTP_406_NOT_ACCEPTABLE,
-                detail=log_text)
-
-        cur_label = None
-        if not next_label_value:
-            for label, category in lab_cat_dict.items():
-                if category == update_category:
-                    cur_label = label
-                    break
-        else:
-            cur_label = next_label_value
-
+        print("Single saving one text-label pair updated csv file:")
         if BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:
             new_text_lab_csv_path = prev_text_lab_csv_path
             with open(file=prev_text_lab_csv_path, mode="a",
-                      encoding="utf-8", newline="") as prev_csv2_file:
-                csv_text_lab = CsvTextLabel(prev_csv2_file)
-                csv_text_lab.add_new_text_label_row(
+                      encoding="utf-8", newline="") as prev_text_lab_csv_f:
+                csv_text_lab = CsvTextLabel(prev_text_lab_csv_f)
+                csv_text_lab.add_single_text_label_row(
                     new_text=update_text,
                     new_label=cur_label)
         else:
@@ -155,18 +159,18 @@ def add_save_test_category(update_text: str,
             new_text_lab_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[new_dataset_dir_path],
                 file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
-
             shutil.copy2(src=prev_text_lab_csv_path,
                          dst=new_text_lab_csv_path)
-
             with open(file=new_text_lab_csv_path, mode="a",
-                      encoding="utf-8", newline="") as new_csv2_file:
-                csv_text_lab = CsvTextLabel(new_csv2_file)
-                csv_text_lab.add_new_text_label_row(
+                      encoding="utf-8", newline="") as new_text_lab_csv_f:
+                csv_text_lab = CsvTextLabel(new_text_lab_csv_f)
+                csv_text_lab.add_single_text_label_row(
                     new_text=update_text,
                     new_label=cur_label)
-            bert_model_inst.last_saved_dataset_dir = new_dataset_dir_path
 
+        bert_model_inst.last_saved_dataset_dir = new_dataset_dir_path
+
+        print("Saving updated dataset ini file path:\n")
         last_saved_dataset_ini_fpath = get_full_file_normal_path(
             all_dir_str_parts=[BASE_DIR],
             file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FILE_PATH)
@@ -180,7 +184,9 @@ def add_save_test_category(update_text: str,
 
         new_csv_files_paths = {
             "lab_cat_csv_path": new_lab_cat_csv_path,
-            "text_lab_csv_path": new_text_lab_csv_path}
+            "text_lab_csv_path": new_text_lab_csv_path,
+            "last_saved_dataset_ini_fpath": last_saved_dataset_ini_fpath,
+        }
         return new_csv_files_paths
 
     except Exception as error:

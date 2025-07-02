@@ -44,9 +44,18 @@ class CsvTextLabel:
         return True
 
     def add_multi_text_label_rows(
-            self, update_text_label_data: list[list]) -> bool:
-        print(f"update_text_label_data: {update_text_label_data}")
+            self, upd_text_label_data: list[list]) -> bool:
         csv_writer = csv.writer(self.csv_file_obj,
                                 quoting=csv.QUOTE_NONNUMERIC)
-        csv_writer.writerows(update_text_label_data)
+        csv_writer.writerows(upd_text_label_data)
+        return True
+
+    def write_new_text_label_csv(
+            self, text_label_dict: dict) -> bool:
+        csv_writer = csv.writer(self.csv_file_obj,
+                                quoting=csv.QUOTE_NONNUMERIC)
+        csv_writer.writerow(["date_time", "label", "text"])
+        date_time_str = str(datetime.now())
+        for key, value in text_label_dict.items():
+            csv_writer.writerow([date_time_str, key, value])
         return True

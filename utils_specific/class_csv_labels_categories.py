@@ -47,19 +47,18 @@ class CsvLabelCategory:
         return True
 
     def add_multi_label_category_rows(
-            self, update_label_category_data: list[list]) -> bool:
-        print(f"update_label_category_data: {update_label_category_data}")
+            self, upd_label_category_data: list[list]) -> bool:
         csv_writer = csv.writer(self.csv_file_obj,
                                 quoting=csv.QUOTE_NONNUMERIC)
-        csv_writer.writerows(update_label_category_data)
+        csv_writer.writerows(upd_label_category_data)
         return True
 
     def write_new_label_category_csv(
-            self, labels_categories_dict: dict) -> bool:
+            self, label_category_dict: dict) -> bool:
         csv_writer = csv.writer(self.csv_file_obj,
                                 quoting=csv.QUOTE_NONNUMERIC)
         csv_writer.writerow(["date_time", "label", "category"])
         date_time_str = str(datetime.now())
-        for key, value in labels_categories_dict.items():
+        for key, value in label_category_dict.items():
             csv_writer.writerow([date_time_str, key, value])
         return True

@@ -64,7 +64,7 @@ def initialise_bert_model(labels_categories_dict: Dict[int, str],
           f"Model Cached Dir: {green_color}{model_cache_dir}{reset_color}")
 
     # TODO: Use common data with unpacking instead of params for creating model bellow
-    # bert_init_data = {"labels": labels_categories_dict,
+    # bert_init_data = {"labels": label_category_dict,
     #                   "model_name": model_name,
     #                   "cache_dir": model_cache_dir,
     #                   "max_len": token_str_max_len}

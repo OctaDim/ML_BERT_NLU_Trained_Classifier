@@ -1,31 +1,19 @@
 # import asyncio
 # from functools import partial
 import os
-import re
-
-import pandas
-import shutil
 from datetime import datetime
-from typing import Annotated, Tuple
+from typing import Annotated
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import JSONResponse
 
-from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
-    BASE_DIR, BERT_OPTIONS)
-from fast_api.app_add_texts_categories_file.func_add_save_test_category_file import add_save_multi_text_category_file
-from fast_api.app_add_texts_categories_file.scheme_add_texts_cetegories_file import (
-    TextCategoryFileData)
+    BERT_OPTIONS)
+from fast_api.app_add_texts_categories_file.func_add_save_test_category_file import (
+    add_save_multi_text_category_file)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
-from fast_api.app_auth.scheme_auth import AuthDataBert
-from utils_common.normalized_path import (
-    get_full_dir_normal_path, get_full_file_normal_path)
 from utils_common.class_file_validate_read import FileValidateRead
-from utils_specific.class_csv_labels_categories import CsvLabelCategory
-from utils_specific.class_csv_texts_labels import CsvTextLabel
-from utils_specific.new_dataset_dir_path import get_new_dataset_dir_path
 
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
@@ -118,45 +106,40 @@ async def bert_add_text_category_file(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=log_text)
 
-    print()
-    for elem in update_data_list:
-        print(type(elem), "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", elem)
-    print()
-
-    # return JSONResponse(status_code=status.HTTP_200_OK,
-    #                     content=update_data_list)
-
     try:
         datetime_start = datetime.now()
-        # ##############################################################
-        # ##############################################################
         new_csv_files_paths = add_save_multi_text_category_file(
             update_text_category_data=update_data_list)
-        # ##############################################################
-        # ##############################################################
         adding_time = (datetime.now() - datetime_start).total_seconds()
         adding_time = round(adding_time, 1)
 
         new_lab_cat_csv_path = new_csv_files_paths.get("lab_cat_csv_path")
         new_text_lab_csv_path = new_csv_files_paths.get("text_lab_csv_path")
+        dataset_ini_file_path = new_csv_files_paths.get("last_saved_dataset_ini_fpath")
+        empty_error_skipped_rows = new_csv_files_paths.get("empty_error_skipped_rows")
         json_response = JSONResponse(
             content={"message": "BERT text-category csv added [OK]",
                      "username": username,
                      "dataset init": BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH,
                      "csv label-category path": new_lab_cat_csv_path,
                      "csv text-label path:": new_text_lab_csv_path,
+                     "dataset ini file path": dataset_ini_file_path,
                      "adding time": adding_time,
-                     "update data list": update_data_list},
+                     "update data list": update_data_list,
+                     "empty error skipped rows": empty_error_skipped_rows},
             status_code=status.HTTP_200_OK)
 
         blue_color = CONSOLE_COLORS.BRIGHT_BLUE
+        yellow_color = CONSOLE_COLORS.BRIGHT_YELLOW
         reset_color = CONSOLE_COLORS.RESET
         print(f"BERT response.body: {json_response.body}\n"
               f"BERT response.status_code: {json_response.status_code}\n"
               f"username: {username}\n"
               f"csv label-category path: {new_lab_cat_csv_path}\n"
               f"csv text-label path: {new_text_lab_csv_path}\n"
-              f"update data list: {blue_color}{update_data_list}{reset_color}\n")
+              f"dataset ini file path: {dataset_ini_file_path}\n"
+              f"update data list: {blue_color}{update_data_list}{reset_color}\n"
+              f"empty error skipped rows: {yellow_color}{empty_error_skipped_rows}{reset_color}\n")
         return json_response
     except Exception as error:
         log_text = f"BERT router [ERROR]: error: {error}"

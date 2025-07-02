@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS)
-from fast_api.app_add_text_category.func_add_save_test_category import add_save_test_category
+from fast_api.app_add_text_category.func_add_save_test_category import add_save_single_text_category
 from fast_api.app_add_text_category.scheme_add_text_category import (
     TextCategoryDataBert)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
@@ -28,23 +28,20 @@ async def bert_add_text_category(auth_data: AuthDataBert,
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
-    update_text = text_category_data.update_text
-    update_category = text_category_data.update_category
+    update_text = text_category_data.update_text.strip().lower()
+    update_category = text_category_data.update_category.strip().lower()
 
     if not update_text or not update_category:
-        log_text = (f"Empty text or category [ERROR]: "
-                    f"text_category_data.update_text: {update_text}, "
+        log_text = (f"Empty text or category [ERROR]:\n"
+                    f"text_category_data.update_text: {update_text}\n"
                     f"text_category_data.update_category: {update_category}\n")
         print(log_text)
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                             detail=log_text)
 
     try:
-        update_text = update_text.strip().lower()
-        update_category = update_category.strip().lower()
-
         datetime_start = datetime.now()
-        new_csv_files_paths = add_save_test_category(
+        new_csv_files_paths = add_save_single_text_category(
             update_text=update_text,
             update_category=update_category)
         adding_time = (datetime.now() - datetime_start).total_seconds()
@@ -52,6 +49,7 @@ async def bert_add_text_category(auth_data: AuthDataBert,
 
         new_lab_cat_csv_path = new_csv_files_paths.get("lab_cat_csv_path")
         new_text_lab_csv_path = new_csv_files_paths.get("text_lab_csv_path")
+        dataset_ini_file_path = new_csv_files_paths.get("last_saved_dataset_ini_fpath")
         json_response = JSONResponse(
             content={
                 "message": "BERT text-category csv added [OK]",
@@ -59,6 +57,7 @@ async def bert_add_text_category(auth_data: AuthDataBert,
                 "dataset init": BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH,
                 "csv label-category path": new_lab_cat_csv_path,
                 "csv text-label path:": new_text_lab_csv_path,
+                "dataset ini file path": dataset_ini_file_path,
                 "adding time": adding_time,
                 "added text": update_text,
                 "added category": update_category},
@@ -71,6 +70,7 @@ async def bert_add_text_category(auth_data: AuthDataBert,
               f"username: {auth_data.username}\n"
               f"csv label-category path: {new_lab_cat_csv_path}\n"
               f"csv text-label path: {new_text_lab_csv_path}\n"
+              f"dataset ini file path: {dataset_ini_file_path}\n"
               f"added text: {blue_color}{update_text}{reset_color}\n"
               f"added category: {blue_color}{update_category}{reset_color}\n")
         return json_response
