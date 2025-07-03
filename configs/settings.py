@@ -68,19 +68,19 @@ class BERT_OPTIONS:
     BERT_ACTIVE_MODEL_NAME: str = BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED
     BERT_INITIAL_MODEL_DOWNLOAD_PATH: str = "ML_BERT_models/model_bert_init_pretrained"
     # TRAINED MODELS BASE PATH
-    BERT_TRAINED_MODELS_BASE_PATH: str = "ML_BERT_models/models_bert_product_trained"
+    BERT_TRAINED_MODELS_BASE_PATH: str = "working_data/trained_product_bert_models"
     BERT_TRAINED_MODELS_SAVE_DIR_PREFIX: str = "trained_bert"
     # DATASETS CSV
     BERT_INITIAL_DATASET_CSV_PATH: str = "ML_BERT_train_datasets/product_init_train_dataset"
     BERT_TRAIN_DATASET_FILE_EXTENSIONS: tuple = ("xlsx", "xls", "txt", "csv")
-    BERT_NEW_DATASETS_CSV_BASE_PATH: str = "ML_BERT_train_datasets/product_updated_train_datasets"
+    BERT_NEW_DATASETS_CSV_BASE_PATH: str = "working_data/updated_product_train_datasets"
     BERT_LABEL_CATEGORY_CSV_FILE_NAME: str = "prod_labels_categories.csv"
     BERT_TEXT_LABEL_CSV_FILE_NAME: str = "prod_texts_labels.csv"
     BERT_OVERWRITE_PREV_CSV_DATASET: bool = False
     BERT_NEW_DATASET_CSV_DIR_PREFIX: str = "updated_dataset"
     # MODEL AND CSV SAVE PATHS INI FILES
-    BERT_LAST_SAVED_MODEL_INI_FILE_PATH: str = "configs_last_saved_model/last_saved_model_dir_path.ini"
-    BERT_LAST_SAVED_DATASET_INI_FILE_PATH: str = "configs_last_saved_dataset/last_saved_dataset_dir_path.ini"
+    BERT_LAST_SAVED_MODEL_INI_FILE_PATH: str = "working_data/last_saved_model_ini_file/last_saved_model_dir_path.ini"
+    BERT_LAST_SAVED_DATASET_INI_FILE_PATH: str = "working_data/last_saved_dataset_ini_file/last_saved_dataset_dir_path.ini"
 
 
 @dataclass

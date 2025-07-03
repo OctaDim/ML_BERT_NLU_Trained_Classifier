@@ -95,26 +95,30 @@ def add_save_single_text_category(update_text: str,
                 detail=log_text)
 
         new_dataset_dir_path = get_new_dataset_dir_path()
-        new_lab_cat_csv_path = None
 
         print("Single adding one label-category pair:")
-        next_label_value = None
+        new_lab_cat_csv_path = None
+
         if update_category not in prev_lab_cat_dict.values():
-            next_label_value = max(prev_lab_cat_dict.keys()) + 1
-            prev_lab_cat_dict[next_label_value] = update_category
+            next_label_flag_value = max(prev_lab_cat_dict.keys()) + 1
+            prev_lab_cat_dict[next_label_flag_value] = update_category
+            new_category = update_category
+        else:
+            next_label_flag_value = None
+            new_category = ""
 
         print("Single adding one single text-label pair:")
         cur_label = None
-        if not next_label_value:  # Old category and label
+        if not next_label_flag_value:  # Old category and label
             for label, category in prev_lab_cat_dict.items():
                 if category == update_category:
                     cur_label = label
                     break
         else:  # New category and new label
-            cur_label = next_label_value
+            cur_label = next_label_flag_value
 
         print("Single saving one label-category pair updated csv file:")
-        if next_label_value:  # New category to add added
+        if next_label_flag_value:  # New category to add added
             if BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:
                 new_lab_cat_csv_path = prev_lab_cat_csv_path
                 with open(file=new_lab_cat_csv_path, mode="a",
@@ -182,12 +186,12 @@ def add_save_single_text_category(update_text: str,
                   mode="w", encoding="utf-8") as dataset_ini_file:
             dataset_ini_file.write(new_dataset_dir_path)
 
-        new_csv_files_paths = {
+        new_csv_files_data = {
             "lab_cat_csv_path": new_lab_cat_csv_path,
             "text_lab_csv_path": new_text_lab_csv_path,
             "last_saved_dataset_ini_fpath": last_saved_dataset_ini_fpath,
-        }
-        return new_csv_files_paths
+            "new_category": new_category}
+        return new_csv_files_data
 
     except Exception as error:
         log_text = (f"BERT add and save single text-category [ERROR]: "

@@ -94,16 +94,17 @@ def add_save_multi_text_category_file(update_text_category_data: list) -> dict:
                 status_code=status.HTTP_406_NOT_ACCEPTABLE,
                 detail=log_text)
 
+        print("Group adding multi label-category pairs:")
         new_dataset_dir_path = get_new_dataset_dir_path()
+        new_lab_cat_csv_path = None
+
         common_datetime_str = str(datetime.now())
 
         update_lab_cat_csv_list = []
         update_text_lab_csv_list = []
         empty_error_skipped_rows = []
+        new_categories_list = []
 
-        new_lab_cat_csv_path = None
-
-        print("Group adding multi label-category pairs:")
         for cur_text_cat_pair in update_text_category_data:
             if len(cur_text_cat_pair) != 2:
                 print(f"Current row skipped, not 2 fields number [ERROR]:\n"
@@ -121,22 +122,24 @@ def add_save_multi_text_category_file(update_text_category_data: list) -> dict:
                 continue
 
             # print("\nAdding new multi label-category pair:")
-            next_label_value = None
             if cur_update_category not in prev_lab_cat_dict.values():
-                next_label_value = max(prev_lab_cat_dict.keys()) + 1
-                prev_lab_cat_dict[next_label_value] = cur_update_category
+                next_label_flag_value = max(prev_lab_cat_dict.keys()) + 1
+                prev_lab_cat_dict[next_label_flag_value] = cur_update_category
                 update_lab_cat_csv_list.append(
-                    [common_datetime_str, next_label_value, cur_update_category])
+                    [common_datetime_str, next_label_flag_value, cur_update_category])
+                new_categories_list.append(cur_update_category)
+            else:
+                next_label_flag_value = None
 
             # print("Adding new multi text-label pair:")
             update_label = None
-            if not next_label_value:  # Old category and label
+            if not next_label_flag_value:  # Old category and label
                 for cur_csv_label, cur_csv_category in prev_lab_cat_dict.items():
                     if cur_update_category == cur_csv_category:
                         update_label = cur_csv_label
                         break
             else:  # New category and new label
-                update_label = next_label_value
+                update_label = next_label_flag_value
 
             update_text_lab_csv_list.append(
                 [common_datetime_str, update_label, cur_update_text])
@@ -208,14 +211,13 @@ def add_save_multi_text_category_file(update_text_category_data: list) -> dict:
                   mode="w", encoding="utf-8") as dataset_ini_file:
             dataset_ini_file.write(new_dataset_dir_path)
 
-        new_csv_files_paths = {
+        new_csv_files_data = {
             "lab_cat_csv_path": new_lab_cat_csv_path,
             "text_lab_csv_path": new_text_lab_csv_path,
             "last_saved_dataset_ini_fpath": last_saved_dataset_ini_fpath,
             "empty_error_skipped_rows": empty_error_skipped_rows,
-        }
-        return new_csv_files_paths
-
+            "new_categories_list": new_categories_list}
+        return new_csv_files_data
     except Exception as error:
         log_text = (f"BERT add and save single text-category [ERROR]: "
                     f"error: {error}")
