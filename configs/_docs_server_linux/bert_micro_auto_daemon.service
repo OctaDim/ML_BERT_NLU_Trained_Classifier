@@ -1,0 +1,14 @@
+[Unit]
+Description=ML_BERT_NLU_Training_Classifier
+After=network.target
+
+[Service]
+User=octadim
+WorkingDirectory=/usr/local/ML_BERT_NLU_Training_Classifier
+ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /usr/local/ML_BERT_NLU_Training_Classifier/main.py
+Restart=always
+RestartSec=180
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

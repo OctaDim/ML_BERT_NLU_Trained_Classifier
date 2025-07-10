@@ -1,0 +1,34 @@
+*** Инструкция от Димона (DM) по запуску ASR сервера, как фонового процесса ***
+
+- Создаем все директории для лог файла одним махом через флаг -p, иначе ловим ошибки:
+mkdir -p /usr/local/ML_BERT_NLU_Training_Classifier/logs/
+
+- Для надежности заходим в директорию (проекта) запускаемого модуля Питона:
+cd cd /usr/local/ML_BERT_NLU_Training_Classifier
+
+- Запускаем модуль питона:
+nohup /usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /usr/local/ML_BERT_NLU_Training_Classifier/main.py > /usr/local/ML_BERT_NLU_Training_Classifier/logs/bert_micro_fastapi.log 2>&1 &
+Примечание:
+    - nohup - оставит процесс работать после выхода юзера из системы
+    - без флага -m, т.к. указываем абсолютный адрес и файл.py, а не имя без пути
+    - ">" перенаправляет логи stdout в лог-файл
+    - "2>&1"  2-это stderr (ошибки) направляет в тот же файл, что и stdout
+    - "&" - в фоне, чтобы не процесс не закрылся с окном терминала
+
+- устанавливаем цветной вывод (необязательно, но информативнее)
+sudo apt install ccze
+
+- Следим за изменениями логов в реальном времени (ЦВЕТНОЙ ШРИФТ):
+tail -f /usr/local/ML_BERT_NLU_Training_Classifier/logs/bert_micro_fastapi.log | ccze -A
+
+- Следим за изменениями логов в реальном времени (БЕЛЫЙ ШРИФТ):
+tail -f /usr/local/ML_BERT_NLU_Training_Classifier/logs/bert_micro_fastapi.log
+
+- Просмотреть процессы, которые слушают порт 8000:
+sudo lsof -i :8000
+
+- Остановить процесс по номеру PID:
+    - мягко закрыть (обычное штатное закрытие)
+            sudo kill <PID>
+    - жестко убить процесс (если завис наглухо)
+            sudo kill -9 <PID>

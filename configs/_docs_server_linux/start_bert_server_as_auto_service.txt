@@ -1,0 +1,63 @@
+*** Инструкция от Димона (DM) по запуску ASR сервера, как сервиса или дИмона)) ***
+
+Лучший способ для управления дИмонами (автозапуск, логи, перезагрузка)
+
+- Создаем сервисный файл в директории Linux для авто загружаемых сервисов:
+sudo nano /etc/systemd/system/bert_micro_auto_daemon.service
+
+- Копируем и вставляем текст конфигурации в открытый файл:
+[Unit]
+Description=ML_BERT_NLU_Training_Classifier
+After=network.target
+[Service]
+User=octadim
+WorkingDirectory=/usr/local/ML_BERT_NLU_Training_Classifier
+ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /usr/local/ML_BERT_NLU_Training_Classifier/main.py
+Restart=always
+RestartSec=180
+Type=simple
+[Install]
+WantedBy=multi-user.target
+
+- Сохраняем изменения в файле:
+[CTRL]+[O] => [ENTER]
+
+- Проверяем, что все сохранилось, зайдя опять в файл:
+sudo nano /etc/systemd/system/bert_micro_auto_daemon.service
+
+- Выходим из файла:
+[CTRL+X] => [ENTER]
+
+- Перезагружаем все сервисы (димоны), чтобы ос увидела новую конфу:
+sudo systemctl daemon-reload
+
+- Запускаем сервис bert_micro_auto_daemon, как димон:
+sudo systemctl start bert_micro_auto_daemon
+
+- Добавляем сервис в автозагрузку:
+sudo systemctl enable bert_micro_auto_daemon
+
+- Проверяем статус запущенной службы (димона)
+sudo systemctl status bert_micro_auto_daemon
+
+- устанавливаем цветной вывод (необязательно, но информативнее)
+sudo apt install ccze
+
+- Смотрим логи ошибок и все логи консоли в онлайн режиме (ЦВЕТНОЙ ШРИФТ):
+sudo journalctl -u bert_micro_auto_daemon -f | ccze -A
+
+- Смотрим логи ошибок и все логи консоли в онлайн режиме (БЕЛЫЙ ШРИФТ):
+sudo journalctl -u bert_micro_auto_daemon -f
+
+- Посмотреть службу слушающую 8000 порт:
+    - Сначала узнать номер PID процесса, слушающего порт:
+        lsof -i :8000
+    - Получаем инфу о службе, управляющей этим процессом:
+        systemctl status <PID>
+            - В выводе Loaded: ищем название <имя_службы>.service
+
+- Перезапуск службы-димона:
+sudo systemctl restart bert_micro_auto_daemon
+
+- Остановка службы-димона:
+sudo systemctl stop bert_micro_auto_daemon
