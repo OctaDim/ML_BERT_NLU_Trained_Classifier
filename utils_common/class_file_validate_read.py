@@ -32,11 +32,11 @@ class FileValidateRead:
                                      validate_xlsx: bool = True,
                                      validate_xls: bool = True) -> bool:
         file_content = await self.async_reset_and_read_file()
-        is_valid_xls_xlsx_file = any([
+        is_valid_excel_file = any([
             validate_xlsx and file_content.startswith(self.signature_xlsx),
             validate_xls and file_content.startswith(self.signature_xls),
         ])
-        return is_valid_xls_xlsx_file
+        return is_valid_excel_file
 
     async def validate_content_txt(self) -> bool:
         await self.async_reset_and_read_file()
