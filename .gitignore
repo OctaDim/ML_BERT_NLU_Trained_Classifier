@@ -242,3 +242,5 @@ ML_BERT_classifier/model_bert_pretrained/*
 data_outgoing/*
 .configs.ini
 main_extra_train_backup.py
+
+WORKING_DATA/*
