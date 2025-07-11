@@ -13,7 +13,7 @@ class FileValidateRead:
     def __init__(self, file: UploadFile):
         self.file = file
         self.file_content = None
-        self.signature_xlsx = b"\x50\x4B\x03\x04",  # XLSX (ZIP archive)
+        self.signature_xlsx = b"\x50\x4B\x03\x04"  # XLSX (ZIP archive)
         self.signature_xls = b"\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"  # XLS (OLE Compound File)
 
     @staticmethod
