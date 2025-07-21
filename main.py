@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from configs.settings import API_HOST, API_PORT
+from fast_api.app_add_single_category.router_add_single_category import router_bert_add_single_category
 from fast_api.app_add_text_category.router_add_text_category import router_bert_add_text_category
 from fast_api.app_add_texts_categories_file.router_add_texts_categories_file import router_bert_add_text_category_file
 from fast_api.app_bert_get_all_categories.router_bert_get_all_categories import router_bert_get_all_categories
@@ -14,7 +15,6 @@ from fast_api.app_tests.router_test_categorise import router_test_categorise
 from fast_api.app_tests.router_test_load_model import router_test_load_model
 from fast_api.app_tests.router_test_save_model import router_test_save_model
 from fast_api.app_tests.router_test_train_categorise import router_test_train_categorise
-
 
 routers_list = [
     router_root_url,
@@ -29,6 +29,7 @@ routers_list = [
     router_bert_get_all_categories,
     router_bert_add_text_category,
     router_bert_add_text_category_file,
+    router_bert_add_single_category,
 
 ]
 
@@ -49,6 +50,10 @@ def run_uvicorn_fastapi_server():
                 # factory=True,
                 use_colors=True, )
     print("Uvicorn and FastAPI server started [OK]")
+
+
+def run_redis():
+    pass
 
 
 if __name__ == "__main__":
