@@ -29,7 +29,7 @@ class API_CONFIG_NAMES:
     API_TEST_DEXP_IP = "API_dexp_ip_192_168_0_117_8000"
 
 
-full_path = os.path.join(BASE_DIR, ".configs.ini")
+full_path = os.path.join(BASE_DIR, ".configs_api.ini")
 normal_env_path = os.path.normpath(full_path)
 api_configs = ConfigParser()
 api_configs.read(filenames=normal_env_path)
@@ -52,6 +52,31 @@ API_HOST: str = api_configs.get(section=api_conf_name, option="API_HOST")
 API_PORT: int = int(api_configs.get(section=api_conf_name, option="API_PORT"))
 API_USERNAME: str = api_configs.get(section=api_conf_name, option="API_USERNAME")
 API_PASSWORD: str = api_configs.get(section=api_conf_name, option="API_PASSWORD")
+
+class DB_CONFIG_NAMES:
+    REDIS_PRODUCT_ANY_IP = "Redis_any_ip_prod_configs"
+
+if cur_external_ip == "___.___.___.___":
+    redis_conf_name = DB_CONFIG_NAMES.REDIS_PRODUCT_ANY_IP  # Certain configs can be defined
+else:
+    redis_conf_name = DB_CONFIG_NAMES.REDIS_PRODUCT_ANY_IP
+
+full_path = os.path.join(BASE_DIR, ".configs_db.ini")
+normal_env_path = os.path.normpath(full_path)
+db_configs = ConfigParser()
+db_configs.read(filenames=normal_env_path)
+
+REDIS_DATABASE = db_configs.get(section=redis_conf_name, option="REDIS_DATABASE")
+REDIS_HOST = db_configs.get(section=redis_conf_name, option="REDIS_HOST")
+REDIS_PORT = db_configs.get(section=redis_conf_name, option="REDIS_PORT")
+REDIS_PASSWORD = db_configs.get(section=redis_conf_name, option="REDIS_PASSWORD")
+
+
+@dataclass
+class REDIS_OPTIONS:
+    DECODE_RESPONSES = True
+    SOCKET_CONNECTION_TIMEOUT = 5
+    SOCKET_KEEPALIVE = True
 
 
 @dataclass
