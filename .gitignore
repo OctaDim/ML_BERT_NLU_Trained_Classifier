@@ -240,7 +240,9 @@ stt_VOSK/models_vosk/*
 stt_WHISPER/models_whisper/*
 ML_BERT_classifier/model_bert_pretrained/*
 data_outgoing/*
-.configs.ini
+.configs_api.ini
+.configs_db.ini
+
 main_extra_train_backup.py
 
 WORKING_DATA/*
