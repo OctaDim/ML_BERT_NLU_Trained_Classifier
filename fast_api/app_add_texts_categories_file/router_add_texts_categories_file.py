@@ -26,8 +26,8 @@ router_bert_add_text_category_file = APIRouter(prefix=f"/{bert_base_url_name}",
                                          response_model=None)
 async def bert_add_text_category_file(
         upload_file: Annotated[UploadFile, File(description="file .xls, .xlsx, or .txt")],
-        username: Annotated[str, Form()] = "temp_zxc",  # TODO: remove default test-debug username
-        password: Annotated[str, Form()] = "temp_123",  # TODO: remove default test-debug password
+        username: Annotated[str, Form()],
+        password: Annotated[str, Form()],
 ):
     verify_prod_username_password(username=username,
                                   password=password)
