@@ -1,9 +1,13 @@
 # import asyncio
 # from functools import partial
+import redis
+import json
+from datetime import timedelta
 import os
+import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, BackgroundTasks
 from fastapi.responses import JSONResponse
 
 from ML_BERT_classifier.init_bert import bert_model_inst
@@ -19,7 +23,6 @@ from fast_api.app_bert_train_model.scheme_bert_train_model import TrainModelData
 from utils_common.normalized_path import get_full_dir_normal_path, get_full_file_normal_path
 from utils_specific.class_csv_texts_labels import CsvTextLabel
 
-
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_train_model = APIRouter(prefix=f"/{bert_base_url_name}",
                                     tags=["BERT"])
@@ -28,8 +31,11 @@ router_bert_train_model = APIRouter(prefix=f"/{bert_base_url_name}",
 @router_bert_train_model.post(path="/bert_train_model/",
                               # TODO: Describe responses here
                               response_model=None)
-async def bert_train_model(auth_data: AuthDataBert,
-                           train_model_data: TrainModelDataBert):
+async def bert_train_model(
+        auth_data: AuthDataBert,
+        train_model_data: TrainModelDataBert,
+        background_tasks: BackgroundTasks,  # class for fastapi background tasks adding and getting
+):
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
@@ -78,6 +84,9 @@ async def bert_train_model(auth_data: AuthDataBert,
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=log_text)
 
+        background_task_id = str(uuid.uuid4())
+        # TODO: REDIS training_statuses[task_id] = {"status": "pending", "progress": 0}
+
         print("\nModel training:")
         datetime_start = datetime.now()
         bert_model_inst.train(
@@ -100,7 +109,7 @@ async def bert_train_model(auth_data: AuthDataBert,
                      "train dataset path": train_text_lab_csv_path,
                      "creating dataset time": creating_dataset_time,
                      "training model time": training_time_str},
-            status_code=status.HTTP_200_OK)
+            status_code=status.HTTP_202_ACCEPTED)
 
         blue_color = CONSOLE_COLORS.BRIGHT_BLUE
         reset_color = CONSOLE_COLORS.RESET
@@ -120,6 +129,7 @@ async def bert_train_model(auth_data: AuthDataBert,
                 redirected_train_text_lab_csv_path=train_text_lab_csv_path,
                 redirected_creating_dataset_time=creating_dataset_time,
                 redirected_training_time=training_time_str)
+            # Redirecting to save model view with necessary params
             await bert_save_model(
                 auth_data=auth_data,
                 save_model_data=save_model_data_bert,
