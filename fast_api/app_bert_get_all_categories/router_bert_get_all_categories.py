@@ -47,7 +47,7 @@ async def bert_get_categories_list(auth_data: AuthDataBert):
         getting_time = round(getting_time, 1)
 
         json_response = JSONResponse(
-            content={"message": "BERT text-phrase categorised: [OK]",
+            content={"message": "BERT text-phrase categorised [OK]",
                      "username": auth_data.username,
                      "model init": BERT_OPTIONS.BERT_MODEL_INIT,
                      "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
