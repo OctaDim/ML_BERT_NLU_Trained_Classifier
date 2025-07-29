@@ -7,11 +7,11 @@ async def redis_save_key_mapping_dict(key_name: str,
                                       mapping_dict: dict,
                                       expiry_seconds: timedelta | int
                                       ) -> None | str:
-    async with RedisAsyncConnection(
-            host=None, port=None, db=None, password=None,
-            decode_responses=None,
-            socket_connect_timeout=None,
-            socket_keepalive=None) as redis_conn:
+    async with RedisAsyncConnection(host=None, port=None,
+                                    db=None, password=None,
+                                    decode_responses=None,
+                                    socket_connect_timeout=None,
+                                    socket_keepalive=None) as redis_conn:
         try:
             await redis_conn.hset(name=key_name, mapping=mapping_dict)
             await redis_conn.expire(name=key_name, time=expiry_seconds)
