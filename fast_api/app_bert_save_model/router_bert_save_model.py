@@ -1,18 +1,21 @@
 import os
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
 from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
-from configs.settings import BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS
+from configs.settings import (
+    BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, REDIS_OPTIONS)
+from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
-from fast_api.app_bert_save_model.scheme_bert_save_model import SaveModelAfterTrainBert, SaveModelDataBert
-from utils_common.normalized_path import get_full_dir_normal_path, get_full_file_normal_path
-
+from fast_api.app_bert_save_model.scheme_bert_save_model import (
+    SaveModelAfterTrainBert, SaveModelDataBert)
+from utils_common.normalized_path import (
+    get_full_dir_normal_path, get_full_file_normal_path)
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_save_model = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -24,12 +27,26 @@ router_bert_save_model = APIRouter(prefix=f"/{bert_base_url_name}",
                              response_model=None)
 async def bert_save_model(auth_data: AuthDataBert,
                           save_model_data: SaveModelDataBert,
-                          save_model_after_train_data: SaveModelAfterTrainBert):
+                          save_model_after_train_data: SaveModelAfterTrainBert,
+                          dataset_name: str = None):
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
-    print("#" * 100)
+    REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
+
     try:
+        print("\nBERT saving model after train process:")
+        redis_update = {
+            "status": REDIS_OPTIONS.STATUS_MODEL_SAVING_PROCESS,
+            "step_7_saving_process": "[OK]",
+        }
+        redis_error = await redis_save_key_mapping_dict(
+            key_name=dataset_name,
+            mapping_dict=redis_update,
+            expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+        if redis_error:
+            print(redis_error)
+
         if save_model_data.model_save_dir_path:
             model_save_path = save_model_data.model_save_dir_path
         else:
@@ -84,6 +101,22 @@ async def bert_save_model(auth_data: AuthDataBert,
 
         model_saving_time = (datetime.now() - datetime_start).total_seconds()
         model_saving_time = round(model_saving_time, 1)
+
+        new_model_path_dirs = model_save_path.split(os.sep)
+        new_model_name = new_model_path_dirs[-1]  # Same as new model directory name
+
+        redis_update = {
+            "status": REDIS_OPTIONS.STATUS_TRAIN_AND_SAVE_FINISH,
+            "new_model_name": new_model_name,
+            "model_saving_time": model_saving_time,
+            "step_8_saving_model_after_train_finish": "[OK]",
+        }
+        redis_error = await redis_save_key_mapping_dict(
+            key_name=dataset_name,
+            mapping_dict=redis_update,
+            expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+        if redis_error:
+            print(redis_error)
 
         blue_color = CONSOLE_COLORS.BRIGHT_BLUE
         reset_color = CONSOLE_COLORS.RESET
