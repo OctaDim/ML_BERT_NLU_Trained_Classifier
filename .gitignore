@@ -241,7 +241,8 @@ stt_WHISPER/models_whisper/*
 ML_BERT_classifier/model_bert_pretrained/*
 data_outgoing/*
 .configs_api.ini
-.configs_db.ini
+.configs_redis.ini
+.configs_sqlalchemy.ini
 
 main_extra_train_backup.py
 
