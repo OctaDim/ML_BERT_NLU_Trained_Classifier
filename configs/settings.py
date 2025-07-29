@@ -79,7 +79,6 @@ class REDIS_OPTIONS:
     SOCKET_CONNECTION_TIMEOUT = 5
     SOCKET_KEEPALIVE = True
     STATUSES_EXPIRY_DAYS = 90
-    TRAIN_TASK_ID_PREFIX = "train_task_id:"
     STATUS_PENDING = "Pending"
     STATUS_DATASET_PREPARING = "Preparing dataset"
     STATUS_TRAIN_START = "Model training started"
