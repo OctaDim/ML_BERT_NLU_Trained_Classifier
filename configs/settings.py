@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 from utils_common.get_cur_ip_address import (
     get_cur_external_ip_via_google_dns, get_cur_internal_ip)
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 full_path = os.path.join(BASE_DIR, ".env")
@@ -53,23 +52,25 @@ API_PORT: int = int(api_configs.get(section=api_conf_name, option="API_PORT"))
 API_USERNAME: str = api_configs.get(section=api_conf_name, option="API_USERNAME")
 API_PASSWORD: str = api_configs.get(section=api_conf_name, option="API_PASSWORD")
 
+
 class DB_CONFIG_NAMES:
     REDIS_PRODUCT_ANY_IP = "Redis_any_ip_prod_configs"
+
 
 if cur_external_ip == "___.___.___.___":
     redis_conf_name = DB_CONFIG_NAMES.REDIS_PRODUCT_ANY_IP  # Certain configs can be defined
 else:
     redis_conf_name = DB_CONFIG_NAMES.REDIS_PRODUCT_ANY_IP
 
-full_path = os.path.join(BASE_DIR, ".configs_db.ini")
+full_path = os.path.join(BASE_DIR, ".configs_redis.ini")
 normal_env_path = os.path.normpath(full_path)
 db_configs = ConfigParser()
 db_configs.read(filenames=normal_env_path)
 
-REDIS_DATABASE = db_configs.get(section=redis_conf_name, option="REDIS_DATABASE")
 REDIS_HOST = db_configs.get(section=redis_conf_name, option="REDIS_HOST")
 REDIS_PORT = db_configs.get(section=redis_conf_name, option="REDIS_PORT")
-REDIS_PASSWORD = db_configs.get(section=redis_conf_name, option="REDIS_PASSWORD")
+REDIS_DB = db_configs.get(section=redis_conf_name, option="REDIS_DATABASE")
+REDIS_PASSWORD = db_configs.get(section=redis_conf_name, option="REDIS_PASSWORD") or None
 
 
 @dataclass
@@ -77,6 +78,18 @@ class REDIS_OPTIONS:
     DECODE_RESPONSES = True
     SOCKET_CONNECTION_TIMEOUT = 5
     SOCKET_KEEPALIVE = True
+    STATUSES_EXPIRY_DAYS = 90
+    TRAIN_TASK_ID_PREFIX = "train_task_id:"
+    STATUS_PENDING = "Pending"
+    STATUS_DATASET_PREPARING = "Preparing dataset"
+    STATUS_TRAIN_START = "Model training started"
+    STATUS_TRAIN_PROCESS = "Model training in process"
+    STATUS_TRAIN_FINISH = "Model training without saving finished"
+    STATUS_TRAIN_NO_SAVE_FINISH = "Model training without saving completed"
+    STATUS_MODEL_SAVING_START = "Saving trained model started"
+    STATUS_MODEL_SAVING_PROCESS = "Saving trained model in process"
+    STATUS_MODEL_SAVING_FINISH = "Saving trained model finished"
+    STATUS_TRAIN_AND_SAVE_FINISH = "Model training and saving completed"
 
 
 @dataclass
