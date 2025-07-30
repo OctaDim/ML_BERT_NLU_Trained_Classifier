@@ -4,7 +4,7 @@ from configs.settings import BASE_DIR, BERT_OPTIONS
 from utils_common.normalized_path import get_full_file_normal_path
 
 
-def get_last_saved_model_dir_path():
+def get_last_saved_model_dir_path() -> str|None:
     last_saved_model_ini_file_path = ""
     last_saved_model_dir_path = ""
     try:
