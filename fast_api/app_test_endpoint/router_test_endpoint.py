@@ -66,7 +66,8 @@ async def develop_test_endpoint(auth_data: AuthDataBert):
 
     all_dataset_dirs = train_dataset_dir.split(os.sep)
     dataset_container_dir = all_dataset_dirs[-1]
-    print("############################# dataset_container_dir", dataset_container_dir)
+    print("############ train_dataset_dir", train_dataset_dir)
+    print("############ dataset_container_dir", dataset_container_dir)
 
 
     print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ TEST ENDPOINT [FINISH]")
