@@ -16,7 +16,7 @@ from fast_api.app_tests.router_test_categorise import router_test_categorise
 from fast_api.app_tests.router_test_load_model import router_test_load_model
 from fast_api.app_tests.router_test_save_model import router_test_save_model
 from fast_api.app_tests.router_test_train_categorise import router_test_train_categorise
-from fast_api.app_train_task_list.router_train_task_list import router_bert_get_train_tasks_list
+from fast_api.app_train_tasks_list.router_train_tasks_list import router_bert_get_train_tasks_list
 
 routers_list = [
     router_root_url,
