@@ -9,6 +9,7 @@ from fast_api.app_bert_get_all_categories.router_bert_get_all_categories import 
 from fast_api.app_bert_load_model.router_bert_load_model import router_bert_load_model
 from fast_api.app_bert_save_model.router_bert_save_model import router_bert_save_model
 from fast_api.app_bert_train_model.router_bert_train_model import router_bert_train_model
+from fast_api.app_last_dataset_name.router_last_dataset_name import router_bert_last_dataset_name
 from fast_api.app_predict_text.router_predict_single_text import router_bert_predict_single_text
 from fast_api.app_root_url.router_main import router_root_url
 from fast_api.app_test_endpoint.router_test_endpoint import router_develop_test_endpoint
@@ -33,6 +34,7 @@ routers_list = [
     router_bert_add_text_category_file,
     router_bert_add_single_category,
     router_bert_get_train_tasks_list,
+    router_bert_last_dataset_name,
 
     # Test end-point (debug time)
     router_develop_test_endpoint,
@@ -59,6 +61,7 @@ def run_uvicorn_fastapi_server():
 
 
 def run_redis():
+    # TODO: Check Redis is available and start Redis if not
     pass
 
 
