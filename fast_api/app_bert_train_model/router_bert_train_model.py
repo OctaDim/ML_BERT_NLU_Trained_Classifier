@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
-    BERT_OPTIONS, BASE_DIR, BERT_TRAIN_OPTIONS, BERT_MODEL_NAMES,
+    BERT_OPTIONS, BERT_TRAIN_OPTIONS, BERT_MODEL_NAMES,
     REDIS_OPTIONS)
 from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
@@ -20,8 +20,10 @@ from fast_api.app_bert_train_model.func_train_save_model_background import (
 from fast_api.app_bert_train_model.scheme_bert_train_model import (
     TrainModelDataBert)
 from utils_common.normalized_path import (
-    get_full_dir_normal_path, get_full_file_normal_path)
+    get_full_file_normal_path)
 from utils_specific.class_csv_texts_labels import CsvTextLabel
+from utils_specific.get_last_saved_dataset_path import (
+    get_last_saved_dataset_dir_path)
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_train_model = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -39,47 +41,16 @@ async def bert_train_model(
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
+    print("\nGetting last saved dataset directory name:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
-
-    print("\nGetting last saved dataset full path:")
-    # TODO: move to the separate function getting last saved dataset full path
-    last_saved_dataset_ini_dir = ""
-    last_saved_dataset_ini_path = ""
-    try:
-        last_saved_dataset_ini_path = get_full_file_normal_path(
-            all_dir_str_parts=[BASE_DIR],
-            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FILE_PATH)
-
-        if os.path.isfile(last_saved_dataset_ini_path):
-            with open(file=last_saved_dataset_ini_path,
-                      mode="r", encoding="utf-8") as dataset_ini_file:
-                dataset_ini_file.seek(0)
-                dataset_file_saved_path = dataset_ini_file.read()
-        else:
-            dataset_file_saved_path = ""
-    except Exception as error:
-        dataset_file_saved_path = ""  # not necessary, for reliability
-        print(f"Read last model saved ini file [ERROR]: error: {error}, "
-              f"last_saved_dataset_ini_dir: {last_saved_dataset_ini_dir}, "
-              f"last_saved_dataset_ini_path: {last_saved_dataset_ini_path}")
-
-    if bert_model_inst.last_saved_dataset_dir:
-        train_dataset_dir = bert_model_inst.last_saved_dataset_dir
-    elif dataset_file_saved_path:
-        train_dataset_dir = dataset_file_saved_path
-    else:
-        initial_dataset_dir = BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH
-        train_dataset_dir = get_full_dir_normal_path(
-            [BASE_DIR, initial_dataset_dir])
-        if not (os.path.exists(train_dataset_dir)
-                and os.path.isdir(train_dataset_dir)):
-            train_dataset_dir = bert_model_inst.last_saved_dataset_dir
-
+    train_dataset_dir = get_last_saved_dataset_dir_path()
     dataset_path_dirs = train_dataset_dir.split(os.sep)
     dataset_name = dataset_path_dirs[-1]  # As dataset files directory name
     train_task_uuid = str(uuid.uuid4())
+
     redis_update = {
         "status": REDIS_OPTIONS.STATUS_PENDING,
+        "complete_status": "",
         "train_task_uuid": train_task_uuid,
         "dataset_name": dataset_name,
         "step_1_pending": "[OK]",

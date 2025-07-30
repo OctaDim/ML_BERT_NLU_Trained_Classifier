@@ -22,9 +22,9 @@ async def background_train_save_model(
         train_text_lab_csv_path: str,
         creating_dataset_time: float
 ) -> None:
+    print("\nBERT model training start:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
 
-    print("\nBERT model training start:")
     redis_update = {
         "status": REDIS_OPTIONS.STATUS_TRAIN_PROCESS,
         "step_4_training_start": "[OK]",
@@ -37,6 +37,7 @@ async def background_train_save_model(
         print(redis_error)
 
     datetime_start = datetime.now()
+    # TODO: Training model temporary switched off
     # bert_model_inst.train(
     #     train_dataset=new_train_dataset,
     #     max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
@@ -46,11 +47,14 @@ async def background_train_save_model(
     training_time = (datetime.now() - datetime_start).total_seconds()
     hours, remainder = [int(el) for el in divmod(training_time, 3600)]
     minutes, seconds = [int(el) for el in divmod(remainder, 60)]
-    training_time_str = f"{hours} hrs : {minutes} min : {seconds} sec"
+    # training_time_str = f"{hours} hrs : {minutes} min : {seconds} sec"
+    training_time_str = f"{hours} hrs : {minutes} min"
+    training_time_str_ru = f"{hours} час {minutes} мин"
 
     redis_update = {
         "status": REDIS_OPTIONS.STATUS_TRAIN_FINISH,
         "training_time_str": training_time_str,
+        "training_time_str_ru": training_time_str_ru,
         "step_5_training_finish": "[OK]",
     }
     redis_error = await redis_save_key_mapping_dict(
@@ -110,7 +114,7 @@ async def background_train_save_model(
         print("\nBERT training model without saving finish:")
         redis_update = {
             "status": REDIS_OPTIONS.STATUS_TRAIN_NO_SAVE_FINISH,
-            "training_time_str": training_time_str,
+            "complete_status": "complete",
             "step_6-1_training_no_saving_finish": "[OK]",
         }
         redis_error = await redis_save_key_mapping_dict(
