@@ -28,18 +28,19 @@ async def bert_get_last_dataset_name(auth_data: AuthDataBert):
         datetime_start = datetime.now()
         last_saved_dataset_dir = get_last_saved_dataset_dir_path()
         dataset_path_dirs = last_saved_dataset_dir.split(os.sep)
-        dataset_name = dataset_path_dirs[-1]  # As dataset files directory name
+        last_saved_dataset_name = dataset_path_dirs[-1]  # As dataset files dir name
         getting_time = (datetime.now() - datetime_start).total_seconds()
         getting_time = round(getting_time, 1)
 
         json_response = JSONResponse(
-            content={"message": "BERT last saved dataset dir name [OK]",
-                     "username": auth_data.username,
-                     "model init": BERT_OPTIONS.BERT_MODEL_INIT,
-                     "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
-                     "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
-                     "getting time": getting_time,
-                     "dataset_name": dataset_name},
+            content={
+                "message": "BERT last saved dataset dir name [OK]",
+                "username": auth_data.username,
+                "model init": BERT_OPTIONS.BERT_MODEL_INIT,
+                "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
+                "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
+                "getting time": getting_time,
+                "last_saved_dataset_name": last_saved_dataset_name},
             status_code=status.HTTP_200_OK)
 
         blue_color = CONSOLE_COLORS.BRIGHT_BLUE
@@ -48,7 +49,7 @@ async def bert_get_last_dataset_name(auth_data: AuthDataBert):
               f"BERT response.status_code: {json_response.status_code}\n"
               f"username: {auth_data.username}\n"
               f"getting_time: {getting_time}\n"
-              f"dataset_name: {blue_color}{dataset_name}{reset_color}\n")
+              f"last_saved_dataset_name: {blue_color}{last_saved_dataset_name}{reset_color}\n")
         return json_response
     except Exception as error:
         log_text = (f"BERT router last saved dataset dir name [ERROR]: "
