@@ -28,18 +28,9 @@ async def bert_get_train_tasks_list(auth_data: AuthDataBert):
         redis_match_pattern = f"{BERT_OPTIONS.BERT_NEW_DATASET_CSV_DIR_PREFIX}*"  # * - ends with any symbols
         tasks_dicts_list = await get_redis_values_by_pattern(
             partial_pattern=redis_match_pattern)
-
         tasks_sorted_list = sorted(tasks_dicts_list,
                                    key=lambda s: s["dataset_name"],
                                    reverse=True)
-
-        for cur_task_dict in tasks_sorted_list:
-            print()
-            print()
-            print(cur_task_dict)
-            print()
-            print()
-
         getting_time = (datetime.now() - datetime_start).total_seconds()
         getting_time = round(getting_time, 1)
 
