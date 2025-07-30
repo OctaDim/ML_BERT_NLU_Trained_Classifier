@@ -32,10 +32,10 @@ async def bert_save_model(auth_data: AuthDataBert,
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
+    print("\nBERT saving model without train or after train process:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
 
     try:
-        print("\nBERT saving model after train process:")
         redis_update = {
             "status": REDIS_OPTIONS.STATUS_MODEL_SAVING_PROCESS,
             "step_7_saving_process": "[OK]",
@@ -107,6 +107,7 @@ async def bert_save_model(auth_data: AuthDataBert,
 
         redis_update = {
             "status": REDIS_OPTIONS.STATUS_TRAIN_AND_SAVE_FINISH,
+            "complete_status": "complete",
             "new_model_name": new_model_name,
             "model_saving_time": model_saving_time,
             "step_8_saving_model_after_train_finish": "[OK]",
