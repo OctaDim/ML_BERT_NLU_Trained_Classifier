@@ -2,8 +2,10 @@ from datetime import datetime, timedelta
 
 from torch.utils.data import TensorDataset
 
+from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
-from configs.settings import REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES
+from configs.settings import (
+    REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, BERT_TRAIN_OPTIONS)
 from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_save_model.router_bert_save_model import (
@@ -38,12 +40,13 @@ async def background_train_save_model(
 
     datetime_start = datetime.now()
     # TODO: Training model temporary switched off
-    # bert_model_inst.train(
-    #     train_dataset=new_train_dataset,
-    #     max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
-    #     max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
-    #     batch_size=BERT_TRAIN_OPTIONS.BERT_TRAIN_BATCH_SUZE,
-    #     learning_rate=BERT_TRAIN_OPTIONS.BERT_TRAIN_LEARNING_RATE)
+    # time.sleep(60)
+    bert_model_inst.train(
+        train_dataset=new_train_dataset,
+        max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
+        max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
+        batch_size=BERT_TRAIN_OPTIONS.BERT_TRAIN_BATCH_SUZE,
+        learning_rate=BERT_TRAIN_OPTIONS.BERT_TRAIN_LEARNING_RATE)
     training_time = (datetime.now() - datetime_start).total_seconds()
     hours, remainder = [int(el) for el in divmod(training_time, 3600)]
     minutes, seconds = [int(el) for el in divmod(remainder, 60)]

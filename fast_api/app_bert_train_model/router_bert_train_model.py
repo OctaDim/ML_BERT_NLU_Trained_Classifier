@@ -121,6 +121,7 @@ async def bert_train_model(
         if redis_error:
             print(redis_error)
 
+        print(111111111111111111111111111111111111111)
         background_tasks.add_task(background_train_save_model,
                                   auth_data,
                                   train_model_data,
@@ -128,6 +129,8 @@ async def bert_train_model(
                                   dataset_name,
                                   train_text_lab_csv_path,
                                   creating_dataset_time)
+        print(222222222222222222222222222222222222222)
+
 
         json_response = JSONResponse(
             content={
@@ -139,6 +142,7 @@ async def bert_train_model(
                 "train dataset path": train_text_lab_csv_path,
                 "creating dataset time": creating_dataset_time,
                 "dataset_name": dataset_name,
+                "current_status": REDIS_OPTIONS.STATUS_TRAIN_START,
             },
             status_code=status.HTTP_202_ACCEPTED)
 
@@ -154,6 +158,7 @@ async def bert_train_model(
               f"train dataset path: {train_text_lab_csv_path}\n"
               f"creating dataset time: {creating_dataset_time}\n"
               f"dataset_name: {blue_color}{dataset_name}{reset_color}\n")
+        print(3333333333333333333333333333333333333333)
         return json_response
     except Exception as error:
         log_text = f"BERT router train model [ERROR]: error: {error}"
