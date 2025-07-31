@@ -92,6 +92,30 @@ class REDIS_OPTIONS:
 
 
 @dataclass
+class STATUSES:
+    # STATUS_PENDING = "Pending"
+    STATUS_PENDING = "Ожидание"
+    STATUS_DATASET_PREPARING = "Подготовка дата-сета"
+    # STATUS_DATASET_PREPARING = "Preparing dataset"
+    STATUS_TRAIN_START = "Обучение модели начато"
+    # STATUS_TRAIN_START = "Model training started"
+    STATUS_TRAIN_PROCESS = "Идет процесс обучения модели"
+    # STATUS_TRAIN_PROCESS = "Model training in process"
+    STATUS_TRAIN_FINISH = "Обучение модели завершено"
+    # STATUS_TRAIN_FINISH = "Model training without saving finished"
+    STATUS_TRAIN_NO_SAVE_FINISH = "Обучение модели без сохранения завершено"
+    # STATUS_TRAIN_NO_SAVE_FINISH = "Model training without saving completed"
+    STATUS_MODEL_SAVING_START = "Сохранение обученной модели начато"
+    # STATUS_MODEL_SAVING_START = "Saving trained model started"
+    STATUS_MODEL_SAVING_PROCESS = "Идет процесс сохранения обученной модели"
+    # STATUS_MODEL_SAVING_PROCESS = "Saving trained model in process"
+    STATUS_MODEL_SAVING_FINISH = "Сохранение обученной модели завершено"
+    # STATUS_MODEL_SAVING_FINISH = "Saving trained model finished"
+    STATUS_TRAIN_AND_SAVE_FINISH = "Обучение и сохранение модели завершено"
+    # STATUS_TRAIN_AND_SAVE_FINISH = "Model training and saving completed"
+
+
+@dataclass
 class BERT_MODEL_NAMES:
     BERT_BASE_MULTILINGUAL_CASED: str = "bert-base-multilingual-cased"
 
