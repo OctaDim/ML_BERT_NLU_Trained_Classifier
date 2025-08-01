@@ -1,5 +1,5 @@
 ### With checking Redis installed, comparing minimal required Redis version,
-### auto-installing or auto-updating Redis, auto-starting Redis and staring
+### auto-installing or auto-updating Redis, auto-starting Redis and starting
 ### the service itself
 ### NOTE: script uncommented and working
 [Unit]
@@ -18,7 +18,7 @@ Type=simple
 WantedBy=multi-user.target
 
 
-### With checking Redis server started and staring the service itself
+### With checking Redis server started and starting the service itself
 ### NOTE: script commented
 #[Unit]
 #Description=ML_BERT_NLU_Training_Classifier
@@ -36,11 +36,12 @@ WantedBy=multi-user.target
 #WantedBy=multi-user.target
 
 
-### Without checking Redis server started and staring the service itself
+### Without checking Redis server started and starting the service itself
 ### NOTE: script commented
 #[Unit]
 #Description=ML_BERT_NLU_Training_Classifier
 #After=network.target
+###After=network.target redis-server.service
 #[Service]
 #User=octadim
 #WorkingDirectory=/usr/local/ML_BERT_NLU_Training_Classifier
