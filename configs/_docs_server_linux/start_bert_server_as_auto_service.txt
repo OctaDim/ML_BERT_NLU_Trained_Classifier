@@ -5,13 +5,53 @@
 - Создаем сервисный файл в директории Linux для авто загружаемых сервисов:
 sudo nano /etc/systemd/system/bert_micro_auto_daemon.service
 
-- Копируем и вставляем текст конфигурации в открытый файл:
+- Вариант 1. Копируем и вставляем текст конфигурации в открытый файл
+    (ВНИМАНИЕ: с проверкой установленной минимальной версии Redis, авто-установкой
+    Redis и ожиданием успешно запущенного сервера Redis для запуска самой службы):
 [Unit]
 Description=ML_BERT_NLU_Training_Classifier
-After=network.target
+After=network.target redis-server.service
+Requires=redis-server.service
 [Service]
 User=octadim
 WorkingDirectory=/usr/local/ML_BERT_NLU_Training_Classifier
+ExecStartPre=/bin/bash -c '/usr/local/ML_BERT_NLU_Training_Classifier/db_redis/check_version_auto_install_redis.sh'
+ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /usr/local/ML_BERT_NLU_Training_Classifier/main.py
+Restart=always
+RestartSec=180
+Type=simple
+[Install]
+WantedBy=multi-user.target
+
+- Вариант 2. Копируем и вставляем текст конфигурации в открытый файл
+    (ВНИМАНИЕ: этот вариант только с ожиданием успешно запущенного сервера
+    Redis перед запуском самой службы):
+[Unit]
+Description=ML_BERT_NLU_Training_Classifier
+After=network.target redis-server.service
+Requires=redis-server.service
+[Service]
+User=octadim
+WorkingDirectory=/usr/local/ML_BERT_NLU_Training_Classifier
+#ExecStartPre=/bin/bash -c '/usr/local/ML_BERT_NLU_Training_Classifier/db_redis/check_version_auto_install_redis.sh'
+ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /usr/local/ML_BERT_NLU_Training_Classifier/main.py
+Restart=always
+RestartSec=180
+Type=simple
+[Install]
+WantedBy=multi-user.target
+
+- Вариант 3. Копируем и вставляем текст конфигурации в открытый файл
+    (ВНИМАНИЕ: этот вариант без проверки успешно запущенного сервера Redis
+    перед запуском самой службы):
+[Unit]
+Description=ML_BERT_NLU_Training_Classifier
+After=network.target
+#After=network.target redis-server.service
+[Service]
+User=octadim
+WorkingDirectory=/usr/local/ML_BERT_NLU_Training_Classifier
+#ExecStartPre=/bin/bash -c '/usr/local/ML_BERT_NLU_Training_Classifier/db_redis/check_version_auto_install_redis.sh'
 ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /usr/local/ML_BERT_NLU_Training_Classifier/main.py
 Restart=always
 RestartSec=180
