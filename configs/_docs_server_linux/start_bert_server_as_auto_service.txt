@@ -20,6 +20,9 @@ ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /u
 Restart=always
 RestartSec=180
 Type=simple
+StandardOutput=journal
+StandardError=journal
+LogLevelMax=debug
 [Install]
 WantedBy=multi-user.target
 
@@ -38,6 +41,9 @@ ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /u
 Restart=always
 RestartSec=180
 Type=simple
+StandardOutput=journal
+StandardError=journal
+LogLevelMax=debug
 [Install]
 WantedBy=multi-user.target
 
@@ -56,6 +62,9 @@ ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /u
 Restart=always
 RestartSec=180
 Type=simple
+StandardOutput=journal
+StandardError=journal
+LogLevelMax=debug
 [Install]
 WantedBy=multi-user.target
 
@@ -84,10 +93,10 @@ sudo systemctl status bert_micro_auto_daemon
 sudo apt install ccze
 
 - Смотрим логи ошибок и все логи консоли в онлайн режиме (ЦВЕТНОЙ ШРИФТ):
-sudo journalctl -u bert_micro_auto_daemon -f | ccze -A
+sudo journalctl -u bert_micro_auto_daemon -f --all | ccze -A
 
 - Смотрим логи ошибок и все логи консоли в онлайн режиме (БЕЛЫЙ ШРИФТ):
-sudo journalctl -u bert_micro_auto_daemon -f
+sudo journalctl -u bert_micro_auto_daemon -f --all
 
 - Посмотреть службу слушающую 8000 порт:
     - Сначала узнать номер PID процесса, слушающего порт:

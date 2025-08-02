@@ -14,6 +14,9 @@ ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /u
 Restart=always
 RestartSec=180
 Type=simple
+StandardOutput=journal
+StandardError=journal
+LogLevelMax=debug
 [Install]
 WantedBy=multi-user.target
 
@@ -32,6 +35,9 @@ WantedBy=multi-user.target
 #Restart=always
 #RestartSec=180
 #Type=simple
+#StandardOutput=journal
+#StandardError=journal
+#LogLevelMax=debug
 #[Install]
 #WantedBy=multi-user.target
 
@@ -50,5 +56,8 @@ WantedBy=multi-user.target
 #Restart=always
 #RestartSec=180
 #Type=simple
+#StandardOutput=journal
+#StandardError=journal
+#LogLevelMax=debug
 #[Install]
 #WantedBy=multi-user.target
