@@ -17,9 +17,9 @@ router_bert_last_dataset_name = APIRouter(prefix=f"/{bert_base_url_name}",
                                           tags=["BERT"])
 
 
-@router_bert_last_dataset_name.get(path="/bert_get_last_dataset_name/",
-                                   # TODO: Describe responses here
-                                   response_model=None)
+@router_bert_last_dataset_name.post(path="/bert_get_last_dataset_name/",
+                                    # TODO: Describe responses here
+                                    response_model=None)
 async def bert_get_last_dataset_name(auth_data: AuthDataBert):
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)

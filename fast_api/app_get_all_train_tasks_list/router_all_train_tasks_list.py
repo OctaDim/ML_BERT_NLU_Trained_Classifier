@@ -16,9 +16,9 @@ router_bert_get_train_tasks_list = APIRouter(prefix=f"/{bert_base_url_name}",
                                              tags=["BERT"])
 
 
-@router_bert_get_train_tasks_list.get(path="/bert_get_train_tasks_list/",
-                                      # TODO: Describe responses here
-                                      response_model=None)
+@router_bert_get_train_tasks_list.post(path="/bert_get_train_tasks_list/",
+                                       # TODO: Describe responses here
+                                       response_model=None)
 async def bert_get_train_tasks_list(auth_data: AuthDataBert):
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
