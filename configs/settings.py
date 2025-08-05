@@ -81,6 +81,7 @@ class REDIS_OPTIONS:
     STATUSES_EXPIRY_DAYS = 90
     STATUS_PENDING = "Pending"
     STATUS_DATASET_PREPARING = "Preparing dataset"
+    STATUS_MODEL_REINIT = "Model reinitialising"
     STATUS_TRAIN_START = "Model training started"
     STATUS_TRAIN_PROCESS = "Model training in process"
     STATUS_TRAIN_FINISH = "Model training without saving finished"
@@ -142,7 +143,7 @@ class BERT_OPTIONS:
     # MODEL AND CSV SAVE PATHS INI FILES
     BERT_LAST_SAVED_MODEL_INI_FILE_PATH: str = "WORKING_DATA/last_saved_model_ini_file/last_saved_model_dir_path.ini"
     BERT_LAST_SAVED_DATASET_INI_FILE_PATH: str = "WORKING_DATA/last_saved_dataset_ini_file/last_saved_dataset_dir_path.ini"
-
+    BERT_BEFORE_REINIT_MODEL_TEMP_PATH: str = "WORKING_DATA/temp_saved_model_prior_init_train"
 
 @dataclass
 class BERT_TRAIN_OPTIONS:
