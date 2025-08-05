@@ -11,7 +11,7 @@ from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS, BERT_TRAIN_OPTIONS, BERT_MODEL_NAMES,
-    REDIS_OPTIONS)
+    REDIS_OPTIONS, BASE_DIR)
 from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
@@ -20,7 +20,8 @@ from fast_api.app_bert_train_model.func_train_save_model_background import (
 from fast_api.app_bert_train_model.scheme_bert_train_model import (
     TrainModelDataBert)
 from utils_common.normalized_path import (
-    get_full_file_normal_path)
+    get_full_file_normal_path, get_full_dir_normal_path)
+from utils_specific.class_csv_labels_categories import CsvLabelCategory
 from utils_specific.class_csv_texts_labels import CsvTextLabel
 from utils_specific.get_last_saved_dataset_path import (
     get_last_saved_dataset_dir_path)
@@ -63,6 +64,73 @@ async def bert_train_model(
         print(redis_error)
 
     try:
+        print("\nGetting csv label-category train file path:")
+        train_lab_cat_csv_path = get_full_file_normal_path(
+            all_dir_str_parts=[train_dataset_dir],
+            file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
+        print(f"train_lab_cat_csv_path: {train_lab_cat_csv_path}")
+
+        print("\nGetting csv label-category file data:")
+        with open(file=train_lab_cat_csv_path,
+                  mode="r", encoding="utf-8") as train_lab_cat_csv_file:
+            csf_text_lab = CsvLabelCategory(train_lab_cat_csv_file)
+            new_lab_cat_dict = csf_text_lab.get_label_category_dict()
+            print(f"new_lab_cat_dict [{len(new_lab_cat_dict)}]: "
+                  f"{new_lab_cat_dict}")
+
+        if not new_lab_cat_dict:
+            log_text = (f"Empty or wrong label-category csv data [ERROR]: "
+                        f"train_lab_cat_csv_path: {train_lab_cat_csv_path}, "
+                        f"new_lab_cat_dict: {new_lab_cat_dict}\n")
+            print(log_text)
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail=log_text)
+
+        if bert_model_inst.labels != new_lab_cat_dict:  # labels-categories are different
+            print("###################################################")
+            print("\nReinitializing model before training (start):")
+            before_reinit_model_temp_path = get_full_dir_normal_path(
+                [BASE_DIR, BERT_OPTIONS.BERT_BEFORE_REINIT_MODEL_TEMP_PATH])
+            if not os.path.isdir(before_reinit_model_temp_path):
+                os.makedirs(before_reinit_model_temp_path)
+
+            error_log = bert_model_inst.save_model(
+                dir_full_path=before_reinit_model_temp_path)  # Model saving before reinitialising
+            if error_log:
+                print(error_log)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=error_log)
+
+            error_log = bert_model_inst.reinitialize_with_new_labels(
+                new_labels=new_lab_cat_dict)  # Model reinitialising
+            if error_log:
+                print(error_log)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=error_log)
+
+            error_log = bert_model_inst.load_model(
+                dir_full_path=before_reinit_model_temp_path)  # Model loading after reinitialising
+            if error_log:
+                print(error_log)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=error_log)
+
+            redis_update = {
+                "status": REDIS_OPTIONS.STATUS_MODEL_REINIT,
+                "step_1-2_reinitialising": "[OK]", }
+            redis_error = await redis_save_key_mapping_dict(
+                key_name=dataset_name,
+                mapping_dict=redis_update,
+                expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+            if redis_error:
+                print(redis_error)
+            print("\nReinitializing model before training (end)")
+            print("###################################################")
+
         print("\nGetting csv text-label train file path:")
         redis_update = {
             "status": REDIS_OPTIONS.STATUS_DATASET_PREPARING,
@@ -82,8 +150,8 @@ async def bert_train_model(
 
         print("\nGetting csv text-label file train data:")
         with open(file=train_text_lab_csv_path,
-                  mode="r", encoding="utf-8") as train_csv_file:
-            csf_text_lab = CsvTextLabel(train_csv_file)
+                  mode="r", encoding="utf-8") as train_text_lab_csv_file:
+            csf_text_lab = CsvTextLabel(train_text_lab_csv_file)
             train_texts = csf_text_lab.get_texts_list_unique()
             train_labels = csf_text_lab.get_labels_list_unique()
             print(f"train_texts [{len(train_texts)}]: {train_texts}")
@@ -121,7 +189,7 @@ async def bert_train_model(
         if redis_error:
             print(redis_error)
 
-        print(111111111111111111111111111111111111111)
+        print("####### BEFORE BACKGROUND TRAIN AND SAVE MODEL")
         background_tasks.add_task(background_train_save_model,
                                   auth_data,
                                   train_model_data,
@@ -129,8 +197,7 @@ async def bert_train_model(
                                   dataset_name,
                                   train_text_lab_csv_path,
                                   creating_dataset_time)
-        print(222222222222222222222222222222222222222)
-
+        print("####### AFTER BACKGROUND TRAIN AND SAVE MODEL")
 
         json_response = JSONResponse(
             content={
@@ -158,7 +225,7 @@ async def bert_train_model(
               f"train dataset path: {train_text_lab_csv_path}\n"
               f"creating dataset time: {creating_dataset_time}\n"
               f"dataset_name: {blue_color}{dataset_name}{reset_color}\n")
-        print(3333333333333333333333333333333333333333)
+        print("####### AFTER PRIOR RESPONSE 202 AND BACKGROUND TRAINING")
         return json_response
     except Exception as error:
         log_text = f"BERT router train model [ERROR]: error: {error}"
