@@ -17,12 +17,13 @@ class ClassifierBERT:
                  cache_dir: str = None,
                  max_len: int = 64):
         """ BERT Model classifier to classify text phrases by sense categories.
-        test_train_data: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}
-        model_name: str: Pretrained model name, 'bert-base-multilingual-cased' by default
-        cache_dir: str: Pretrained model download directory when init, if differs from default one
-        max_len: int: Max length in symbols of the token string, more will be cut"""
-
+        labels: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}
+        arg: model_name: str: Pretrained model name, 'bert-base-multilingual-cased' by default
+        arg: cache_dir: str: Pretrained model download directory when init, if differs from default one
+        arg: max_len: int: Max length in symbols of the token string, more will be cut"""
         self.labels = labels
+        self.model_name = model_name
+        self.cache_dir = cache_dir
         self.max_len = max_len
         self.last_saved_model_dir = None
         self.last_saved_dataset_dir = None
@@ -31,22 +32,27 @@ class ClassifierBERT:
         self.device = torch.device(device_name)
         green_color = CONSOLE_COLORS.BRIGHT_GREEN
         reset_color = CONSOLE_COLORS.RESET
-        print(f"Device: "
-              f"{green_color}{device_name.upper()}{reset_color}\n")
+        print(f"Device: {green_color}{device_name.upper()}{reset_color}\n")
 
-        self.tokenizer = BertTokenizer.from_pretrained(
-            pretrained_model_name_or_path=model_name,  # org
-            cache_dir=cache_dir,  # extra
+        self.tokenizer = self.__get_bert_tokenizer()
+        self.model = self.__get_bert_for_sequence_classification()
+
+    def __get_bert_tokenizer(self):
+        tokenizer = BertTokenizer.from_pretrained(
+            pretrained_model_name_or_path=self.model_name,  # org
+            cache_dir=self.cache_dir,  # extra
             force_download=False,
             local_files_only=True,  # False by default
             token=None,
             revision="main",
-            trust_remote_code=False,
-        )
+            trust_remote_code=False, )
+        return tokenizer
 
-        self.model = BertForSequenceClassification.from_pretrained(
-            pretrained_model_name_or_path=model_name,  # org
-            cache_dir=cache_dir,  # extra
+    def __get_bert_for_sequence_classification(
+            self) -> BertForSequenceClassification | None:
+        model = BertForSequenceClassification.from_pretrained(
+            pretrained_model_name_or_path=self.model_name,  # org
+            cache_dir=self.cache_dir,  # extra
             config=None,
             ignore_mismatched_sizes=False,
             force_download=False,
@@ -55,8 +61,9 @@ class ClassifierBERT:
             revision="main",
             use_safetensors=None,
             weights_only=True,
-            num_labels=len(labels),
+            num_labels=len(self.labels),
         ).to(self.device)  # Transfer pretrained model to the cur device cpu or gpu
+        return model
 
     def predict(self, text: str) -> str:
         """Predict class (category, label) for given text or phrase
@@ -180,10 +187,13 @@ class ClassifierBERT:
                           differentiable=False,
                           fused=None)
 
-        print("\nModel training epochs process...")
+        red_color = CONSOLE_COLORS.BRIGHT_RED
+        reset_color = CONSOLE_COLORS.RESET
+        print(f"\n{red_color} Model training epochs process....."
+              f"{reset_color}")
         self.model.train()
-        cont_100perc_epochs_counter = 0
 
+        cont_100perc_epochs_counter = 0
         for cur_train_epoch_idx in range(max_training_epochs):
             total_loss = 0
 
@@ -206,7 +216,8 @@ class ClassifierBERT:
                 cont_100perc_epochs_counter += 1
             else:
                 cont_100perc_epochs_counter = 0
-            print(f"Training epoch: {cur_train_epoch_idx + 1} "
+            print(f"{red_color}Training epoch:{reset_color} "
+                  f"{cur_train_epoch_idx + 1} "
                   f"[Right categories: {cur_perc_res}%] "
                   f"{cont_100perc_epochs_counter}/{max_cont_100perc_epochs}")
 
@@ -262,4 +273,17 @@ class ClassifierBERT:
         except Exception as error:
             error_log = f"BERT Model loading [ERROR]: error: {error}"
             print(error_log)
+            return error_log
+
+    def reinitialize_with_new_labels(self, new_labels: Dict[int, str]
+                                     ) -> None | str:
+        """Reinitialize the model with a new set (dictionary) of labels.
+        This preserves the original model_name, cache_dir and max_len parameters,
+        but adjusts the model's classification head to accommodate the new number of labels.
+        arg: new_labels: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}"""
+        try:
+            self.labels = new_labels  # Update the labels number
+            self.model = self.__get_bert_for_sequence_classification()
+        except Exception as error:
+            error_log = f"BERT Model reinitialising [ERROR]: error: {error}"
             return error_log
