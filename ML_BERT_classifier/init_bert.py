@@ -1,8 +1,7 @@
+# from ML_BERT_train_datasets.test_init_train_datasets.test_labels_categories import labels_categories
 from typing import Dict
 
 from ML_BERT_classifier.class_bert import ClassifierBERT
-from ML_BERT_train_datasets.test_init_train_datasets.test_labels_categories import (
-    labels_categories)
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_OPTIONS, BERT_TRAIN_OPTIONS
 from utils_common.exec_time_decorator import execution_time_decorator
@@ -96,6 +95,38 @@ if BERT_OPTIONS.BERT_MODEL_INIT:
     last_saved_model_dir_path = get_last_saved_model_dir_path()
     initial_model_dir_path = get_initial_model_dir_path()
     load_error_log = ""
+
+    # ##################################################################
+    # ################## TEMPORARY DEBUG (start) #######################
+    # TODO: Make loading labels-categories dict from the last dataset if exists.
+    #  Fix cycle import error due to bert_model_inst.last_saved_dataset_dir
+    #  using in get_last_saved_dataset_dir_path()
+    # print("\nGetting csv label-category train file path:")
+    # last_saved_dataset_dir = get_last_saved_dataset_dir_path()
+    # last_saved_lab_cat_csv_path = get_full_file_normal_path(
+    #     all_dir_str_parts=[last_saved_dataset_dir],
+    #     file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
+    # print(f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}")
+    #
+    # print("\nGetting csv label-category file data:")
+    # with open(file=last_saved_lab_cat_csv_path,
+    #           mode="r", encoding="utf-8") as lab_cat_csv_file:
+    #     csf_text_lab = CsvLabelCategory(lab_cat_csv_file)
+    #     new_lab_cat_dict = csf_text_lab.get_label_category_dict()
+    #     print(f"new_lab_cat_dict [{len(new_lab_cat_dict)}]: "
+    #           f"{new_lab_cat_dict}")
+    #
+    # if new_lab_cat_dict:
+    #     labels_categories = new_lab_cat_dict
+    #     print(f"Empty or wrong label-category csv data [ERROR]: "
+    #           f"last_saved_dataset_dir: {last_saved_dataset_dir}, "
+    #           f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}, "
+    #           f"new_lab_cat_dict: {new_lab_cat_dict}\n")
+    # else:
+    #     labels_categories = {}
+    # #################### TEMPORARY DEBUG (end) #######################
+    # ##################################################################
+    labels_categories = {}
 
     if last_saved_model_dir_path and initial_model_dir_path:
         bert_model_inst = initialise_bert_model(
