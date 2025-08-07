@@ -126,7 +126,7 @@ if BERT_OPTIONS.BERT_MODEL_INIT:
     #     labels_categories = {}
     # #################### TEMPORARY DEBUG (end) #######################
     # ##################################################################
-    labels_categories = {}
+    labels_categories = {0: "api initial category"}
 
     if last_saved_model_dir_path and initial_model_dir_path:
         bert_model_inst = initialise_bert_model(
