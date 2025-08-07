@@ -1,7 +1,7 @@
 from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
-from test_phrases.test_phrases import test_phrases
-from ML_BERT_train_datasets.test_init_train_datasets.test_labels_categories import (
+from fast_api.app_tests.test_phrases import test_phrases
+from fast_api.app_tests.test_labels_categories import (
     labels_categories)
 
 
