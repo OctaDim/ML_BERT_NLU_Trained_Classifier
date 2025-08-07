@@ -5,10 +5,12 @@ from configs.settings import API_HOST, API_PORT
 from fast_api.app_add_single_category.router_add_single_category import router_bert_add_single_category
 from fast_api.app_add_text_category.router_add_text_category import router_bert_add_text_category
 from fast_api.app_add_texts_categories_file.router_add_texts_categories_file import router_bert_add_text_category_file
-from fast_api.app_get_all_categories.router_get_all_categories import router_bert_get_all_categories
 from fast_api.app_bert_load_model.router_bert_load_model import router_bert_load_model
 from fast_api.app_bert_save_model.router_bert_save_model import router_bert_save_model
 from fast_api.app_bert_train_model.router_bert_train_model import router_bert_train_model
+from fast_api.app_checkset_model_test.router_checkset_model_test import router_bert_checkset_model_test
+from fast_api.app_get_all_categories.router_get_all_categories import router_bert_get_all_categories
+from fast_api.app_get_all_train_tasks_list.router_all_train_tasks_list import router_bert_get_train_tasks_list
 from fast_api.app_last_dataset_name.router_last_dataset_name import router_bert_last_dataset_name
 from fast_api.app_predict_text.router_predict_single_text import router_bert_predict_single_text
 from fast_api.app_root_url.router_main import router_root_url
@@ -17,7 +19,6 @@ from fast_api.app_tests.router_test_categorise import router_test_categorise
 from fast_api.app_tests.router_test_load_model import router_test_load_model
 from fast_api.app_tests.router_test_save_model import router_test_save_model
 from fast_api.app_tests.router_test_train_categorise import router_test_train_categorise
-from fast_api.app_get_all_train_tasks_list.router_all_train_tasks_list import router_bert_get_train_tasks_list
 
 routers_list = [
     router_root_url,
@@ -35,6 +36,7 @@ routers_list = [
     router_bert_add_single_category,
     router_bert_get_train_tasks_list,
     router_bert_last_dataset_name,
+    router_bert_checkset_model_test,
 
     # Test end-point (debug time)
     router_develop_test_endpoint,
