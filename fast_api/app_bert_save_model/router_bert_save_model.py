@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
-    BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, REDIS_OPTIONS)
+    BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, REDIS_OPTIONS, STATUSES)
 from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
@@ -35,17 +35,19 @@ async def bert_save_model(auth_data: AuthDataBert,
     print("\nBERT saving model without train or after train process:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
 
+    save_after_train_flag = save_model_after_train_data.trained_model_redirected_save_flag
+
     try:
-        redis_update = {
-            "status": REDIS_OPTIONS.STATUS_MODEL_SAVING_PROCESS,
-            "step_7_saving_process": "[OK]",
-        }
-        redis_error = await redis_save_key_mapping_dict(
-            key_name=dataset_name,
-            mapping_dict=redis_update,
-            expiry_seconds=REDIS_KEY_EXPIRE_TIME)
-        if redis_error:
-            print(redis_error)
+        if save_after_train_flag:
+            redis_update = {
+                "train_status": STATUSES.STATUS_TRAINED_MODEL_SAVE_PROCESS_EN,
+                "train_step_10_saving_model_after_train_in_process": "[OK]", }
+            redis_error = await redis_save_key_mapping_dict(
+                key_name=dataset_name,
+                mapping_dict=redis_update,
+                expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+            if redis_error:
+                print(redis_error)
 
         if save_model_data.model_save_dir_path:
             model_save_path = save_model_data.model_save_dir_path
@@ -105,19 +107,19 @@ async def bert_save_model(auth_data: AuthDataBert,
         new_model_path_dirs = model_save_path.split(os.sep)
         new_model_name = new_model_path_dirs[-1]  # Same as new model directory name
 
-        redis_update = {
-            "status": REDIS_OPTIONS.STATUS_TRAIN_AND_SAVE_FINISH,
-            "complete_status": "complete",
-            "new_model_name": new_model_name,
-            "model_saving_time": model_saving_time,
-            "step_8_saving_model_after_train_finish": "[OK]",
-        }
-        redis_error = await redis_save_key_mapping_dict(
-            key_name=dataset_name,
-            mapping_dict=redis_update,
-            expiry_seconds=REDIS_KEY_EXPIRE_TIME)
-        if redis_error:
-            print(redis_error)
+        if save_after_train_flag:
+            redis_update = {
+                "train_status": STATUSES.STATUS_TRAINED_MODEL_SAVE_FINISH_EN,
+                "train_complete_status": "complete",
+                "new_model_name": new_model_name,
+                "model_saving_time": model_saving_time,
+                "train_step_11_saving_model_after_training_finished": "[OK]", }
+            redis_error = await redis_save_key_mapping_dict(
+                key_name=dataset_name,
+                mapping_dict=redis_update,
+                expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+            if redis_error:
+                print(redis_error)
 
         blue_color = CONSOLE_COLORS.BRIGHT_BLUE
         reset_color = CONSOLE_COLORS.RESET
@@ -131,17 +133,13 @@ async def bert_save_model(auth_data: AuthDataBert,
             f"Trained Model saved dir path: {blue_color}{model_save_path}{reset_color}\n"
             f"Trained Model saving time: {model_saving_time}\n")
 
-        if save_model_after_train_data.trained_model_redirected_save_flag:
+        if save_after_train_flag:
             log_text = (
-                f"{log_text}"
-                f"redirected save flag: "
-                f"{save_model_after_train_data.trained_model_redirected_save_flag}\n"
-                f"train dataset path: "
-                f"{save_model_after_train_data.redirected_train_text_lab_csv_path}\n"
-                f"creating dataset time: "
-                f"{save_model_after_train_data.redirected_creating_dataset_time}\n"
-                f"training model time: "
-                f"{blue_color}{save_model_after_train_data.redirected_training_time}{reset_color}\n")
+                f"{log_text}\n"
+                f"save after train redirected flag: {save_after_train_flag}\n"
+                f"train dataset path: {save_model_after_train_data.redirected_train_text_lab_csv_path}\n"
+                f"creating dataset time: {save_model_after_train_data.redirected_creating_dataset_time}\n"
+                f"training model time: {blue_color}{save_model_after_train_data.redirected_training_time}{reset_color}\n")
         print(log_text)
         json_response = JSONResponse(
             content={"message": log_text},

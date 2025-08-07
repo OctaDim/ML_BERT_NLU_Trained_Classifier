@@ -11,7 +11,7 @@ from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS, BERT_TRAIN_OPTIONS, BERT_MODEL_NAMES,
-    REDIS_OPTIONS, BASE_DIR)
+    REDIS_OPTIONS, BASE_DIR, STATUSES)
 from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
@@ -50,12 +50,11 @@ async def bert_train_model(
     train_task_uuid = str(uuid.uuid4())
 
     redis_update = {
-        "status": REDIS_OPTIONS.STATUS_PENDING,
-        "complete_status": "",
+        "train_status": STATUSES.STATUS_PENDING_EN,
+        "complete_train_status": "",
         "train_task_uuid": train_task_uuid,
         "dataset_name": dataset_name,
-        "step_1_pending": "[OK]",
-    }
+        "train_step_1_pending": "[OK]", }
     redis_error = await redis_save_key_mapping_dict(
         key_name=dataset_name,
         mapping_dict=redis_update,
@@ -89,7 +88,17 @@ async def bert_train_model(
 
         if bert_model_inst.labels != new_lab_cat_dict:  # labels-categories are different
             print("###################################################")
-            print("\nReinitializing model before training (start):")
+            print("\nReinitializing model before training start:")
+            redis_update = {
+                "train_status": STATUSES.STATUS_MODEL_REINIT_START_EN,
+                "train_step_2_reinitialising_before_training_started": "[OK]", }
+            redis_error = await redis_save_key_mapping_dict(
+                key_name=dataset_name,
+                mapping_dict=redis_update,
+                expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+            if redis_error:
+                print(redis_error)
+
             before_reinit_model_temp_path = get_full_dir_normal_path(
                 [BASE_DIR, BERT_OPTIONS.BERT_BEFORE_REINIT_MODEL_TEMP_PATH])
             if not os.path.isdir(before_reinit_model_temp_path):
@@ -120,22 +129,21 @@ async def bert_train_model(
                     detail=error_log)
 
             redis_update = {
-                "status": REDIS_OPTIONS.STATUS_MODEL_REINIT,
-                "step_1-2_reinitialising": "[OK]", }
+                "train_status": STATUSES.STATUS_MODEL_REINIT_FINISH_EN,
+                "train_step_3_reinitialising_before_training_finished": "[OK]", }
             redis_error = await redis_save_key_mapping_dict(
                 key_name=dataset_name,
                 mapping_dict=redis_update,
                 expiry_seconds=REDIS_KEY_EXPIRE_TIME)
             if redis_error:
                 print(redis_error)
-            print("\nReinitializing model before training (end)")
+            print("\nReinitializing model before training finished")
             print("###################################################")
 
         print("\nGetting csv text-label train file path:")
         redis_update = {
-            "status": REDIS_OPTIONS.STATUS_DATASET_PREPARING,
-            "step_2_dataset_start": "[OK]"
-        }
+            "train_status": STATUSES.STATUS_DATASET_CREATION_START_EN,
+            "train_step_4_dataset_creation_started": "[OK]", }
         redis_error = await redis_save_key_mapping_dict(
             key_name=dataset_name,
             mapping_dict=redis_update,
@@ -168,6 +176,17 @@ async def bert_train_model(
         creating_dataset_time = (datetime.now() - datetime_start).total_seconds()
         creating_dataset_time = round(creating_dataset_time, 1)
 
+        redis_update = {
+            "train_status": STATUSES.STATUS_DATASET_CREATION_FINISH_EN,
+            "creating_dataset_time": creating_dataset_time,
+            "train_step_5_dataset_creation_finished": "[OK]", }
+        redis_error = await redis_save_key_mapping_dict(
+            key_name=dataset_name,
+            mapping_dict=redis_update,
+            expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+        if redis_error:
+            print(redis_error)
+
         if not new_train_dataset:
             log_text = (f"TrainDataset [ERROR]: get train dataset with"
                         f"method .create_train_dataset() first:\n"
@@ -178,10 +197,8 @@ async def bert_train_model(
                 detail=log_text)
 
         redis_update = {
-            "status": REDIS_OPTIONS.STATUS_TRAIN_START,
-            "creating_dataset_time": creating_dataset_time,
-            "step_3_dataset_finish": "[OK]",
-        }
+            "train_status": STATUSES.STATUS_MODEL_TRAIN_START_EN,
+            "train_step_6_model_training_started": "[OK]", }
         redis_error = await redis_save_key_mapping_dict(
             key_name=dataset_name,
             mapping_dict=redis_update,
@@ -209,7 +226,7 @@ async def bert_train_model(
                 "train dataset path": train_text_lab_csv_path,
                 "creating dataset time": creating_dataset_time,
                 "dataset_name": dataset_name,
-                "current_status": REDIS_OPTIONS.STATUS_TRAIN_START,
+                "current_status": STATUSES.STATUS_MODEL_TRAIN_START_EN,
             },
             status_code=status.HTTP_202_ACCEPTED)
 
@@ -222,8 +239,8 @@ async def bert_train_model(
               f"model init: {BERT_OPTIONS.BERT_MODEL_INIT}\n"
               f"model name: {BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED}\n"
               f"model path: {BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH}\n"
-              f"train dataset path: {train_text_lab_csv_path}\n"
-              f"creating dataset time: {creating_dataset_time}\n"
+              f"train_text_lab_csv_path: {train_text_lab_csv_path}\n"
+              f"creating_dataset_time: {creating_dataset_time}\n"
               f"dataset_name: {blue_color}{dataset_name}{reset_color}\n")
         print("####### AFTER PRIOR RESPONSE 202 AND BACKGROUND TRAINING")
         return json_response

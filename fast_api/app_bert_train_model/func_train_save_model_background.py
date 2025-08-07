@@ -1,11 +1,11 @@
+import time
 from datetime import datetime, timedelta
 
 from torch.utils.data import TensorDataset
 
-from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
-    REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, BERT_TRAIN_OPTIONS)
+    REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, STATUSES)
 from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_save_model.router_bert_save_model import (
@@ -28,9 +28,8 @@ async def background_train_save_model(
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
 
     redis_update = {
-        "status": REDIS_OPTIONS.STATUS_TRAIN_PROCESS,
-        "step_4_training_start": "[OK]",
-    }
+        "train_status": STATUSES.STATUS_MODEL_TRAIN_PROCESS_EN,
+        "train_step_7_model_training_in_process": "[OK]", }
     redis_error = await redis_save_key_mapping_dict(
         key_name=dataset_name,
         mapping_dict=redis_update,
@@ -39,14 +38,14 @@ async def background_train_save_model(
         print(redis_error)
 
     datetime_start = datetime.now()
-    # TODO: Training model temporary switched off
-    # time.sleep(60)
-    bert_model_inst.train(
-        train_dataset=new_train_dataset,
-        max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
-        max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
-        batch_size=BERT_TRAIN_OPTIONS.BERT_TRAIN_BATCH_SUZE,
-        learning_rate=BERT_TRAIN_OPTIONS.BERT_TRAIN_LEARNING_RATE)
+    time.sleep(30)
+    # TODO: TEMPORARY SWITCHED OFF
+    # bert_model_inst.train(
+    #     train_dataset=new_train_dataset,
+    #     max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
+    #     max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
+    #     batch_size=BERT_TRAIN_OPTIONS.BERT_TRAIN_BATCH_SUZE,
+    #     learning_rate=BERT_TRAIN_OPTIONS.BERT_TRAIN_LEARNING_RATE)
     training_time = (datetime.now() - datetime_start).total_seconds()
     hours, remainder = [int(el) for el in divmod(training_time, 3600)]
     minutes, seconds = [int(el) for el in divmod(remainder, 60)]
@@ -55,11 +54,10 @@ async def background_train_save_model(
     training_time_str_ru = f"{hours} час {minutes} мин"
 
     redis_update = {
-        "status": REDIS_OPTIONS.STATUS_TRAIN_FINISH,
+        "train_status": STATUSES.STATUS_TRAINED_MODEL_SAVE_FINISH_EN,
         "training_time_str": training_time_str,
         "training_time_str_ru": training_time_str_ru,
-        "step_5_training_finish": "[OK]",
-    }
+        "train_step_8_model_training_finished": "[OK]", }
     redis_error = await redis_save_key_mapping_dict(
         key_name=dataset_name,
         mapping_dict=redis_update,
@@ -74,18 +72,17 @@ async def background_train_save_model(
           f"model init: {BERT_OPTIONS.BERT_MODEL_INIT}\n"
           f"model name: {BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED}\n"
           f"model path: {BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH}\n"
-          f"train dataset path: {train_text_lab_csv_path}\n"
-          f"creating dataset time: {creating_dataset_time}\n"
+          f"train_text_lab_csv_path: {train_text_lab_csv_path}\n"
+          f"creating_dataset_time: {creating_dataset_time}\n"
           f"new_train_dataset: {new_train_dataset}\n"
           f"dataset_name: {dataset_name}\n"
-          f"training model time: {blue_color}{training_time_str}{reset_color}\n")
+          f"training_time_str: {blue_color}{training_time_str}{reset_color}\n")
 
     if train_model_data.save_model_after_train:
         print("\nBERT saving model after train start:")
         redis_update = {
-            "status": REDIS_OPTIONS.STATUS_MODEL_SAVING_START,
-            "step_6-2_saving_model_start": "[OK]",
-        }
+            "train_status": STATUSES.STATUS_TRAINED_MODEL_SAVE_START_EN,
+            "train_step_9_saving_model_after_training_started": "[OK]", }
         redis_error = await redis_save_key_mapping_dict(
             key_name=dataset_name,
             mapping_dict=redis_update,
@@ -111,14 +108,24 @@ async def background_train_save_model(
             auth_data=auth_data,
             save_model_data=save_model_data_bert,
             save_model_after_train_data=save_model_after_train_bert,
-            dataset_name=dataset_name,
-        )
-    else:
-        print("\nBERT training model without saving finish:")
+            dataset_name=dataset_name, )
+
+        print("\nBERT saving model after train finished")
         redis_update = {
-            "status": REDIS_OPTIONS.STATUS_TRAIN_NO_SAVE_FINISH,
-            "complete_status": "complete",
-            "step_6-1_training_no_saving_finish": "[OK]",
+            "train_status": STATUSES.STATUS_TRAIN_AND_SAVE_COMPLETE_EN,
+            "train_step_12_saving_model_after_training_complete": "[OK]", }
+        redis_error = await redis_save_key_mapping_dict(
+            key_name=dataset_name,
+            mapping_dict=redis_update,
+            expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+        if redis_error:
+            print(redis_error)
+    else:
+        print("\nBERT training model without saving complete:")
+        redis_update = {
+            "train_status": STATUSES.STATUS_TRAIN_WITHOUT_SAVE_COMPLETE_EN,
+            "train_complete_status": "complete",
+            "train_step_1212_training_without_saving_complete": "[OK]",
         }
         redis_error = await redis_save_key_mapping_dict(
             key_name=dataset_name,

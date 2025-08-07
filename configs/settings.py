@@ -79,41 +79,32 @@ class REDIS_OPTIONS:
     SOCKET_CONNECTION_TIMEOUT = 5
     SOCKET_KEEPALIVE = True
     STATUSES_EXPIRY_DAYS = 90
-    STATUS_PENDING = "Pending"
-    STATUS_DATASET_PREPARING = "Preparing dataset"
-    STATUS_MODEL_REINIT = "Model reinitialising"
-    STATUS_TRAIN_START = "Model training started"
-    STATUS_TRAIN_PROCESS = "Model training in process"
-    STATUS_TRAIN_FINISH = "Model training without saving finished"
-    STATUS_TRAIN_NO_SAVE_FINISH = "Model training without saving completed"
-    STATUS_MODEL_SAVING_START = "Saving trained model started"
-    STATUS_MODEL_SAVING_PROCESS = "Saving trained model in process"
-    STATUS_MODEL_SAVING_FINISH = "Saving trained model finished"
-    STATUS_TRAIN_AND_SAVE_FINISH = "Model training and saving completed"
+    CHECKSET_TESTS_EXPIRY_DAYS = 90
 
 
 @dataclass
 class STATUSES:
-    # STATUS_PENDING = "Pending"
-    STATUS_PENDING = "Ожидание"
-    STATUS_DATASET_PREPARING = "Подготовка дата-сета"
-    # STATUS_DATASET_PREPARING = "Preparing dataset"
-    STATUS_TRAIN_START = "Обучение модели начато"
-    # STATUS_TRAIN_START = "Model training started"
-    STATUS_TRAIN_PROCESS = "Идет процесс обучения модели"
-    # STATUS_TRAIN_PROCESS = "Model training in process"
-    STATUS_TRAIN_FINISH = "Обучение модели завершено"
-    # STATUS_TRAIN_FINISH = "Model training without saving finished"
-    STATUS_TRAIN_NO_SAVE_FINISH = "Обучение модели без сохранения завершено"
-    # STATUS_TRAIN_NO_SAVE_FINISH = "Model training without saving completed"
-    STATUS_MODEL_SAVING_START = "Сохранение обученной модели начато"
-    # STATUS_MODEL_SAVING_START = "Saving trained model started"
-    STATUS_MODEL_SAVING_PROCESS = "Идет процесс сохранения обученной модели"
-    # STATUS_MODEL_SAVING_PROCESS = "Saving trained model in process"
-    STATUS_MODEL_SAVING_FINISH = "Сохранение обученной модели завершено"
-    # STATUS_MODEL_SAVING_FINISH = "Saving trained model finished"
-    STATUS_TRAIN_AND_SAVE_FINISH = "Обучение и сохранение модели завершено"
-    # STATUS_TRAIN_AND_SAVE_FINISH = "Model training and saving completed"
+    STATUS_PENDING_EN = "Pending"
+
+    STATUS_DATASET_CREATION_START_EN = "Preparing dataset tarted"
+    STATUS_DATASET_CREATION_FINISH_EN = "Preparing dataset tarted"
+
+    STATUS_MODEL_REINIT_START_EN = "Model reinitialising before training started"
+    STATUS_MODEL_REINIT_FINISH_EN = "Model reinitialising before training finished"
+
+    STATUS_MODEL_TRAIN_START_EN = "Model training started"
+    STATUS_MODEL_TRAIN_PROCESS_EN = "Model training in process"
+    STATUS_MODEL_TRAIN_FINISH_EN = "Model training without saving finished"
+    STATUS_TRAIN_WITHOUT_SAVE_COMPLETE_EN = "Model training without saving completed"
+
+    STATUS_TRAINED_MODEL_SAVE_START_EN = "Trained model saving started"
+    STATUS_TRAINED_MODEL_SAVE_PROCESS_EN = "Trained model saving in process"
+    STATUS_TRAINED_MODEL_SAVE_FINISH_EN = "Trained model saving finished"
+    STATUS_TRAIN_AND_SAVE_COMPLETE_EN = "Model training and saving completed"
+
+    STATUS_CHECKSET_TEST_START_EN = "Check-set model test started"
+    STATUS_CHECKSET_TEST_PROCESS_EN = "Check-set model test in process"
+    STATUS_CHECKSET_TEST_FINISH_EN = "Check-set model test finished"
 
 
 @dataclass
@@ -144,6 +135,7 @@ class BERT_OPTIONS:
     BERT_LAST_SAVED_MODEL_INI_FILE_PATH: str = "WORKING_DATA/last_saved_model_ini_file/last_saved_model_dir_path.ini"
     BERT_LAST_SAVED_DATASET_INI_FILE_PATH: str = "WORKING_DATA/last_saved_dataset_ini_file/last_saved_dataset_dir_path.ini"
     BERT_BEFORE_REINIT_MODEL_TEMP_PATH: str = "WORKING_DATA/temp_saved_model_prior_init_train"
+
 
 @dataclass
 class BERT_TRAIN_OPTIONS:
