@@ -9,7 +9,7 @@ from configs.settings import (
 from fast_api.app_auth.funcs_auth import verify_test_username_password
 from fast_api.app_tests.func_tests import test_group_prediction
 from fast_api.app_tests.schemes_test import AuthDataTest
-from ML_BERT_train_datasets.test_init_train_datasets.test_texts_labels import (
+from fast_api.app_tests.test_texts_labels import (
     texts_labels)
 
 
