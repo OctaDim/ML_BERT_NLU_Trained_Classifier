@@ -83,31 +83,6 @@ class REDIS_OPTIONS:
 
 
 @dataclass
-class STATUSES:
-    STATUS_PENDING_EN = "Pending"
-
-    STATUS_DATASET_CREATION_START_EN = "Preparing dataset tarted"
-    STATUS_DATASET_CREATION_FINISH_EN = "Preparing dataset tarted"
-
-    STATUS_MODEL_REINIT_START_EN = "Model reinitialising before training started"
-    STATUS_MODEL_REINIT_FINISH_EN = "Model reinitialising before training finished"
-
-    STATUS_MODEL_TRAIN_START_EN = "Model training started"
-    STATUS_MODEL_TRAIN_PROCESS_EN = "Model training in process"
-    STATUS_MODEL_TRAIN_FINISH_EN = "Model training without saving finished"
-    STATUS_TRAIN_WITHOUT_SAVE_COMPLETE_EN = "Model training without saving completed"
-
-    STATUS_TRAINED_MODEL_SAVE_START_EN = "Trained model saving started"
-    STATUS_TRAINED_MODEL_SAVE_PROCESS_EN = "Trained model saving in process"
-    STATUS_TRAINED_MODEL_SAVE_FINISH_EN = "Trained model saving finished"
-    STATUS_TRAIN_AND_SAVE_COMPLETE_EN = "Model training and saving completed"
-
-    STATUS_CHECKSET_TEST_START_EN = "Check-set model test started"
-    STATUS_CHECKSET_TEST_PROCESS_EN = "Check-set model test in process"
-    STATUS_CHECKSET_TEST_FINISH_EN = "Check-set model test finished"
-
-
-@dataclass
 class BERT_MODEL_NAMES:
     BERT_BASE_MULTILINGUAL_CASED: str = "bert-base-multilingual-cased"
 
@@ -116,14 +91,14 @@ class BERT_MODEL_NAMES:
 class BERT_OPTIONS:
     # API
     BERT_API_URL_BASE_NAME: str = "bert"
-    # INITIAL MODEL PATH
+    # INITIAL MODEL PATH OPTIONS
     BERT_MODEL_INIT: bool = True
     BERT_ACTIVE_MODEL_NAME: str = BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED
     BERT_INITIAL_MODEL_DOWNLOAD_PATH: str = "ML_BERT_models/model_bert_init_pretrained"
-    # TRAINED MODELS BASE PATH
+    # TRAINED MODELS BASE PATH OPTIONS
     BERT_TRAINED_MODELS_BASE_PATH: str = "WORKING_DATA/trained_product_bert_models"
     BERT_TRAINED_MODELS_SAVE_DIR_PREFIX: str = "trained_bert"
-    # DATASETS CSV
+    # DATASETS CSV OPTIONS
     BERT_INITIAL_DATASET_CSV_PATH: str = "ML_BERT_train_datasets/product_init_train_dataset"
     BERT_TRAIN_DATASET_FILE_EXTENSIONS: tuple = ("xlsx", "xls", "txt", "csv")
     BERT_NEW_DATASETS_CSV_BASE_PATH: str = "WORKING_DATA/updated_product_train_datasets"
@@ -131,10 +106,12 @@ class BERT_OPTIONS:
     BERT_TEXT_LABEL_CSV_FILE_NAME: str = "prod_texts_labels.csv"
     BERT_OVERWRITE_PREV_CSV_DATASET: bool = False
     BERT_NEW_DATASET_CSV_DIR_PREFIX: str = "updated_dataset"
-    # MODEL AND CSV SAVE PATHS INI FILES
+    # MODEL AND CSV SAVE PATHS INI FILES OPTIONS
     BERT_LAST_SAVED_MODEL_INI_FILE_PATH: str = "WORKING_DATA/last_saved_model_ini_file/last_saved_model_dir_path.ini"
     BERT_LAST_SAVED_DATASET_INI_FILE_PATH: str = "WORKING_DATA/last_saved_dataset_ini_file/last_saved_dataset_dir_path.ini"
     BERT_BEFORE_REINIT_MODEL_TEMP_PATH: str = "WORKING_DATA/temp_saved_model_prior_init_train"
+    # CHECKSETS OPTIONS
+    BERT_CHECKSET_NAME_REDIS_PREFIX: str = "test_checkset"
 
 
 @dataclass
@@ -156,3 +133,28 @@ class BERT_TRAIN_OPTIONS:
     BERT_TOKEN_TRUNCATION: bool = False
     BERT_TOKEN_PADDING: Union[Literal["max_length", "longest"], False, None] = "max_length"
     BERT_RETURN_TENSOR: Union[Literal["pt", "tf", "np"], None] = "pt"
+
+
+@dataclass
+class STATUSES:
+    STATUS_DATASET_CREATION_START_EN = "Preparing dataset tarted"
+    STATUS_DATASET_CREATION_FINISH_EN = "Preparing dataset tarted"
+
+    STATUS_MODEL_REINIT_START_EN = "Model reinitialising before training started"
+    STATUS_MODEL_REINIT_FINISH_EN = "Model reinitialising before training finished"
+
+    STATUS_MODEL_TRAIN_PENDING_EN = "Training model pending"
+    STATUS_MODEL_TRAIN_START_EN = "Model training started"
+    STATUS_MODEL_TRAIN_PROCESS_EN = "Model training in process"
+    STATUS_MODEL_TRAIN_FINISH_EN = "Model training without saving finished"
+    STATUS_TRAIN_WITHOUT_SAVE_COMPLETE_EN = "Model training without saving completed"
+
+    STATUS_TRAINED_MODEL_SAVE_START_EN = "Trained model saving started"
+    STATUS_TRAINED_MODEL_SAVE_PROCESS_EN = "Trained model saving in process"
+    STATUS_TRAINED_MODEL_SAVE_FINISH_EN = "Trained model saving finished"
+    STATUS_TRAIN_AND_SAVE_COMPLETE_EN = "Model training and saving completed"
+
+    STATUS_CHECKSET_TEST_PENDING_EN = "Check-set model test pending"
+    STATUS_CHECKSET_TEST_START_EN = "Check-set model test started"
+    STATUS_CHECKSET_TEST_PROCESS_EN = "Check-set model test in process"
+    STATUS_CHECKSET_TEST_FINISH_EN = "Check-set model test finished"
