@@ -26,15 +26,23 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
                                   password=auth_data.password)
     try:
         print("\nGetting check-sets result by check-set file name:")
+        checkset_filename = checkset_data.checkset_filename
+        if not checkset_filename:
+            log_text = (f"Check-sets empty file name [ERROR]: "
+                        f"checkset_filename: {checkset_filename}")
+            print(log_text)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=log_text)
+
         datetime_start = datetime.now()
         checkset_prefix = BERT_OPTIONS.BERT_CHECKSET_NAME_REDIS_PREFIX
-        checkset_filename = checkset_data.checkset_filename
         redis_checkset_name = f"{checkset_prefix}_{checkset_filename}"
 
-        redis_match_pattern = f"*{redis_checkset_name}*"  # * - starts, ends with any symbols
+        redis_match_pattern = f"{redis_checkset_name}"  # * - starts, ends with any symbols
         redis_checksets_results = await get_redis_values_by_pattern(
             partial_pattern=redis_match_pattern,
-            get_dictionary=True)
+            get_dictionary=False)
 
         if redis_checksets_results:
             checkset_result = redis_checksets_results[0]

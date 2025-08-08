@@ -10,7 +10,9 @@ from fast_api.app_bert_save_model.router_bert_save_model import router_bert_save
 from fast_api.app_bert_train_model.router_bert_train_model import router_bert_train_model
 from fast_api.app_checkset_model_test.router_checkset_model_test import router_bert_checkset_model_test
 from fast_api.app_get_all_categories.router_get_all_categories import router_bert_get_all_categories
+from fast_api.app_get_all_checkset_results.router_alll_checkset_results import router_bert_all_checksets_results
 from fast_api.app_get_all_train_tasks_list.router_all_train_tasks_list import router_bert_get_train_tasks_list
+from fast_api.app_get_checkset_result.router_get_checkset_result import router_bert_single_checkset_result
 from fast_api.app_last_dataset_name.router_last_dataset_name import router_bert_last_dataset_name
 from fast_api.app_predict_text.router_predict_single_text import router_bert_predict_single_text
 from fast_api.app_root_url.router_main import router_root_url
@@ -37,6 +39,8 @@ routers_list = [
     router_bert_get_train_tasks_list,
     router_bert_last_dataset_name,
     router_bert_checkset_model_test,
+    router_bert_all_checksets_results,
+    router_bert_single_checkset_result,
 
     # Test end-point (debug time)
     router_develop_test_endpoint,
