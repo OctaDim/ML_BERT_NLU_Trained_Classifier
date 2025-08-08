@@ -6,7 +6,7 @@ from fast_api.app_tests.test_labels_categories import (
 
 
 def test_group_prediction():
-    print("#" * 100)
+    print("#" * 65)
     all_categories_lens = [len(cat) for cat in labels_categories.values()]
     categories_max_len = max(all_categories_lens)
     all_phrases_tot = len(test_phrases)
@@ -30,6 +30,6 @@ def test_group_prediction():
         order_str = f"{counter}/{all_phrases_tot}".ljust(9)
         print(f"{order_str} {category_str} {cur_text} {result_str}")
     accuracy = round((right_categories_tot / all_phrases_tot) * 100)
-    print("#" * 100)
+    print("#" * 65)
     print(f"Right Categories: {right_categories_tot}/{all_phrases_tot} "
           f"[{accuracy} %]\n")

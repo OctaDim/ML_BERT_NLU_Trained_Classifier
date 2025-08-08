@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS
 from fast_api.app_auth.funcs_auth import verify_test_username_password
-from fast_api.app_tests.func_tests import test_group_prediction
+from fast_api.app_tests.func_test_group_prediction import test_group_prediction
 from fast_api.app_tests.schemes_test import AuthDataTest
 
 

@@ -50,7 +50,7 @@ async def bert_train_model(
     train_task_uuid = str(uuid.uuid4())
 
     redis_update = {
-        "train_status": STATUSES.STATUS_PENDING_EN,
+        "train_status": STATUSES.STATUS_MODEL_TRAIN_PENDING_EN,
         "complete_train_status": "",
         "train_task_uuid": train_task_uuid,
         "dataset_name": dataset_name,
@@ -242,7 +242,7 @@ async def bert_train_model(
               f"train_text_lab_csv_path: {train_text_lab_csv_path}\n"
               f"creating_dataset_time: {creating_dataset_time}\n"
               f"dataset_name: {blue_color}{dataset_name}{reset_color}\n")
-        print("####### AFTER PRIOR RESPONSE 202 AND BACKGROUND TRAINING")
+        print("####### PRELIMINARY 202 RESPONSE AFTER BACKGROUND TRAINING START")
         return json_response
     except Exception as error:
         log_text = f"BERT router train model [ERROR]: error: {error}"

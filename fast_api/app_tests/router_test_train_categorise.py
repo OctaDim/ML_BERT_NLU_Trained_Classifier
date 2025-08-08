@@ -7,7 +7,7 @@ from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.settings import (
     BERT_MODEL_NAMES, BERT_OPTIONS, BERT_TRAIN_OPTIONS)
 from fast_api.app_auth.funcs_auth import verify_test_username_password
-from fast_api.app_tests.func_tests import test_group_prediction
+from fast_api.app_tests.func_test_group_prediction import test_group_prediction
 from fast_api.app_tests.schemes_test import AuthDataTest
 from fast_api.app_tests.test_texts_labels import (
     texts_labels)
