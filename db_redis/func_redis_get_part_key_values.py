@@ -2,7 +2,7 @@ from db_redis.init_redis import RedisAsyncConnection
 
 
 async def get_redis_values_by_pattern(partial_pattern: str,
-                                      get_dictionary: bool = False) -> list:
+                                      get_dictionary: bool = False) -> list|dict:
     """'partial_pattern can be like '*any_string', 'any_string*',
     '*any_string*' or '*any*str*:*'"""
     if get_dictionary:
