@@ -1,4 +1,4 @@
-import time
+import asyncio
 from datetime import datetime, timedelta
 
 from torch.utils.data import TensorDataset
@@ -24,7 +24,8 @@ async def background_train_save_model(
         train_text_lab_csv_path: str,
         creating_dataset_time: float
 ) -> None:
-    print("\nBERT model training start:")
+    print("#" * 65)
+    print("\nBERT model background training start:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
 
     redis_update = {
@@ -38,7 +39,9 @@ async def background_train_save_model(
         print(redis_error)
 
     datetime_start = datetime.now()
-    time.sleep(30)
+    # TODO: TEMPORARY SWITCHED ON
+    await asyncio.sleep(60)
+    # time.sleep(60)
     # TODO: TEMPORARY SWITCHED OFF
     # bert_model_inst.train(
     #     train_dataset=new_train_dataset,
@@ -79,7 +82,7 @@ async def background_train_save_model(
           f"training_time_str: {blue_color}{training_time_str}{reset_color}\n")
 
     if train_model_data.save_model_after_train:
-        print("\nBERT saving model after train start:")
+        print("\nBERT background saving model after train start:")
         redis_update = {
             "train_status": STATUSES.STATUS_TRAINED_MODEL_SAVE_START_EN,
             "train_step_9_saving_model_after_training_started": "[OK]", }
@@ -110,7 +113,7 @@ async def background_train_save_model(
             save_model_after_train_data=save_model_after_train_bert,
             dataset_name=dataset_name, )
 
-        print("\nBERT saving model after train finished")
+        print("\nBERT background saving model after train finished")
         redis_update = {
             "train_status": STATUSES.STATUS_TRAIN_AND_SAVE_COMPLETE_EN,
             "train_step_12_saving_model_after_training_complete": "[OK]", }
@@ -121,7 +124,7 @@ async def background_train_save_model(
         if redis_error:
             print(redis_error)
     else:
-        print("\nBERT training model without saving complete:")
+        print("\nBERT background training model without saving completed:")
         redis_update = {
             "train_status": STATUSES.STATUS_TRAIN_WITHOUT_SAVE_COMPLETE_EN,
             "train_complete_status": "complete",
