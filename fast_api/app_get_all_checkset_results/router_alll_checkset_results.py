@@ -46,8 +46,8 @@ async def bert_get_all_checksets_results(auth_data: AuthDataBert):
                      "model init": BERT_OPTIONS.BERT_MODEL_INIT,
                      "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
                      "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
-                     "getting time": getting_time,
-                     "checksets results": checksets_results},
+                     "getting_time": getting_time,
+                     "checksets_results": checksets_results},
             status_code=status.HTTP_200_OK)
 
         blue_color = CONSOLE_COLORS.BRIGHT_BLUE
