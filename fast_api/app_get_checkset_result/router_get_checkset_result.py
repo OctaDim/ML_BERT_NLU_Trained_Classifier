@@ -1,5 +1,6 @@
 # import asyncio
 # from functools import partial
+import json
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, status
@@ -38,7 +39,6 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
         datetime_start = datetime.now()
         checkset_prefix = BERT_OPTIONS.BERT_CHECKSET_NAME_REDIS_PREFIX
         redis_checkset_name = f"{checkset_prefix}_{checkset_filename}"
-
         redis_match_pattern = f"{redis_checkset_name}"  # * - starts, ends with any symbols
         redis_checksets_results = await get_redis_values_by_pattern(
             partial_pattern=redis_match_pattern,
@@ -46,6 +46,17 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
 
         if redis_checksets_results:
             checkset_result = redis_checksets_results[0]
+            try:
+                dict_json_str = checkset_result["checkset_test_results"]
+                dict_python = json.loads(dict_json_str)
+                checkset_result["checkset_test_results"] = dict_python
+            except (json.JSONDecodeError, Exception) as json_error:
+                log_text = (f"Redis json deserialization [ERROR]: "
+                            f"json_error: {json_error}")
+                print(log_text)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=log_text)
         else:
             checkset_result = {}
         getting_time = (datetime.now() - datetime_start).total_seconds()
@@ -70,7 +81,7 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
               f"getting_time: {getting_time}\n")
         return json_response
     except Exception as error:
-        log_text = (f"BERT router train model tasks list [ERROR]: "
+        log_text = (f"BERT router get check-set model test result [ERROR]: "
                     f"error: {error}")
         print(log_text)
         raise HTTPException(
