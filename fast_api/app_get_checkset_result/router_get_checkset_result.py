@@ -26,7 +26,7 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
     try:
-        print("\nGetting check-sets result by check-set file name:")
+        print("\nGetting check-set result by check-set file name:")
         checkset_filename = checkset_data.checkset_filename
         if not checkset_filename:
             log_text = (f"Check-sets empty file name [ERROR]: "
@@ -47,12 +47,17 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
         if redis_checksets_results:
             checkset_result = redis_checksets_results[0]
             try:
-                dict_json_str = checkset_result["checkset_test_results"]
-                dict_python = json.loads(dict_json_str)
-                checkset_result["checkset_test_results"] = dict_python
-            except (json.JSONDecodeError, Exception) as json_error:
+                json_str_dict = checkset_result.get("checkset_test_results")
+                print(f"####### json_str_dict: {type(json_str_dict)}, {json_str_dict}")
+                if json_str_dict:
+                    python_dict = json.loads(json_str_dict)
+                    print(f"####### python_dict: {type(python_dict)}, {python_dict}")
+                    checkset_result["checkset_test_results"] = python_dict
+                else:
+                    checkset_result["checkset_test_results"] = []
+            except Exception as error:
                 log_text = (f"Redis json deserialization [ERROR]: "
-                            f"json_error: {json_error}")
+                            f"error: {error}")
                 print(log_text)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -81,7 +86,7 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
               f"getting_time: {getting_time}\n")
         return json_response
     except Exception as error:
-        log_text = (f"BERT router get check-set model test result [ERROR]: "
+        log_text = (f"BERT router get check-set result [ERROR]: "
                     f"error: {error}")
         print(log_text)
         raise HTTPException(

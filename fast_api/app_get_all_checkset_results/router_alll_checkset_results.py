@@ -38,12 +38,17 @@ async def bert_get_all_checksets_results(auth_data: AuthDataBert):
                 BERT_OPTIONS.BERT_CHECKSET_NAME_REDIS_PREFIX)
             # TODO: Test JSON deserializing (start)
             try:
-                dict_json_str = cur_result_dict["checkset_test_results"]
-                dict_python = json.loads(dict_json_str)
-                cur_result_dict["checkset_test_results"] = dict_python
-            except (json.JSONDecodeError, Exception) as json_error:
+                json_str_list = cur_result_dict.get("checkset_test_results")
+                print(f"####### json_str_list: {type(json_str_list)}, {json_str_list}")
+                if json_str_list:
+                    python_list = json.loads(json_str_list)
+                    print(f"####### python_list: {type(python_list)}, {python_list}")
+                    cur_result_dict["checkset_test_results"] = python_list
+                else:
+                    cur_result_dict["checkset_test_results"] = []
+            except Exception as error:
                 log_text = (f"Redis json deserialization [ERROR]: "
-                            f"json_error: {json_error}")
+                            f"error: {error}")
                 print(log_text)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -71,9 +76,10 @@ async def bert_get_all_checksets_results(auth_data: AuthDataBert):
               f"username: {auth_data.username}\n"
               f"checksets_results: {blue_color}{checksets_results}{reset_color}\n"
               f"getting_time: {getting_time}\n")
+        print(77)
         return json_response
     except Exception as error:
-        log_text = (f"BERT router get check-sets model test results [ERROR]: "
+        log_text = (f"BERT router get check-sets results [ERROR]: "
                     f"error: {error}")
         print(log_text)
         raise HTTPException(
