@@ -17,7 +17,8 @@ def get_last_saved_dataset_dir_path() -> str | None:
             with open(file=last_saved_dataset_ini_path,
                       mode="r", encoding="utf-8") as dataset_ini_file:
                 dataset_ini_file.seek(0)
-                dataset_file_saved_path = dataset_ini_file.read()
+                dataset_file_saved_path = dataset_ini_file.readline()
+                dataset_file_saved_path = dataset_file_saved_path.strip()
         else:
             dataset_file_saved_path = ""
     except Exception as error:

@@ -20,7 +20,7 @@ def get_last_saved_model_dir_path() -> str|None:
         with open(file=last_saved_model_ini_file_path,
                   mode="r", encoding="utf-8") as model_ini_file:
             model_ini_file.seek(0)
-            last_saved_model_dir_path = model_ini_file.readline()
+            last_saved_model_dir_path = model_ini_file.readline().strip()
 
         if not os.path.isdir(last_saved_model_dir_path):
             print(f"Last saved model dir path not found [ERROR]:\n"
