@@ -9,6 +9,7 @@ from fastapi import (APIRouter, File, Form, HTTPException, UploadFile,
                      status, BackgroundTasks)
 from fastapi.responses import JSONResponse
 
+from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS, REDIS_OPTIONS, STATUSES, BERT_MODEL_NAMES)
@@ -18,6 +19,7 @@ from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_checkset_model_test.func_checkset_model_test_background import (
     background_checkset_test_model)
 from utils_common.class_file_validate_read import FileValidateRead
+from utils_specific.get_last_saved_model_dir import get_last_saved_model_dir_path
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_checkset_model_test = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -39,6 +41,7 @@ async def bert_start_checkset_model_test(
     print("\nBERT Model check-set start test:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.CHECKSET_TESTS_EXPIRY_DAYS)
 
+    print("\nBERT file extension and format verifying:")
     ALLOWED_FILE_MIME_TYPES = (
         "application/vnd.ms-excel",  # xls, old excel
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  # xlsx, new excel
@@ -130,8 +133,47 @@ async def bert_start_checkset_model_test(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=log_text)
 
+    print("\nBERT Getting last saved model dir path and dir name:")
+    last_saved_model_dir_path = get_last_saved_model_dir_path()
+    # if checkset_model_data.checkset_model_dir_path:  # Request parameter
+    #     checkset_model_dir_path = checkset_model_data.model_load_dir_path
+    if bert_model_inst.last_saved_model_dir:
+        checkset_model_dir_path = bert_model_inst.last_saved_model_dir
+    elif last_saved_model_dir_path:
+        checkset_model_dir_path = last_saved_model_dir_path
+    else:
+        # opt.1: No checkset model path parameter error
+        checkset_model_dir_path = ""
+        # opt.2: Load initial model without error
+        # initial_model_dir = BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH
+        # checkset_model_dir_path = get_full_dir_normal_path(
+        #     [BASE_DIR, initial_model_dir])
+
+    if not checkset_model_dir_path:
+        log_text = (f"BERT Checkset test model dir path not defined [ERROR]:\n"
+                    # f"as request parameter 'checkset_model_dir_path' \n"
+                    f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
+                    f"bert_model_instance.last_saved_model_path: "
+                    f"{bert_model_inst.last_saved_model_dir}\n"
+                    f"checkset_model_dir_path: {checkset_model_dir_path}\n")
+        print(log_text)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=log_text)
+
+    if not os.path.isdir(checkset_model_dir_path):
+        log_text = (f"BERT Checkset test model dir path not exists [ERROR]: "
+                    f"checkset_model_dir_path: {checkset_model_dir_path}")
+        print(log_text)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=log_text)
+
+    checkset_model_path_dirs = checkset_model_dir_path.split(os.sep)
+    checkset_model_dir_name = checkset_model_path_dirs[-1]
+
     redis_update = {
         "checkset_status": STATUSES.STATUS_CHECKSET_TEST_START_EN,
+        "checkset_model_name": checkset_model_dir_name,
         "step_t2_model_checkset_testing_start": "[OK]", }
     redis_error = await redis_save_key_mapping_dict(
         key_name=checkset_redis_name,
