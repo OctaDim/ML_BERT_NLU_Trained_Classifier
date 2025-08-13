@@ -112,6 +112,9 @@ class BERT_OPTIONS:
     BERT_BEFORE_REINIT_MODEL_TEMP_PATH: str = "WORKING_DATA/temp_saved_model_prior_init_train"
     # CHECKSETS OPTIONS
     BERT_CHECKSET_NAME_REDIS_PREFIX: str = "test_checkset"
+    # LEARNING FILES OPTIONS
+    BERT_UNIQUE_LEARNING_FILE_PREFIX: str = "learn_file_unique"
+    BERT_UNIQUE_LEARNING_FILES_PATH: str = "WORKING_DATA/learn_files_unique"
 
 
 @dataclass

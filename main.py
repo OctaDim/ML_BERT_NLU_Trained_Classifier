@@ -9,6 +9,7 @@ from fast_api.app_bert_load_model.router_bert_load_model import router_bert_load
 from fast_api.app_bert_save_model.router_bert_save_model import router_bert_save_model
 from fast_api.app_bert_train_model.router_bert_train_model import router_bert_train_model
 from fast_api.app_checkset_model_test.router_checkset_model_test import router_bert_checkset_model_test
+from fast_api.app_create_unique_learn_file.router_create_unique_learn_file import router_bert_create_unique_learn_file
 from fast_api.app_get_all_categories.router_get_all_categories import router_bert_get_all_categories
 from fast_api.app_get_all_checkset_results.router_alll_checkset_results import router_bert_all_checksets_results
 from fast_api.app_get_all_train_tasks_list.router_all_train_tasks_list import router_bert_get_train_tasks_list
@@ -41,6 +42,7 @@ routers_list = [
     router_bert_checkset_model_test,
     router_bert_all_checksets_results,
     router_bert_single_checkset_result,
+    router_bert_create_unique_learn_file,
 
     # Test end-point (debug time)
     router_develop_test_endpoint,
