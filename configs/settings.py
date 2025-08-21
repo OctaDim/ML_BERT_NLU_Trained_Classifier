@@ -116,7 +116,7 @@ class BERT_OPTIONS:
     # CHECKSETS OPTIONS
     BERT_CHECKSET_NAME_REDIS_PREFIX: str = "test_checkset"
     # LEARNING FILES OPTIONS
-    BERT_UNIQUE_LEARNING_FILE_PREFIX: str = "learn_file_unique"
+    BERT_UNIQUE_LEARNING_FILE_PREFIX: str = "unique"
     BERT_UNIQUE_LEARNING_FILES_PATH: str = "WORKING_DATA/learn_files_unique"
 
 

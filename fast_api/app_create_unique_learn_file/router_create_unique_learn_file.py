@@ -1,31 +1,29 @@
 # import asyncio
 # from functools import partial
 import os
+import random
 from datetime import datetime
 from typing import Annotated
 
-from django.utils.cache import learn_cache_key
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import JSONResponse
 
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
-    BERT_OPTIONS)
-from fast_api.app_add_texts_categories_file.func_add_save_test_category_file import (
-    add_save_multi_text_category_file)
+    BERT_OPTIONS, BASE_DIR)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
-from fast_api.app_create_unique_learn_file.func_unify_save_learn_file import unify_save_inque_learn_file
 from utils_common.class_file_validate_read import FileValidateRead
-
+from utils_common.get_file_name_extra_part import get_file_name_with_extra_part
+from utils_common.normalized_path import get_full_file_normal_path
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_create_unique_learn_file = APIRouter(prefix=f"/{bert_base_url_name}",
-                                               tags=["BERT"])
+                                                 tags=["BERT"])
 
 
 @router_bert_create_unique_learn_file.post(path="/bert_create_unique_learn_file/",
-                                         # TODO: Describe responses here
-                                         response_model=None)
+                                           # TODO: Describe responses here
+                                           response_model=None)
 async def bert_create_unique_learn_file(
         upload_file: Annotated[UploadFile, File(description="file .xls, .xlsx, or .txt")],
         username: Annotated[str, Form()],
@@ -58,7 +56,7 @@ async def bert_create_unique_learn_file(
 
     allowed_extensions = BERT_OPTIONS.BERT_TRAIN_DATASET_FILE_EXTENSIONS
     file_name = os.path.basename(upload_file.filename)
-    _, file_extension = os.path.splitext(file_name)
+    filename_no_ext, file_extension = os.path.splitext(file_name)
     file_extension = file_extension.lower()
     if not file_name.lower().endswith(allowed_extensions):
         log_text = (f"File extension not xls, xlsx, csv or txt [ERROR]:\n"
@@ -109,22 +107,35 @@ async def bert_create_unique_learn_file(
                             detail=log_text)
 
     try:
+        print("\nBERT Creating new learn filename full path with extra part:")
         datetime_start = datetime.now()
+        datetime_str = datetime.now().strftime("%d_%m_%Y_%H_%M_%S_%f")
+        random_str = str(random.randint(10000, 99999))
+        learn_file_prefix = BERT_OPTIONS.BERT_UNIQUE_LEARNING_FILE_PREFIX
+        new_learn_file_name = (f"{filename_no_ext}_{learn_file_prefix}_"
+                               f"{datetime_str}_{random_str}.csv")
+
+        learn_files_dir_name = BERT_OPTIONS.BERT_UNIQUE_LEARNING_FILES_PATH
+        learn_file_save_path = get_full_file_normal_path(
+            all_dir_str_parts=[BASE_DIR, learn_files_dir_name],
+            file_name_with_ext=new_learn_file_name)
         print("###########################################################")
+        print("@@@@@@@ file_name:", file_name)
+        print("@@@@@@@ new_learn_file_name:", new_learn_file_name)
+        print("@@@@@@@ learn_file_save_path:", learn_file_save_path)
+
         print("@@@@@@@ len(learn_data_list):", len(learn_data_list))
-        unique_learn_data = unify_save_inque_learn_file(learn_data_list)
+        learn_data_tuples_list = [tuple(cur_list) for cur_list in learn_data_list]
+        unique_learn_data = list(set(learn_data_tuples_list))
+
         print("@@@@@@@ len(unique_learn_data):", len(unique_learn_data))
         print("###########################################################")
+        # unique_learn_data = unify_save_inque_learn_file(learn_data_list)
         creating_time = (datetime.now() - datetime_start).total_seconds()
         creating_time = round(creating_time, 1)
 
-        # new_csv_files_data = add_save_multi_text_category_file(
-        #     update_text_category_data=learn_data_list)
-        # new_lab_cat_csv_path = new_csv_files_data.get("lab_cat_csv_path")
-        # new_text_lab_csv_path = new_csv_files_data.get("text_lab_csv_path")
-        # dataset_ini_file_path = new_csv_files_data.get("last_saved_dataset_ini_fpath")
-        # empty_error_skipped_rows = new_csv_files_data.get("empty_error_skipped_rows")
-        # new_categories_list = new_csv_files_data.get("new_categories_list")
+        print("\nBERT Creating new learn filename full path with extra part:")
+
         json_response = JSONResponse(
             content={"message": "BERT text-category csv added [OK]",
                      "username": username,
@@ -151,7 +162,7 @@ async def bert_create_unique_learn_file(
               # f"learn_data_list: {blue_color}{learn_data_list}{reset_color}\n"
               # f"empty_error_skipped_rows: {yellow_color}{empty_error_skipped_rows}{reset_color}\n"
               # f"new_categories_list: {blue_color}{new_categories_list}{reset_color}\n"
-        )
+              )
         return json_response
     except Exception as error:
         log_text = f"BERT router [ERROR]: error: {error}"
