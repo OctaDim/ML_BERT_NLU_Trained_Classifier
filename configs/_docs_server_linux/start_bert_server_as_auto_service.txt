@@ -22,6 +22,8 @@ RestartSec=180
 Type=simple
 StandardOutput=journal
 StandardError=journal
+#StandardOutput=file:/var/log/bert/bert.log
+#StandardError=file:/var/log/bert/bert.err
 LogLevelMax=debug
 [Install]
 WantedBy=multi-user.target
@@ -43,6 +45,8 @@ RestartSec=180
 Type=simple
 StandardOutput=journal
 StandardError=journal
+#StandardOutput=file:/var/log/bert/bert.log
+#StandardError=file:/var/log/bert/bert.err
 LogLevelMax=debug
 [Install]
 WantedBy=multi-user.target
@@ -64,6 +68,8 @@ RestartSec=180
 Type=simple
 StandardOutput=journal
 StandardError=journal
+#StandardOutput=file:/var/log/bert/bert.log
+#StandardError=file:/var/log/bert/bert.err
 LogLevelMax=debug
 [Install]
 WantedBy=multi-user.target
