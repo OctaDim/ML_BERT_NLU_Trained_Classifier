@@ -86,9 +86,22 @@ async def bert_train_model(
                 status_code=status.HTTP_406_NOT_ACCEPTABLE,
                 detail=log_text)
 
-        if bert_model_inst.labels != new_lab_cat_dict:  # labels-categories are different
-            print("###################################################")
-            print("\nReinitializing model before training start:")
+        print(f"####### bert_model_inst: {bert_model_inst}")
+        print(f"####### bert_model_inst.model: {bert_model_inst.model}")
+        print(f"####### bert_model_inst.labels: {bert_model_inst.labels}")
+        print(f"####### new_lab_cat_dict: {new_lab_cat_dict}")
+        print(f"####### bert_model_inst.labels == new_lab_cat_dict: {bert_model_inst.labels == new_lab_cat_dict}")
+
+        # TODO: Realize passing the training process
+        # if bert_model_inst.labels == new_lab_cat_dict:  # The same labels-categories
+        #     pass
+        if True:  # Different labels-categories
+            print("***************************************************")
+            print("*** REINITIALIZING MODEL BEFORE TRAINING (start) **")
+            print("***************************************************")
+
+            print(f"####### bert_model_inst.labels: {bert_model_inst.labels}")
+            print(f"####### new_lab_cat_dict: {new_lab_cat_dict}")
             redis_update = {
                 "train_status": STATUSES.STATUS_MODEL_REINIT_START_EN,
                 "train_step_2_reinitialising_before_training_started": "[OK]", }
@@ -102,7 +115,7 @@ async def bert_train_model(
             before_reinit_model_temp_path = get_full_dir_normal_path(
                 [BASE_DIR, BERT_OPTIONS.BERT_BEFORE_REINIT_MODEL_TEMP_PATH])
             if not os.path.isdir(before_reinit_model_temp_path):
-                os.makedirs(before_reinit_model_temp_path)
+                os.makedirs(before_reinit_model_temp_path, exist_ok=True)
 
             error_log = bert_model_inst.save_model(
                 dir_full_path=before_reinit_model_temp_path)  # Model saving before reinitialising
@@ -120,13 +133,13 @@ async def bert_train_model(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=error_log)
 
-            error_log = bert_model_inst.load_model(
-                dir_full_path=before_reinit_model_temp_path)  # Model loading after reinitialising
-            if error_log:
-                print(error_log)
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=error_log)
+            # error_log = bert_model_inst.load_model(
+            #     dir_full_path=before_reinit_model_temp_path)  # Model loading after reinitialising
+            # if error_log:
+            #     print(error_log)
+            #     raise HTTPException(
+            #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            #         detail=error_log)
 
             redis_update = {
                 "train_status": STATUSES.STATUS_MODEL_REINIT_FINISH_EN,
@@ -137,8 +150,10 @@ async def bert_train_model(
                 expiry_seconds=REDIS_KEY_EXPIRE_TIME)
             if redis_error:
                 print(redis_error)
-            print("\nReinitializing model before training finished")
-            print("###################################################")
+
+            print("***************************************************")
+            print("**** REINITIALIZING MODEL BEFORE TRAINING (end) ***")
+            print("***************************************************")
 
         print("\nGetting csv text-label train file path:")
         redis_update = {
@@ -176,6 +191,8 @@ async def bert_train_model(
         creating_dataset_time = (datetime.now() - datetime_start).total_seconds()
         creating_dataset_time = round(creating_dataset_time, 1)
 
+        print(f"new_train_dataset: {new_train_dataset}")
+
         redis_update = {
             "train_status": STATUSES.STATUS_DATASET_CREATION_FINISH_EN,
             "creating_dataset_time": creating_dataset_time,
@@ -206,7 +223,7 @@ async def bert_train_model(
         if redis_error:
             print(redis_error)
 
-        print("####### BEFORE BACKGROUND TRAIN AND SAVE MODEL")
+        print("\n####### BEFORE BACKGROUND TRAIN AND SAVE MODEL")
         background_tasks.add_task(background_train_save_model,
                                   auth_data,
                                   train_model_data,
@@ -214,7 +231,7 @@ async def bert_train_model(
                                   dataset_name,
                                   train_text_lab_csv_path,
                                   creating_dataset_time)
-        print("####### AFTER BACKGROUND TRAIN AND SAVE MODEL")
+        print("####### AFTER START BACKGROUND TRAIN AND SAVE MODEL")
 
         json_response = JSONResponse(
             content={
