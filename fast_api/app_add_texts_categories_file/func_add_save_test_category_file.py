@@ -168,7 +168,7 @@ def add_save_multi_text_category_file(update_text_category_data: list) -> dict:
                         upd_label_category_data=update_lab_cat_csv_list)
         else:
             if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:
-                os.makedirs(new_dataset_dir_path)
+                os.makedirs(new_dataset_dir_path, exist_ok=True)
                 new_lab_cat_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
                     file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
