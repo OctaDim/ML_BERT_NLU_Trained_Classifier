@@ -33,6 +33,8 @@ async def bert_test_train_categorise(auth_data: AuthDataTest):
             train_dataset_unique[cur_test_phrase] = cur_test_label
         train_phrases = list(train_dataset_unique.keys())
         train_labels = list(train_dataset_unique.values())
+        print("####### TEST: train_phrases:", type(train_phrases), train_phrases)
+        print("####### TEST: train_labels:", type(train_labels), train_labels)
 
         new_train_dataset = bert_model_inst.create_train_dataset(
             texts_list=train_phrases,
@@ -40,6 +42,8 @@ async def bert_test_train_categorise(auth_data: AuthDataTest):
             truncation=BERT_TRAIN_OPTIONS.BERT_TOKEN_TRUNCATION,
             padding=BERT_TRAIN_OPTIONS.BERT_TOKEN_PADDING,
             return_tensors=BERT_TRAIN_OPTIONS.BERT_RETURN_TENSOR)
+
+        print("####### TEST: new_train_dataset:", type(new_train_dataset), new_train_dataset)
 
         if not new_train_dataset:
             log_text = (f"TrainDataset [ERROR]: get train dataset with"
