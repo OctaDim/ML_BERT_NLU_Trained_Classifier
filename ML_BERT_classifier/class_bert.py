@@ -35,7 +35,7 @@ class ClassifierBERT:
         print(f"Device: {green_color}{device_name.upper()}{reset_color}\n")
 
         self.tokenizer = self.__get_bert_tokenizer()
-        self.model = self.__get_bert_for_sequence_classification()
+        self.model = self.__get_bert_for_sequence_classification(labels)
 
     def __get_bert_tokenizer(self):
         tokenizer = BertTokenizer.from_pretrained(
@@ -49,7 +49,8 @@ class ClassifierBERT:
         return tokenizer
 
     def __get_bert_for_sequence_classification(
-            self) -> BertForSequenceClassification | None:
+            self, labels: dict
+    ) -> BertForSequenceClassification | None:
         model = BertForSequenceClassification.from_pretrained(
             pretrained_model_name_or_path=self.model_name,  # org
             cache_dir=self.cache_dir,  # extra
@@ -61,7 +62,7 @@ class ClassifierBERT:
             revision="main",
             use_safetensors=None,
             weights_only=True,
-            num_labels=len(self.labels),
+            num_labels=len(labels),
         ).to(self.device)  # Transfer pretrained model to the cur device cpu or gpu
         return model
 
@@ -90,7 +91,8 @@ class ClassifierBERT:
             texts_list: List[str],
             labels_list: List[int],
             truncation: bool = False,
-            padding: Union[Literal["max_length", "longest"], False, None] = "max_length",
+            padding: Union[Literal["max_length", "longest"], bool, None] = "max_length",  # Just for prod server
+            # padding: Union[Literal["max_length", "longest"], False, None] = "max_length",  # Its more exact
             return_tensors: Union[Literal["pt", "tf", "np"], None] = "pt"
     ) -> TensorDataset:
         """:param texts_list: list: texts in corresponding test_train_data order
@@ -103,11 +105,11 @@ class ClassifierBERT:
         "tf" returns TensorFlow tensors, "np" returns NumPy arrays,
         None returns lists"""
 
-        print(f"texts_list: {texts_list}\n"
-              f"labels_list: {labels_list}\n"
-              f"truncation: {truncation}\n"
-              f"padding: {padding}\n"
-              f"return_tensors: {return_tensors}\n")
+        print(f"####### texts_list: {texts_list}")
+        print(f"####### labels_list: {labels_list}")
+        print(f"####### truncation: {truncation}")
+        print(f"####### padding: {padding}")
+        print(f"####### return_tensors: {return_tensors}")
 
         input_ids = []
         attention_masks = []
@@ -282,8 +284,25 @@ class ClassifierBERT:
         but adjusts the model's classification head to accommodate the new number of labels.
         arg: new_labels: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}"""
         try:
+            print(f"******* BEFORE MODEL REINITIALIZING:\n"
+                  f"******* self: {self}\n"
+                  f"******* hash(self): {hash(self)}\n"
+                  f"******* self.model: {self.model}\n"
+                  f"******* hash(self.model): {hash(self.model)}\n"
+                  f"******* self.model.config.num_labels: {self.model.config.num_labels}\n"
+                  f"******* self.labels [{len(self.labels)}]: {self.labels}\n"
+                  f"******* new_labels [{len(new_labels)}]: {new_labels}\n")
+            self.model = self.__get_bert_for_sequence_classification(new_labels)
             self.labels = new_labels  # Update the labels number
-            self.model = self.__get_bert_for_sequence_classification()
+            print(f"####### AFTER MODEL REINITIALIZING:\n"
+                  f"####### self: {self}\n"
+                  f"####### hash(self): {hash(self)}\n"
+                  f"####### self.model: {self.model}\n"
+                  f"####### hash(self.model): {hash(self.model)}\n"
+                  f"####### self.model.config.num_labels: {self.model.config.num_labels}\n"
+                  f"####### self.labels [{len(self.labels)}]: {self.labels}\n"
+                  f"####### new_labels [{len(new_labels)}]: {new_labels}\n")
         except Exception as error:
             error_log = f"BERT Model reinitialising [ERROR]: error: {error}"
+            print(error_log)
             return error_log
