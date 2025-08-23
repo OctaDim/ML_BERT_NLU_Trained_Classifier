@@ -6,7 +6,6 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
-from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS
 from db_redis.func_redis_get_part_key_values import get_redis_values_by_pattern
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
@@ -33,19 +32,25 @@ async def bert_get_all_checksets_results(auth_data: AuthDataBert):
             get_dictionary=True)
 
         checksets_results = {}
-        for redis_checkset_name, cur_result_dict in redis_checksets_results.items():
+        for redis_checkset_name, cur_res_dict in redis_checksets_results.items():
+            print("#" * 65)
+            print(f"redis_checkset_name: "
+                  f"{type(redis_checkset_name)}, {redis_checkset_name}")
             orig_checkset_filename = redis_checkset_name.lstrip(
                 BERT_OPTIONS.BERT_CHECKSET_NAME_REDIS_PREFIX)
-            # TODO: Test JSON deserializing (start)
+            print(f"orig_checkset_filename: "
+                  f"{type(orig_checkset_filename)}, {orig_checkset_filename}")
             try:
-                json_str_list = cur_result_dict.get("checkset_test_results")
-                print(f"####### json_str_list: {type(json_str_list)}, {json_str_list}")
+                json_str_list = cur_res_dict.get("checkset_test_results")
+                print(f"type(json_str_list): {type(json_str_list)}")
+                # print(f"json_str_list: {type(json_str_list)}, {json_str_list}")
                 if json_str_list:
                     python_list = json.loads(json_str_list)
-                    print(f"####### python_list: {type(python_list)}, {python_list}")
-                    cur_result_dict["checkset_test_results"] = python_list
+                    print(f"type(python_list): {type(python_list)}")
+                    # print(f"python_list: {type(python_list)}, {python_list}")
+                    cur_res_dict["checkset_test_results"] = python_list
                 else:
-                    cur_result_dict["checkset_test_results"] = []
+                    cur_res_dict["checkset_test_results"] = []
             except Exception as error:
                 log_text = (f"Redis json deserialization [ERROR]: "
                             f"error: {error}")
@@ -53,8 +58,7 @@ async def bert_get_all_checksets_results(auth_data: AuthDataBert):
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=log_text)
-            # TODO: Test JSON deserializing (end)
-            checksets_results[orig_checkset_filename] = cur_result_dict
+            checksets_results[orig_checkset_filename] = cur_res_dict
 
         getting_time = (datetime.now() - datetime_start).total_seconds()
         getting_time = round(getting_time, 1)
@@ -69,14 +73,13 @@ async def bert_get_all_checksets_results(auth_data: AuthDataBert):
                      "checksets_results": checksets_results},
             status_code=status.HTTP_200_OK)
 
-        blue_color = CONSOLE_COLORS.BRIGHT_BLUE
-        reset_color = CONSOLE_COLORS.RESET
-        print(f"BERT response.body: {json_response.body}\n"
+        print(f"BERT response.body: contains 'checksets_results' key\n"
+              # f"BERT response.body: {json_response.body}\n"  # Too long console log
               f"BERT response.status_code: {json_response.status_code}\n"
               f"username: {auth_data.username}\n"
-              f"checksets_results: {blue_color}{checksets_results}{reset_color}\n"
-              f"getting_time: {getting_time}\n")
-        print(77)
+              f"getting_time: {getting_time}\n"
+              f"checksets_results: {type(checksets_results)}\n"
+              f"checksets_results.keys(): {checksets_results.keys()}\n")
         return json_response
     except Exception as error:
         log_text = (f"BERT router get check-sets results [ERROR]: "
