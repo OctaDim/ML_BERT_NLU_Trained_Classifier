@@ -6,10 +6,12 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
+from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
+from utils_specific.get_initial_dataset_dir_path import get_initial_dataset_dir_path
 from utils_specific.get_last_saved_dataset_path import get_last_saved_dataset_dir_path
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
@@ -26,8 +28,33 @@ async def bert_get_last_dataset_name(auth_data: AuthDataBert):
     try:
         print("\nGetting last saved dataset directory name:")
         datetime_start = datetime.now()
-        last_saved_dataset_dir = get_last_saved_dataset_dir_path()
-        dataset_path_dirs = last_saved_dataset_dir.split(os.sep)
+
+        inst_last_saved_dataset_path = bert_model_inst.last_saved_dataset_dir
+        last_saved_dataset_dir_path, initial_dataset_dir_path = None, None
+        if inst_last_saved_dataset_path:
+            last_dataset_dir = inst_last_saved_dataset_path
+        else:
+            last_saved_dataset_dir_path = get_last_saved_dataset_dir_path()
+            if last_saved_dataset_dir_path:
+                last_dataset_dir = last_saved_dataset_dir_path
+            else:
+                initial_dataset_dir_path = get_initial_dataset_dir_path()
+                if initial_dataset_dir_path:
+                    last_dataset_dir = initial_dataset_dir_path
+                else:
+                    last_dataset_dir = ""
+        if not last_dataset_dir:
+            log_text = (
+                f"BERT Last dataset directory or files not found [ERROR]:\n"
+                f"inst_last_saved_dataset_path: {inst_last_saved_dataset_path}\n"
+                f"last_saved_dataset_dir_path: {last_saved_dataset_dir_path}\n"
+                f"initial_dataset_dir_path: {initial_dataset_dir_path}\n"
+                f"last_dataset_dir: {last_dataset_dir}\n")
+            print(log_text)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail=log_text)
+
+        dataset_path_dirs = last_dataset_dir.split(os.sep)
         last_saved_dataset_name = dataset_path_dirs[-1]  # As dataset files dir name
         getting_time = (datetime.now() - datetime_start).total_seconds()
         getting_time = round(getting_time, 1)
