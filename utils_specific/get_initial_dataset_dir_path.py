@@ -16,7 +16,7 @@ def get_initial_dataset_dir_path():
         if not os.path.isdir(bert_dataset_init_dir_path):
             print(f"Dataset initial directory not found [ERROR]:\n"
                   f"bert_dataset_init_dir_path: {bert_dataset_init_dir_path}\n"
-                  f"return bert_dataset_init_dir_path = ''")
+                  f"return bert_dataset_init_dir_path = ''\n")
             bert_dataset_init_dir_path = ""
             return bert_dataset_init_dir_path
 
@@ -35,7 +35,7 @@ def get_initial_dataset_dir_path():
                   f"bert_dataset_init_dir_path: {bert_dataset_init_dir_path}\n"
                   f"init_lab_cat_csv_path: {init_lab_cat_csv_path}\n"
                   f"init_text_lab_csv_path: {init_text_lab_csv_path}\n"
-                  f"return bert_dataset_init_dir_path = ''")
+                  f"return bert_dataset_init_dir_path = ''\n")
             bert_dataset_init_dir_path = ""
         return bert_dataset_init_dir_path
     except Exception as error:
