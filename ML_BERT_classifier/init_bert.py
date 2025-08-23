@@ -5,7 +5,11 @@ from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_OPTIONS, BERT_TRAIN_OPTIONS
 from utils_common.exec_time_decorator import execution_time_decorator
+from utils_common.normalized_path import get_full_file_normal_path
+from utils_specific.class_csv_labels_categories import CsvLabelCategory
+from utils_specific.get_initial_dataset_dir_path import get_initial_dataset_dir_path
 from utils_specific.get_initial_model_dir_path import get_initial_model_dir_path
+from utils_specific.get_last_saved_dataset_path import get_last_saved_dataset_dir_path
 from utils_specific.get_last_saved_model_dir import get_last_saved_model_dir_path
 
 
@@ -92,41 +96,58 @@ if BERT_OPTIONS.BERT_MODEL_INIT:
     yellow_color = CONSOLE_COLORS.BRIGHT_YELLOW
     reset_color = CONSOLE_COLORS.RESET
 
+    print("\nGetting last dataset directory path:")
+    last_saved_dataset_dir_path = get_last_saved_dataset_dir_path()
+    initial_dataset_dir_path = None
+    if last_saved_dataset_dir_path:
+        bert_init_dataset_dir = last_saved_dataset_dir_path
+    else:
+        initial_dataset_dir_path = get_initial_dataset_dir_path()
+        if initial_dataset_dir_path:
+            bert_init_dataset_dir = initial_dataset_dir_path
+        else:
+            bert_init_dataset_dir = ""
+
+    print("\nGetting csv label-category train file path:")
+    if bert_init_dataset_dir:
+        last_saved_lab_cat_csv_path = get_full_file_normal_path(
+            all_dir_str_parts=[bert_init_dataset_dir],
+            file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
+        print(f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}")
+
+        print("\nGetting csv label-category file data:")
+        with open(file=last_saved_lab_cat_csv_path,
+                  mode="r", encoding="utf-8") as lab_cat_csv_file:
+            csf_text_lab = CsvLabelCategory(lab_cat_csv_file)
+            new_lab_cat_dict = csf_text_lab.get_label_category_dict()
+            print(f"new_lab_cat_dict [{len(new_lab_cat_dict)}]: "
+                  f"{new_lab_cat_dict}")
+
+        if new_lab_cat_dict:
+            labels_categories = new_lab_cat_dict
+        else:
+            labels_categories = {0: "api initial category"}
+            print(f"Empty or wrong label-category csv data [ERROR]:\n"
+                  f"last_saved_dataset_dir: {bert_init_dataset_dir}\n"
+                  f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}\n"
+                  f"new_lab_cat_dict: {new_lab_cat_dict}\n")
+    else:
+        labels_categories = {0: "api initial category"}
+        print(f"BERT Last saved or initial dataset dir, files not found [ERROR]:\n"
+            f"last_saved_dataset_dir_path: {last_saved_dataset_dir_path}\n"
+            f"initial_dataset_dir_path: {initial_dataset_dir_path}\n"
+            f"initial_dataset_dir_path: {initial_dataset_dir_path}\n")
+
+    print("\nGetting last model directory path:")
     last_saved_model_dir_path = get_last_saved_model_dir_path()
     initial_model_dir_path = get_initial_model_dir_path()
-    load_error_log = ""
+    # load_error_log = ""
 
-    # ##################################################################
-    # ################## TEMPORARY DEBUG (start) #######################
-    # TODO: Make loading labels-categories dict from the last dataset if exists.
-    #  Fix cycle import error due to bert_model_inst.last_saved_dataset_dir
-    #  using in get_last_saved_dataset_dir_path()
-    # print("\nGetting csv label-category train file path:")
-    # last_saved_dataset_dir = get_last_saved_dataset_dir_path()
-    # last_saved_lab_cat_csv_path = get_full_file_normal_path(
-    #     all_dir_str_parts=[last_saved_dataset_dir],
-    #     file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
-    # print(f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}")
-    #
-    # print("\nGetting csv label-category file data:")
-    # with open(file=last_saved_lab_cat_csv_path,
-    #           mode="r", encoding="utf-8") as lab_cat_csv_file:
-    #     csf_text_lab = CsvLabelCategory(lab_cat_csv_file)
-    #     new_lab_cat_dict = csf_text_lab.get_label_category_dict()
-    #     print(f"new_lab_cat_dict [{len(new_lab_cat_dict)}]: "
-    #           f"{new_lab_cat_dict}")
-    #
-    # if new_lab_cat_dict:
-    #     labels_categories = new_lab_cat_dict
-    #     print(f"Empty or wrong label-category csv data [ERROR]: "
-    #           f"last_saved_dataset_dir: {last_saved_dataset_dir}, "
-    #           f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}, "
-    #           f"new_lab_cat_dict: {new_lab_cat_dict}\n")
-    # else:
-    #     labels_categories = {}
-    # #################### TEMPORARY DEBUG (end) #######################
-    # ##################################################################
-    labels_categories = {0: "api initial category"}
+    print(">>>>>>> last_saved_model_dir_path => ", last_saved_model_dir_path)
+    print(">>>>>>> initial_model_dir_path => ", initial_model_dir_path)
+    print(">>>>>>> last_saved_model_dir_path => ", last_saved_model_dir_path)
+    print(">>>>>>> last_saved_dataset_dir_path => ", last_saved_dataset_dir_path)
+    print(">>>>>>> labels_categories => ", labels_categories)
 
     if last_saved_model_dir_path and initial_model_dir_path:
         bert_model_inst = initialise_bert_model(
@@ -140,7 +161,7 @@ if BERT_OPTIONS.BERT_MODEL_INIT:
         load_error_log = bert_model_inst.load_model(
             dir_full_path=last_saved_model_dir_path)
         if not load_error_log:
-            print(f"Last Saved BERT Model initialised and loaded [OK]\n"
+            print(f"Last Saved BERT Model initialised and loaded [OK]:\n"
                   f"last_saved_model_dir_path: "
                   f"{blue_color}{last_saved_model_dir_path}{reset_color}\n"
                   f"initial_model_dir_path: {initial_model_dir_path}\n")
@@ -156,12 +177,11 @@ if BERT_OPTIONS.BERT_MODEL_INIT:
             token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
             use_singleton=True,
             use_hard_singleton=True)
-        print(f"Pretrained Init BERT Model initialised [OK]\n"
+        print(f"Pretrained Init BERT Model initialised [OK]:\n"
               f"initial_model_dir_path: "
               f"{blue_color}{initial_model_dir_path}{reset_color}\n"
               f"last_saved_model_dir_path: {last_saved_model_dir_path}\n")
     else:
-        print(f"BERT Model initialise [ERROR]\n"
+        print(f"BERT Model initialise [ERROR]:\n"
               f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
-              f"initial_model_dir_path: {initial_model_dir_path}"
-              f"load_error_log: {load_error_log}\n")
+              f"initial_model_dir_path: {initial_model_dir_path}\n")
