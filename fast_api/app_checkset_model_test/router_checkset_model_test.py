@@ -19,6 +19,7 @@ from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_checkset_model_test.func_checkset_model_test_background import (
     background_checkset_test_model)
 from utils_common.class_file_validate_read import FileValidateRead
+from utils_specific.get_initial_model_dir_path import get_initial_model_dir_path
 from utils_specific.get_last_saved_model_dir import get_last_saved_model_dir_path
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
@@ -134,27 +135,25 @@ async def bert_start_checkset_model_test(
                             detail=log_text)
 
     print("\nBERT Getting last saved model dir path and dir name:")
-    last_saved_model_dir_path = get_last_saved_model_dir_path()
-    # if checkset_model_data.checkset_model_dir_path:  # Request parameter
-    #     checkset_model_dir_path = checkset_model_data.model_load_dir_path
-    if bert_model_inst.last_saved_model_dir:
-        checkset_model_dir_path = bert_model_inst.last_saved_model_dir
-    elif last_saved_model_dir_path:
-        checkset_model_dir_path = last_saved_model_dir_path
+    inst_last_saved_model_path = bert_model_inst.last_saved_model_dir
+    last_saved_model_dir_path, initial_model_dir_path = None, None
+    if inst_last_saved_model_path:
+        checkset_model_dir_path = inst_last_saved_model_path
     else:
-        # opt.1: No checkset model path parameter error
-        checkset_model_dir_path = ""
-        # opt.2: Load initial model without error
-        # initial_model_dir = BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH
-        # checkset_model_dir_path = get_full_dir_normal_path(
-        #     [BASE_DIR, initial_model_dir])
-
+        last_saved_model_dir_path = get_last_saved_model_dir_path()
+        if last_saved_model_dir_path:
+            checkset_model_dir_path = last_saved_model_dir_path
+        else:
+            initial_model_dir_path = get_initial_model_dir_path()
+            if initial_model_dir_path:
+                checkset_model_dir_path = initial_model_dir_path
+            else:
+                checkset_model_dir_path = ""
     if not checkset_model_dir_path:
         log_text = (f"BERT Checkset test model dir path not defined [ERROR]:\n"
-                    # f"as request parameter 'checkset_model_dir_path' \n"
+                    f"inst_last_saved_model_path: {inst_last_saved_model_path}\n"
                     f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
-                    f"bert_model_instance.last_saved_model_path: "
-                    f"{bert_model_inst.last_saved_model_dir}\n"
+                    f"initial_model_dir_path: {initial_model_dir_path}\n"
                     f"checkset_model_dir_path: {checkset_model_dir_path}\n")
         print(log_text)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
