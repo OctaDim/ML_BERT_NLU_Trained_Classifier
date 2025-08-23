@@ -29,11 +29,11 @@ def get_last_saved_dataset_dir_path() -> str | None:
             return last_saved_dataset_dir_path
 
         saved_lab_cat_csv_path = get_full_file_normal_path(
-            all_dir_str_parts=[last_saved_dataset_ini_path],
+            all_dir_str_parts=[last_saved_dataset_dir_path],
             file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
 
         saved_text_lab_csv_path = get_full_file_normal_path(
-            all_dir_str_parts=[last_saved_dataset_ini_path],
+            all_dir_str_parts=[last_saved_dataset_dir_path],
             file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
 
         csv_files_exist_flag = all([os.path.isfile(saved_lab_cat_csv_path),
@@ -42,12 +42,13 @@ def get_last_saved_dataset_dir_path() -> str | None:
         if not csv_files_exist_flag:
             print(f"Dataset saved csv files not found [ERROR]:\n"
                   f"last_saved_dataset_ini_path: {last_saved_dataset_ini_path}\n"
+                  f"last_saved_dataset_dir_path: {last_saved_dataset_dir_path}\n"
                   f"saved_lab_cat_csv_path: {saved_lab_cat_csv_path}\n"
                   f"saved_text_lab_csv_path: {saved_text_lab_csv_path}\n"
-                  f"return last_saved_dataset_dir_path = ''")
+                  f"return last_saved_dataset_dir_path = ''\n")
             last_saved_dataset_dir_path = ""
         return last_saved_dataset_dir_path
     except Exception as error:
-        print(f"Read last saved dataset ini file [ERROR]: error: {error}, "
-              f"last_saved_dataset_ini_dir: {last_saved_dataset_ini_dir}, "
-              f"last_saved_dataset_ini_path: {last_saved_dataset_ini_path}")
+        print(f"Read last saved dataset ini file [ERROR]: error: {error}\n"
+              f"last_saved_dataset_ini_dir: {last_saved_dataset_ini_dir}\n"
+              f"last_saved_dataset_ini_path: {last_saved_dataset_ini_path}\n")
