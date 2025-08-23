@@ -83,7 +83,8 @@ class ClassifierBERT:
                                  attention_mask=attention_mask)
             logits = outputs.logits
             prediction = torch.argmax(logits, dim=1).item()
-
+        print("@@@@@@@@@@@@@@@@@@@@@ self.labels => ", self.labels)
+        print("@@@@@@@@@@@@@@@@@@@@@ prediction => ", prediction)
         return self.labels[prediction]
 
     def create_train_dataset(
@@ -260,7 +261,7 @@ class ClassifierBERT:
             print(error_log)
             return error_log
 
-        if not os.path.exists(model_path):
+        if not os.path.isdir(model_path):
             error_log = (f"Model load dir path not exists [ERROR]: "
                          f"dir_full_path: {dir_full_path}, "
                          f"self.last_trained_model_path "
