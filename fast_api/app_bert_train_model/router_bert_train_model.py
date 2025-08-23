@@ -23,6 +23,8 @@ from utils_common.normalized_path import (
     get_full_file_normal_path, get_full_dir_normal_path)
 from utils_specific.class_csv_labels_categories import CsvLabelCategory
 from utils_specific.class_csv_texts_labels import CsvTextLabel
+from utils_specific.get_initial_dataset_dir_path import (
+    get_initial_dataset_dir_path)
 from utils_specific.get_last_saved_dataset_path import (
     get_last_saved_dataset_dir_path)
 
@@ -44,7 +46,32 @@ async def bert_train_model(
 
     print("\nGetting last saved dataset directory name:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
-    train_dataset_dir = get_last_saved_dataset_dir_path()
+
+    inst_last_saved_dataset_path = bert_model_inst.last_saved_dataset_dir
+    last_saved_dataset_dir_path, initial_dataset_dir_path = None, None
+    if inst_last_saved_dataset_path:
+        train_dataset_dir = inst_last_saved_dataset_path
+    else:
+        last_saved_dataset_dir_path = get_last_saved_dataset_dir_path()
+        if last_saved_dataset_dir_path:
+            train_dataset_dir = last_saved_dataset_dir_path
+        else:
+            initial_dataset_dir_path = get_initial_dataset_dir_path()
+            if initial_dataset_dir_path:
+                train_dataset_dir = initial_dataset_dir_path
+            else:
+                train_dataset_dir = ""
+    if not train_dataset_dir:
+        log_text = (
+            f"BERT Train dataset directory or files not found [ERROR]:\n"
+            f"inst_last_saved_dataset_path: {inst_last_saved_dataset_path}\n"
+            f"last_saved_dataset_dir_path: {last_saved_dataset_dir_path}\n"
+            f"initial_dataset_dir_path: {initial_dataset_dir_path}\n"
+            f"train_dataset_dir: {train_dataset_dir}\n")
+        print(log_text)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=log_text)
+
     dataset_path_dirs = train_dataset_dir.split(os.sep)
     dataset_name = dataset_path_dirs[-1]  # As dataset files directory name
     train_task_uuid = str(uuid.uuid4())
