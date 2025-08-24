@@ -83,8 +83,10 @@ class ClassifierBERT:
                                  attention_mask=attention_mask)
             logits = outputs.logits
             prediction = torch.argmax(logits, dim=1).item()
-        print("@@@@@@@@@@@@@@@@@@@@@ self.labels => ", self.labels)
-        print("@@@@@@@@@@@@@@@@@@@@@ prediction => ", prediction)
+        print(f"{'@'*65}\n"
+              f"prediction => {prediction}\n"
+              f"self.labels[prediction] => {self.labels[prediction]}\n"
+              f"self.labels => {self.labels}\n")
         return self.labels[prediction]
 
     def create_train_dataset(
@@ -106,11 +108,11 @@ class ClassifierBERT:
         "tf" returns TensorFlow tensors, "np" returns NumPy arrays,
         None returns lists"""
 
-        print(f"####### texts_list: {texts_list}")
-        print(f"####### labels_list: {labels_list}")
-        print(f"####### truncation: {truncation}")
-        print(f"####### padding: {padding}")
-        print(f"####### return_tensors: {return_tensors}")
+        print(f"####### texts_list: {texts_list}\n"
+              f"####### labels_list: {labels_list}\n"
+              f"####### truncation: {truncation}\n"
+              f"####### padding: {padding}\n"
+              f"####### return_tensors: {return_tensors}\n")
 
         input_ids = []
         attention_masks = []
@@ -285,24 +287,24 @@ class ClassifierBERT:
         but adjusts the model's classification head to accommodate the new number of labels.
         arg: new_labels: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}"""
         try:
-            print(f"******* BEFORE MODEL REINITIALIZING:\n"
-                  f"******* self: {self}\n"
-                  f"******* hash(self): {hash(self)}\n"
-                  f"******* self.model: {self.model}\n"
-                  f"******* hash(self.model): {hash(self.model)}\n"
-                  f"******* self.model.config.num_labels: {self.model.config.num_labels}\n"
-                  f"******* self.labels [{len(self.labels)}]: {self.labels}\n"
-                  f"******* new_labels [{len(new_labels)}]: {new_labels}\n")
+            print(f"*** BEFORE MODEL REINITIALIZING:\n"
+                  f"*** self: {self}\n"
+                  f"*** hash(self): {hash(self)}\n"
+                  f"*** self.model: {self.model}\n"
+                  f"*** hash(self.model): {hash(self.model)}\n"
+                  f"*** self.model.config.num_labels: {self.model.config.num_labels}\n"
+                  f"*** self.labels [{len(self.labels)}]: {self.labels}\n"
+                  f"*** new_labels [{len(new_labels)}]: {new_labels}\n")
             self.model = self.__get_bert_for_sequence_classification(new_labels)
             self.labels = new_labels  # Update the labels number
-            print(f"####### AFTER MODEL REINITIALIZING:\n"
-                  f"####### self: {self}\n"
-                  f"####### hash(self): {hash(self)}\n"
-                  f"####### self.model: {self.model}\n"
-                  f"####### hash(self.model): {hash(self.model)}\n"
-                  f"####### self.model.config.num_labels: {self.model.config.num_labels}\n"
-                  f"####### self.labels [{len(self.labels)}]: {self.labels}\n"
-                  f"####### new_labels [{len(new_labels)}]: {new_labels}\n")
+            print(f"### AFTER MODEL REINITIALIZING:\n"
+                  f"### self: {self}\n"
+                  f"### hash(self): {hash(self)}\n"
+                  f"### self.model: {self.model}\n"
+                  f"### hash(self.model): {hash(self.model)}\n"
+                  f"### self.model.config.num_labels: {self.model.config.num_labels}\n"
+                  f"### self.labels [{len(self.labels)}]: {self.labels}\n"
+                  f"### new_labels [{len(new_labels)}]: {new_labels}\n")
         except Exception as error:
             error_log = f"BERT Model reinitialising [ERROR]: error: {error}"
             print(error_log)

@@ -15,7 +15,6 @@ from fast_api.app_add_texts_categories_file.func_add_save_test_category_file imp
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from utils_common.class_file_validate_read import FileValidateRead
 
-
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_add_text_category_file = APIRouter(prefix=f"/{bert_base_url_name}",
                                                tags=["BERT"])
@@ -118,23 +117,29 @@ async def bert_add_text_category_file(
         dataset_ini_file_path = new_csv_files_data.get("last_saved_dataset_ini_fpath")
         empty_error_skipped_rows = new_csv_files_data.get("empty_error_skipped_rows")
         new_categories_list = new_csv_files_data.get("new_categories_list")
+
+        json_content = {
+            "message": "BERT text-category csv added [OK]",
+            "username": username,
+            "dataset init": BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH,
+            "csv label-category path": new_lab_cat_csv_path,
+            "csv text-label path:": new_text_lab_csv_path,
+            "dataset ini file path": dataset_ini_file_path,
+            "adding time": adding_time,
+            "update data list": update_data_list,
+            "empty error skipped rows": empty_error_skipped_rows,
+            "new categories": new_categories_list}
+
         json_response = JSONResponse(
-            content={"message": "BERT text-category csv added [OK]",
-                     "username": username,
-                     "dataset init": BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH,
-                     "csv label-category path": new_lab_cat_csv_path,
-                     "csv text-label path:": new_text_lab_csv_path,
-                     "dataset ini file path": dataset_ini_file_path,
-                     "adding time": adding_time,
-                     "update data list": update_data_list,
-                     "empty error skipped rows": empty_error_skipped_rows,
-                     "new categories": new_categories_list},
+            content=json_content,
             status_code=status.HTTP_200_OK)
 
         blue_color = CONSOLE_COLORS.BRIGHT_BLUE
         yellow_color = CONSOLE_COLORS.BRIGHT_YELLOW
         reset_color = CONSOLE_COLORS.RESET
-        print(f"BERT response.body: {json_response.body}\n"
+        print(f"BERT response message: {json_content.get('message')}\n"
+              f"BERT response.body keys: {json_content.keys()}\n"
+              # f"BERT response.body: {json_response.body}\n"  # Long to log
               f"BERT response.status_code: {json_response.status_code}\n"
               f"username: {username}\n"
               f"new_lab_cat_csv_path: {new_lab_cat_csv_path}\n"

@@ -5,7 +5,6 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
-from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS
 from db_redis.func_redis_get_part_key_values import get_redis_values_by_pattern
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
@@ -34,23 +33,27 @@ async def bert_get_train_tasks_list(auth_data: AuthDataBert):
         getting_time = (datetime.now() - datetime_start).total_seconds()
         getting_time = round(getting_time, 1)
 
+        json_content = {
+            "message": "BERT train model tasks list [OK]",
+            "username": auth_data.username,
+            "model init": BERT_OPTIONS.BERT_MODEL_INIT,
+            "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
+            "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
+            "getting time": getting_time,
+            "tasks_sorted_list": tasks_sorted_list}
+
         json_response = JSONResponse(
-            content={"message": "BERT train model tasks list [OK]",
-                     "username": auth_data.username,
-                     "model init": BERT_OPTIONS.BERT_MODEL_INIT,
-                     "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
-                     "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
-                     "getting time": getting_time,
-                     "tasks_sorted_list": tasks_sorted_list},
+            content=json_content,
             status_code=status.HTTP_200_OK)
 
-        blue_color = CONSOLE_COLORS.BRIGHT_BLUE
-        reset_color = CONSOLE_COLORS.RESET
-        print(f"BERT response.body: {json_response.body}\n"
+        print(f"BERT response message: {json_content.get('message')}\n"
+              f"BERT response.body keys: {json_content.keys()}\n"
+              # f"BERT response.body: {json_response.body}\n"  # Long to log
               f"BERT response.status_code: {json_response.status_code}\n"
               f"username: {auth_data.username}\n"
-              f"tasks_sorted_list: {blue_color}{tasks_sorted_list}{reset_color}\n"
-              f"getting_time: {getting_time}\n")
+              f"getting_time: {getting_time}\n"
+              f"type(tasks_sorted_list): {type(tasks_sorted_list)}\n"
+              f"tasks_sorted_list: {tasks_sorted_list}\n")
         return json_response
     except Exception as error:
         log_text = (f"BERT router train model tasks list [ERROR]: "

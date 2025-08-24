@@ -34,12 +34,10 @@ async def bert_get_all_checksets_results(auth_data: AuthDataBert):
         checksets_results = {}
         for redis_checkset_name, cur_res_dict in redis_checksets_results.items():
             print("#" * 65)
-            print(f"redis_checkset_name: "
-                  f"{type(redis_checkset_name)}, {redis_checkset_name}")
+            print(f"redis_checkset_name: {redis_checkset_name}")
             orig_checkset_filename = redis_checkset_name.lstrip(
                 BERT_OPTIONS.BERT_CHECKSET_NAME_REDIS_PREFIX)
-            print(f"orig_checkset_filename: "
-                  f"{type(orig_checkset_filename)}, {orig_checkset_filename}")
+            print(f"orig_checkset_filename: {orig_checkset_filename}")
             try:
                 json_str_list = cur_res_dict.get("checkset_test_results")
                 print(f"type(json_str_list): {type(json_str_list)}")
@@ -63,22 +61,27 @@ async def bert_get_all_checksets_results(auth_data: AuthDataBert):
         getting_time = (datetime.now() - datetime_start).total_seconds()
         getting_time = round(getting_time, 1)
 
+        json_content = {
+            "message": "BERT train model tasks list [OK]",
+            "username": auth_data.username,
+            "model init": BERT_OPTIONS.BERT_MODEL_INIT,
+            "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
+            "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
+            "getting_time": getting_time,
+            "checksets_results": checksets_results}
+
         json_response = JSONResponse(
-            content={"message": "BERT train model tasks list [OK]",
-                     "username": auth_data.username,
-                     "model init": BERT_OPTIONS.BERT_MODEL_INIT,
-                     "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
-                     "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
-                     "getting_time": getting_time,
-                     "checksets_results": checksets_results},
+            content=json_content,
             status_code=status.HTTP_200_OK)
 
-        print(f"BERT response.body: contains 'checksets_results' key\n"
-              # f"BERT response.body: {json_response.body}\n"  # Too long console log
+        print(f"BERT response message: {json_content.get('message')}\n"
+              f"BERT response.body keys: {json_content.keys()}\n"
+              # f"BERT response.body: {json_response.body}\n"  # Long to log
               f"BERT response.status_code: {json_response.status_code}\n"
               f"username: {auth_data.username}\n"
               f"getting_time: {getting_time}\n"
-              f"checksets_results: {type(checksets_results)}\n"
+              f"type(checksets_results): {type(checksets_results)}\n"
+              # f"checksets_results: {checksets_results}\n"  # Long to log
               f"checksets_results.keys(): {checksets_results.keys()}\n")
         return json_response
     except Exception as error:

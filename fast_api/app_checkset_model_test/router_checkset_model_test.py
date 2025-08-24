@@ -191,24 +191,26 @@ async def bert_start_checkset_model_test(
                                   checkset_redis_name)
         print("####### AFTER BACKGROUND CHECK-SET MODEL TEST")
 
+        json_content = {
+            "message": "BERT model check-set testing start [OK]",
+            "username": auth_data.username,
+            "model init": BERT_OPTIONS.BERT_MODEL_INIT,
+            "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
+            "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
+            "checkset_file_name": checkset_file_name,
+            "checkset_redis_name": checkset_redis_name,
+            "current status": STATUSES.STATUS_CHECKSET_TEST_START_EN,
+            "checkset_data_list": checkset_data_list}
+
         json_response = JSONResponse(
-            content={
-                "message": "BERT model check-set testing start [OK]",
-                "username": auth_data.username,
-                "model init": BERT_OPTIONS.BERT_MODEL_INIT,
-                "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
-                "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
-                "checkset_file_name": checkset_file_name,
-                "checkset_redis_name": checkset_redis_name,
-                "current status": STATUSES.STATUS_CHECKSET_TEST_START_EN,
-                "checkset_data_list": checkset_data_list,
-            },
+            content=json_content,
             status_code=status.HTTP_202_ACCEPTED)
 
         blue_color = CONSOLE_COLORS.BRIGHT_BLUE
         reset_color = CONSOLE_COLORS.RESET
-        print(f"message: BERT model check-set testing start [OK]\n"
-              f"BERT response.body: {json_response.body}\n"
+        print(f"BERT response message: {json_content.get('message')}\n"
+              f"BERT response.body keys: {json_content.keys()}\n"
+              # f"BERT response.body: {json_response.body}\n"  # Long to log
               f"BERT response.status_code: {json_response.status_code}\n"
               f"username: {auth_data.username}\n"
               f"model init: {BERT_OPTIONS.BERT_MODEL_INIT}\n"
@@ -216,7 +218,9 @@ async def bert_start_checkset_model_test(
               f"model path: {BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH}\n"
               f"checkset_file_name: {blue_color}{checkset_file_name}{reset_color}\n",
               f"checkset_redis_name: {blue_color}{checkset_redis_name}{reset_color}\n"
+              f"type(checkset_data_list): {type(checkset_data_list)}\n"
               f"checkset_data_list: {checkset_data_list}\n")
+
         print("####### PRELIMINARY 202 RESPONSE AFTER BACKGROUND CHECKSET TEST START")
         return json_response
     except Exception as error:
