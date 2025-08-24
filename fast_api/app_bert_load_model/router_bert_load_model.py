@@ -86,6 +86,10 @@ async def bert_load_model(auth_data: AuthDataBert,
         datetime_start = datetime.now()
         error_log = bert_model_inst.load_model(
             dir_full_path=normal_model_load_path)
+        # TODO: Make loading learning dataset from the the saved/loaded model
+        #  directory also and creating new updated csv dataset directory
+        #  and saving path to it in the last saved dataset ini file
+
         if error_log:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -83,6 +83,9 @@ async def bert_save_model(auth_data: AuthDataBert,
         datetime_start = datetime.now()
         error_log = bert_model_inst.save_model(
             dir_full_path=model_save_path)
+        # TODO: Make saving learning dataset into the saved model dir also
+        #  to have opportunity to load model and to load corresponding
+        #  dataset for the model
 
         if error_log:
             raise HTTPException(
