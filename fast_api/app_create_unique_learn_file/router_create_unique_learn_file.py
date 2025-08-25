@@ -13,8 +13,8 @@ from configs.settings import (
     BERT_OPTIONS, BASE_DIR)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from utils_common.class_file_validate_read import FileValidateRead
-from utils_common.get_file_name_extra_part import get_file_name_with_extra_part
-from utils_common.normalized_path import get_full_file_normal_path
+from utils_common.normalized_path import (
+    get_full_file_normal_path, get_full_dir_normal_path)
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_create_unique_learn_file = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -116,53 +116,70 @@ async def bert_create_unique_learn_file(
                                f"{datetime_str}_{random_str}.csv")
 
         learn_files_dir_name = BERT_OPTIONS.BERT_UNIQUE_LEARNING_FILES_PATH
+        learn_files_dir_path = get_full_dir_normal_path(
+            all_dir_str_parts=[BASE_DIR, learn_files_dir_name])
+        if not os.path.isdir(learn_files_dir_path):
+            os.makedirs(learn_files_dir_path, exist_ok=True)
+
         learn_file_save_path = get_full_file_normal_path(
-            all_dir_str_parts=[BASE_DIR, learn_files_dir_name],
+            all_dir_str_parts=[learn_files_dir_path],
             file_name_with_ext=new_learn_file_name)
         print("###########################################################")
         print("@@@@@@@ file_name:", file_name)
         print("@@@@@@@ new_learn_file_name:", new_learn_file_name)
+        print("@@@@@@@ learn_files_dir_path:", learn_files_dir_path)
         print("@@@@@@@ learn_file_save_path:", learn_file_save_path)
-
-        print("@@@@@@@ len(learn_data_list):", len(learn_data_list))
         learn_data_tuples_list = [tuple(cur_list) for cur_list in learn_data_list]
         unique_learn_data = list(set(learn_data_tuples_list))
-
+        print("@@@@@@@ len(learn_data_list):", len(learn_data_list))
         print("@@@@@@@ len(unique_learn_data):", len(unique_learn_data))
+        print("@@@@@@@ unique_learn_data:", unique_learn_data)
         print("###########################################################")
-        # unique_learn_data = unify_save_inque_learn_file(learn_data_list)
         creating_time = (datetime.now() - datetime_start).total_seconds()
         creating_time = round(creating_time, 1)
 
         print("\nBERT Creating new learn filename full path with extra part:")
+        if file_extension.endswith((".xlsx", ".xls")):
+            pass
+        elif file_extension.endswith("txt"):
+            pass
+        elif file_extension.endswith("csv"):
+            pass
+
+        json_content = {
+            "message": "BERT text-category csv added [OK]",
+            "username": username,
+            "learn_files_dir_name": learn_files_dir_name,
+            "creating_time": creating_time,
+            "file_name": file_name,
+            "new_learn_file_name": new_learn_file_name,
+            "learn_files_dir_path": learn_files_dir_path,
+            "learn_file_save_path": learn_file_save_path,
+            "learn_data_list": learn_data_list,
+            "unique_learn_data": unique_learn_data}
 
         json_response = JSONResponse(
-            content={"message": "BERT text-category csv added [OK]",
-                     "username": username,
-                     "dataset init": BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH,
-                     # "csv label-category path": new_lab_cat_csv_path,
-                     # "csv text-label path:": new_text_lab_csv_path,
-                     # "dataset ini file path": dataset_ini_file_path,
-                     "creating_time": creating_time,
-                     # "learn_data_list": learn_data_list,
-                     # "empty error skipped rows": empty_error_skipped_rows,
-                     # "new categories": new_categories_list,
-                     },
+            content=json_content,
             status_code=status.HTTP_200_OK)
 
-        blue_color = CONSOLE_COLORS.BRIGHT_BLUE
-        # yellow_color = CONSOLE_COLORS.BRIGHT_YELLOW
+        yellow_color = CONSOLE_COLORS.BRIGHT_YELLOW
         reset_color = CONSOLE_COLORS.RESET
-        print(f"BERT response.body: {json_response.body}\n"
+        print(f"BERT response message: {json_content.get('message')}\n"
+              f"BERT response.body keys: {json_content.keys()}\n"
+              # f"BERT response.body: {json_response.body}\n"  # Long to log
               f"BERT response.status_code: {json_response.status_code}\n"
               f"username: {username}\n"
-              # f"new_lab_cat_csv_path: {new_lab_cat_csv_path}\n"
-              # f"new_text_lab_csv_path: {new_text_lab_csv_path}\n"
-              # f"dataset_ini_file_path: {dataset_ini_file_path}\n"
-              # f"learn_data_list: {blue_color}{learn_data_list}{reset_color}\n"
-              # f"empty_error_skipped_rows: {yellow_color}{empty_error_skipped_rows}{reset_color}\n"
-              # f"new_categories_list: {blue_color}{new_categories_list}{reset_color}\n"
-              )
+              f"learn_files_dir_name: {learn_files_dir_name}\n"
+              f"creating_time: {creating_time}]\n"
+              f"file_name: {file_name}\n"
+              f"new_learn_file_name: {new_learn_file_name}\n"
+              f"learn_files_dir_path: {learn_files_dir_path}\n"
+              f"learn_file_save_path: {learn_file_save_path}\n"
+              f"type(learn_data_list): {type(learn_data_list)}\n"
+              f"type(unique_learn_data): {type(unique_learn_data)}\n"
+              f"len(learn_data_list): {yellow_color}{len(learn_data_list)}{reset_color}\n"
+              f"len(unique_learn_data): {yellow_color}{len(unique_learn_data)}{reset_color}\n"
+              f"unique_learn_data: {yellow_color}{len(unique_learn_data)}{reset_color}\n")
         return json_response
     except Exception as error:
         log_text = f"BERT router [ERROR]: error: {error}"
