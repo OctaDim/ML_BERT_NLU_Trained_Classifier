@@ -21,7 +21,7 @@ API_TEST_PASSWORD = os.getenv("API_TEST_PASSWORD")
 
 @dataclass
 class API_CONFIG_NAMES:
-    API_PRODUCT_SERVER_IP = "API_prod_server_176_124_136_22_8000"
+    API_PRODUCT_SERVER_IP = "production"
     API_HAKASIA_PROD_SERVER_IP = "API_Hakasia_product_server"
     API_TEST_PORT_ANY_IP = "API_port_all_ips_0_0_0_0_8000"
     API_TEST_WIN_LOCALHOST = "API_win_localhost_127_0_0_1_8000"
@@ -37,9 +37,9 @@ api_configs.read(filenames=normal_env_path)
 get_cur_internal_ip(log_ip=True)
 cur_external_ip = get_cur_external_ip_via_google_dns(log_ip=True)
 
-if cur_external_ip == "176.124.136.22":
+if cur_external_ip == "172.19.201.24":
     api_conf_name = API_CONFIG_NAMES.API_PRODUCT_SERVER_IP
-elif cur_external_ip == "___.___.___.___":
+elif cur_external_ip == "172.19.201.24":
     api_conf_name = API_CONFIG_NAMES.API_HAKASIA_PROD_SERVER_IP
 elif cur_external_ip == "192.168.0.117":
     api_conf_name = API_CONFIG_NAMES.API_TEST_DEXP_IP
