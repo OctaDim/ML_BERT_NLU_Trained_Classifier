@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta
 from typing import Dict, List, Literal, Union
 
 import torch
@@ -7,6 +8,8 @@ from torch.utils.data import DataLoader, TensorDataset
 from transformers import BertForSequenceClassification, BertTokenizer
 
 from configs.console_colors import CONSOLE_COLORS
+from configs.settings import REDIS_OPTIONS
+from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
 
 
 class ClassifierBERT:
@@ -83,7 +86,7 @@ class ClassifierBERT:
                                  attention_mask=attention_mask)
             logits = outputs.logits
             prediction = torch.argmax(logits, dim=1).item()
-        print(f"{'@'*65}\n"
+        print(f"{'@' * 65}\n"
               f"prediction => {prediction}\n"
               f"self.labels[prediction] => {self.labels[prediction]}\n"
               f"self.labels => {self.labels}\n")
@@ -134,12 +137,12 @@ class ClassifierBERT:
         # self.train_dataset = tensor_dataset
         return tensor_dataset
 
-    def train(self,
-              train_dataset: TensorDataset,
-              max_training_epochs: int = 50,
-              max_cont_100perc_epochs: int = 5,
-              batch_size: int = 8,
-              learning_rate: float = 5e-5):
+    async def train(self,
+                    train_dataset: TensorDataset,
+                    max_training_epochs: int = 50,
+                    max_cont_100perc_epochs: int = 5,
+                    batch_size: int = 8,
+                    learning_rate: float = 5e-5):
         """Model retraining with extra training data-set
         :param train_dataset: TensorDataset: Training dataset can be passed
         or self.train_dataset will be used otherwise
@@ -198,10 +201,33 @@ class ClassifierBERT:
               f"{reset_color}")
         self.model.train()
 
+        REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
+        redis_update = {
+            "train_message": "Model training epochs process.....",
+            "max_training_epochs": max_training_epochs,
+            "max_cont_100perc_epochs": max_cont_100perc_epochs,
+            "batch_size": batch_size,
+            "learning_rate": learning_rate, }
+        redis_error = await redis_save_key_mapping_dict(
+            key_name="train_process",
+            mapping_dict=redis_update,
+            expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+        if redis_error:
+            print(redis_error)
+
         cont_100perc_epochs_counter = 0
         for cur_train_epoch_idx in range(max_training_epochs):
-            total_loss = 0
+            redis_update = {
+                "start_cur_epoch": datetime.now(),
+                "cur_train_epoch_idx": cur_train_epoch_idx, }
+            redis_error = await redis_save_key_mapping_dict(
+                key_name="train_process",
+                mapping_dict=redis_update,
+                expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+            if redis_error:
+                print(redis_error)
 
+            total_loss = 0
             for batch in dataloader:
                 input_ids = batch[0].to(self.device)
                 attention_mask = batch[1].to(self.device)
@@ -225,6 +251,20 @@ class ClassifierBERT:
                   f"{cur_train_epoch_idx + 1} "
                   f"[Right categories: {cur_perc_res}%] "
                   f"{cont_100perc_epochs_counter}/{max_cont_100perc_epochs}")
+
+            train_epoch_log = (
+                f"Training epoch: {cur_train_epoch_idx + 1} "
+                f"[Right categories: {cur_perc_res}%] "
+                f"{cont_100perc_epochs_counter}/{max_cont_100perc_epochs}")
+            redis_update = {
+                "train_epoch_log": train_epoch_log,
+                "end_cur_epoch": datetime.now(), }
+            redis_error = await redis_save_key_mapping_dict(
+                key_name="train_process",
+                mapping_dict=redis_update,
+                expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+            if redis_error:
+                print(redis_error)
 
             if cont_100perc_epochs_counter == max_cont_100perc_epochs:
                 return
