@@ -48,7 +48,7 @@ async def background_train_save_model(
 
     print("\n\n***********************************************************")
     print("********* MODEL TRAINING SWITCHED ON (start) **************")
-    bert_model_inst.train(
+    await bert_model_inst.train(
         train_dataset=new_train_dataset,
         max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
         max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
