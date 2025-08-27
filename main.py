@@ -14,6 +14,7 @@ from fast_api.app_get_all_categories.router_get_all_categories import router_ber
 from fast_api.app_get_all_checkset_results.router_all_checkset_results import router_bert_all_checksets_results
 from fast_api.app_get_all_train_tasks_list.router_all_train_tasks_list import router_bert_get_train_tasks_list
 from fast_api.app_get_checkset_result.router_get_checkset_result import router_bert_single_checkset_result
+from fast_api.app_get_confusion_matrix.router_get_confusion_matrix import router_bert_get_confusion_matrix
 from fast_api.app_last_dataset_name.router_last_dataset_name import router_bert_last_dataset_name
 from fast_api.app_predict_text.router_predict_single_text import router_bert_predict_single_text
 from fast_api.app_root_url.router_main import router_root_url
@@ -43,6 +44,7 @@ routers_list = [
     router_bert_all_checksets_results,
     router_bert_single_checkset_result,
     router_bert_create_unique_learn_file,
+    router_bert_get_confusion_matrix,
 
     # Test end-point (debug time)
     router_develop_test_endpoint,
