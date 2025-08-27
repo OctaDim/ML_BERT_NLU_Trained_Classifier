@@ -68,7 +68,7 @@ async def bert_get_confusion_matrix_img(auth_data: AuthDataBert,
             "model name": BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED,
             "model path": BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH,
             "getting_time": getting_time,
-            # "img_base64_content": img_base64_content,  # Too long
+            "img_base64_content": img_base64_content,
             "conf_mtrx_filename": conf_mtrx_filename,
             "conf_mtrx_img_file_path": conf_mtrx_img_file_path}
         json_response = JSONResponse(
@@ -81,9 +81,9 @@ async def bert_get_confusion_matrix_img(auth_data: AuthDataBert,
               f"BERT response.status_code: {json_response.status_code}\n"
               f"username: {auth_data.username}\n"
               f"getting_time: {getting_time}\n"
+              # f"img_base64_content: {img_base64_content}\n"  # Too long
               f"conf_mtrx_filename: {conf_mtrx_filename}\n"
-              f"conf_mtrx_img_file_path: {conf_mtrx_img_file_path}\n"
-              f"img_base64_content: {img_base64_content}\n")
+              f"conf_mtrx_img_file_path: {conf_mtrx_img_file_path}\n")
         return json_response
     except Exception as error:
         log_text = (f"BERT router get confusion matrix image [ERROR]: "
