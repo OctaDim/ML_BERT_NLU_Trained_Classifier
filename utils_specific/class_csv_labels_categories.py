@@ -32,7 +32,7 @@ class CsvLabelCategory:
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
             category = cur_row.get("category", "").strip()
-            category = category.title()
+            # category = category.title()  # Titled if necessary
             categories_list.append(category)
         unique_categories = list(set(categories_list))
         sorted_categories = sorted(unique_categories)
