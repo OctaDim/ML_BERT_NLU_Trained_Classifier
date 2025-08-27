@@ -39,7 +39,7 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
                         f"checkset_filename: {checkset_filename}")
             print(log_text)
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail=log_text)
 
         datetime_start = datetime.now()
@@ -160,6 +160,7 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
 
         print("\nConfusion Matrix window displaying:")
         plt.show()  # Important: Only after savefig(), because show() cleans figure
+        plt.close()
 
         print("\nConfusion Matrix data frame creating:")
         conf_mtrx_data_frame = pd.DataFrame(
