@@ -120,6 +120,10 @@ class BERT_OPTIONS:
     BERT_BEFORE_REINIT_MODEL_TEMP_PATH: str = "WORKING_DATA/temp_saved_model_prior_init_train"
     # CHECKSETS OPTIONS
     BERT_CHECKSET_NAME_REDIS_PREFIX: str = "test_checkset"
+    BERT_CONFUSION_MATRICES_IMAGES_PATH: str = "WORKING_DATA/confusion_matrices_images"
+    BERT_CONFUSION_MATRIX_AXE_TITLE: str = "Confusion Matrix"
+    BERT_CONFUSION_MATRIX_TRUE_LABEL_TXT: str = "True Labels - Правильные Классы"
+    BERT_CONFUSION_MATRIX_PREDICT_LABEL_TXT: str = "Predicted Labels - Предсказанные Классы"
     # LEARNING FILES OPTIONS
     BERT_UNIQUE_LEARNING_FILE_PREFIX: str = "unique"
     BERT_UNIQUE_LEARNING_FILES_PATH: str = "WORKING_DATA/learn_files_unique"
