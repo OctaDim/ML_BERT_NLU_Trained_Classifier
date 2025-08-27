@@ -80,14 +80,14 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
         print("\nConfusion Matrix data preparing:")
         checkset_test_results = checkset_result["checkset_test_results"]
         y_true_labels = []
-        y_predicted_labels = []
+        x_predicted_labels = []
         for cur_result_row in checkset_test_results:
             y_true_labels.append(cur_result_row["checkset_category"])
-            y_predicted_labels.append(cur_result_row["predicted_category"])
-        all_labels = sorted(set(y_true_labels + y_predicted_labels))
+            x_predicted_labels.append(cur_result_row["predicted_category"])
+        all_labels = sorted(set(y_true_labels + x_predicted_labels))
 
         confusion_mtrx = confusion_matrix(y_true=sorted(y_true_labels),
-                                          y_pred=sorted(y_predicted_labels),
+                                          y_pred=sorted(x_predicted_labels),
                                           labels=all_labels,
                                           sample_weight=None,
                                           normalize=None)
@@ -109,8 +109,8 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
         predict_label_text = BERT_OPTIONS.BERT_CONFUSION_MATRIX_PREDICT_LABEL_TXT
 
         axes.set_title(label=conf_matrix_title, fontsize=32)
-        axes.set_xlabel(true_label_text, fontsize=26)
-        axes.set_ylabel(predict_label_text, fontsize=26)
+        axes.set_xlabel(predict_label_text, fontsize=26)
+        axes.set_ylabel(true_label_text, fontsize=26)
         axes.tick_params(axis='both', which='major', labelsize=24)
 
         for text_row in conf_mtrx_display.text_:
