@@ -70,7 +70,7 @@ if cur_external_ip == "___.___.___.___":
 else:
     redis_conf_name = DB_CONFIG_NAMES.REDIS_PRODUCT_ANY_IP
 
-full_path = os.path.join(BASE_DIR, ".configs_redis.ini")
+full_path = os.path.join(BASE_DIR, ".configs_db_redis.ini")
 normal_env_path = os.path.normpath(full_path)
 db_configs = ConfigParser()
 db_configs.read(filenames=normal_env_path)
@@ -79,6 +79,8 @@ REDIS_HOST = db_configs.get(section=redis_conf_name, option="REDIS_HOST")
 REDIS_PORT = db_configs.get(section=redis_conf_name, option="REDIS_PORT")
 REDIS_DB = db_configs.get(section=redis_conf_name, option="REDIS_DATABASE")
 REDIS_PASSWORD = db_configs.get(section=redis_conf_name, option="REDIS_PASSWORD") or None
+
+
 
 
 @dataclass
