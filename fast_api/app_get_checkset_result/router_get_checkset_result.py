@@ -100,7 +100,7 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
             confusion_matrix=confusion_mtrx,
             display_labels=all_labels)
 
-        conf_mtrx_display.plot(ax=axes, values_format="d", xticks_rotation=30)
+        conf_mtrx_display.plot(ax=axes, values_format="d", xticks_rotation=45)
         # conf_mtrx_display.plot(ax=axes, values_format=".2f", xticks_rotation=90)
         # conf_mtrx_display.plot(ax=axes, values_format="d", cmap="Blues", xticks_rotation=45)
 
@@ -108,29 +108,29 @@ async def bert_get_single_checkset_result(auth_data: AuthDataBert,
         true_label_text = BERT_OPTIONS.BERT_CONFUSION_MATRIX_TRUE_LABEL_TXT
         predict_label_text = BERT_OPTIONS.BERT_CONFUSION_MATRIX_PREDICT_LABEL_TXT
 
-        axes.set_title(label=conf_matrix_title, fontsize=32)
-        axes.set_xlabel(predict_label_text, fontsize=26)
-        axes.set_ylabel(true_label_text, fontsize=26)
-        axes.tick_params(axis='both', which='major', labelsize=24)
+        axes.set_title(label=conf_matrix_title, fontsize=24)
+        axes.set_xlabel(predict_label_text, fontsize=20)
+        axes.set_ylabel(true_label_text, fontsize=20)
+        axes.tick_params(axis='both', which='major', labelsize=18)
 
         for text_row in conf_mtrx_display.text_:
             for text in text_row:
-                text.set_fontsize(22)
+                text.set_fontsize(16)
                 text.set_fontweight('bold')
 
-        axes.xaxis.label.set_fontsize(26)
-        axes.yaxis.label.set_fontsize(26)
-        axes.title.set_fontsize(32)
+        axes.xaxis.label.set_fontsize(20)
+        axes.yaxis.label.set_fontsize(20)
+        axes.title.set_fontsize(24)
 
         for label in axes.get_xticklabels():
-            label.set_fontsize(20)
+            label.set_fontsize(16)
         for label in axes.get_yticklabels():
-            label.set_fontsize(20)
+            label.set_fontsize(16)
 
         cbar = conf_mtrx_display.im_.colorbar
         if cbar:
-            cbar.ax.tick_params(labelsize=20)
-            cbar.ax.yaxis.label.set_size(22)
+            cbar.ax.tick_params(labelsize=16)
+            cbar.ax.yaxis.label.set_size(16)
 
         print("\nConfusion Matrix image filename creating:")
         checkset_no_ext_name, _ = os.path.splitext(checkset_filename)
