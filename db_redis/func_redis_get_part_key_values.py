@@ -1,4 +1,4 @@
-from db_redis.init_redis import RedisAsyncConnection
+from db_redis.redis_async_connection import RedisAsyncConnection
 
 
 async def get_redis_values_by_pattern(partial_pattern: str,

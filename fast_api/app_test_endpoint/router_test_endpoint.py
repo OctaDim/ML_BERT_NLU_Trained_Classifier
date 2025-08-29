@@ -8,7 +8,7 @@ from fastapi import APIRouter
 from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.settings import (
     BERT_OPTIONS, BASE_DIR)
-from db_redis.init_redis import RedisAsyncConnection
+from db_redis.redis_async_connection import RedisAsyncConnection
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from utils_common.normalized_path import get_full_dir_normal_path, get_full_file_normal_path
