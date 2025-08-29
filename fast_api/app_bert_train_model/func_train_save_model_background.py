@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime, timedelta
 
 from torch.utils.data import TensorDataset
@@ -7,7 +6,7 @@ from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, STATUSES, BERT_TRAIN_OPTIONS)
-from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
+from db_redis.redis_funcs.func_redis_save_key_mapping import redis_save_key_mapping_dict
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_save_model.router_bert_save_model import (
     bert_save_model)

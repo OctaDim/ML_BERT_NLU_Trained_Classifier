@@ -9,7 +9,7 @@ from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, REDIS_OPTIONS, STATUSES)
-from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
+from db_redis.redis_funcs.func_redis_save_key_mapping import redis_save_key_mapping_dict
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_save_model.scheme_bert_save_model import (

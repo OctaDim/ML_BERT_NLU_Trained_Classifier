@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS
-from db_redis.func_redis_get_part_key_values import get_redis_values_by_pattern
+from db_redis.redis_funcs.func_redis_get_part_key_values import get_redis_values_by_pattern
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 

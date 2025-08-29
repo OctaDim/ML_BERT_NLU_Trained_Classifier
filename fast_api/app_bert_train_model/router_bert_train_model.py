@@ -12,7 +12,7 @@ from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS, BERT_TRAIN_OPTIONS, BERT_MODEL_NAMES,
     REDIS_OPTIONS, BASE_DIR, STATUSES)
-from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
+from db_redis.redis_funcs.func_redis_save_key_mapping import redis_save_key_mapping_dict
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_train_model.func_train_save_model_background import (

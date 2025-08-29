@@ -9,7 +9,7 @@ from transformers import BertForSequenceClassification, BertTokenizer
 
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import REDIS_OPTIONS
-from db_redis.func_redis_save_key_mapping import redis_save_key_mapping_dict
+from db_redis.redis_funcs.func_redis_save_key_mapping import redis_save_key_mapping_dict
 
 
 class ClassifierBERT:

@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS, BASE_DIR
-from db_redis.func_redis_get_part_key_values import get_redis_values_by_pattern
+from db_redis.redis_funcs.func_redis_get_part_key_values import get_redis_values_by_pattern
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_get_checkset_result.scheme_get_checkset_result import (
