@@ -1,6 +1,7 @@
 from datetime import timedelta
 
-from db_redis.redis_async_connection import RedisAsyncConnection
+from db_redis.redis_async_conn.rds_async_conn import (
+    RedisAsyncConnection)
 
 
 async def redis_save_key_mapping_dict(key_name: str,

@@ -1,17 +1,12 @@
 # import asyncio
 # from functools import partial
-import os
-from datetime import timedelta
 
 from fastapi import APIRouter
 
 from ML_BERT_classifier.init_bert import bert_model_inst
-from configs.settings import (
-    BERT_OPTIONS, BASE_DIR)
-from db_redis.redis_async_connection import RedisAsyncConnection
+from configs.settings import BERT_OPTIONS
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
-from utils_common.normalized_path import get_full_dir_normal_path, get_full_file_normal_path
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_develop_test_endpoint = APIRouter(prefix=f"/{bert_base_url_name}",
