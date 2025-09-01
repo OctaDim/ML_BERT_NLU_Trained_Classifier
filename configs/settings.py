@@ -12,16 +12,22 @@ from utils_common.get_cur_ip_address import (
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-full_path = os.path.join(BASE_DIR, ".env")
-normal_env_path = os.path.normpath(full_path)
-env = load_dotenv(normal_env_path)  # for future
+# GETTING TEST ENV CONFIGS #############################################
+test_env_full_path = os.path.join(BASE_DIR, ".env")
+test_env_normal_path = os.path.normpath(test_env_full_path)
+env = load_dotenv(test_env_normal_path)  # for future
 API_TEST_USERNAME = os.getenv("API_TEST_USERNAME")
 API_TEST_PASSWORD = os.getenv("API_TEST_PASSWORD")
 
+# GETTING CURENT INTERNAL AND EXTERNAL IPs #############################
+get_cur_internal_ip(log_ip=True)
+cur_external_ip = get_cur_external_ip_via_google_dns(log_ip=True)
 
+
+# GETTING API INI CONFIGS ##############################################
 @dataclass
 class API_CONFIG_NAMES:
-    API_PRODUCT_SERVER_IP = "production"
+    API_PRODUCT_SERVER_IP = "API_production"
     API_HAKASIA_PROD_SERVER_IP = "API_Hakasia_product_server"
     API_TEST_176_124_136_22_IP = "API_prod_server_176_124_136_22_8000"
     API_TEST_PORT_ANY_IP = "API_port_all_ips_0_0_0_0_8000"
@@ -30,13 +36,10 @@ class API_CONFIG_NAMES:
     API_TEST_DEXP_IP = "API_dexp_ip_192_168_0_117_8000"
 
 
-full_path = os.path.join(BASE_DIR, ".configs_api.ini")
-normal_env_path = os.path.normpath(full_path)
-api_configs = ConfigParser()
-api_configs.read(filenames=normal_env_path)
-
-get_cur_internal_ip(log_ip=True)
-cur_external_ip = get_cur_external_ip_via_google_dns(log_ip=True)
+api_ini_full_path = os.path.join(BASE_DIR, ".configs_api.ini")
+api_ini_normal_path = os.path.normpath(api_ini_full_path)
+api_conf_parser = ConfigParser()
+api_conf_parser.read(filenames=api_ini_normal_path)
 
 if cur_external_ip == "___.___.___.___":  # Just example
     api_conf_name = API_CONFIG_NAMES.API_TEST_PORT_ANY_IP
@@ -55,32 +58,89 @@ elif sys.platform == "win32":
 else:
     api_conf_name = API_CONFIG_NAMES.API_TEST_PORT_ANY_IP
 
-API_HOST: str = api_configs.get(section=api_conf_name, option="API_HOST")
-API_PORT: int = int(api_configs.get(section=api_conf_name, option="API_PORT"))
-API_USERNAME: str = api_configs.get(section=api_conf_name, option="API_USERNAME")
-API_PASSWORD: str = api_configs.get(section=api_conf_name, option="API_PASSWORD")
+API_HOST: str = api_conf_parser.get(section=api_conf_name, option="API_HOST")
+API_PORT: int = int(api_conf_parser.get(section=api_conf_name, option="API_PORT"))
+API_USERNAME: str = api_conf_parser.get(section=api_conf_name, option="API_USERNAME")
+API_PASSWORD: str = api_conf_parser.get(section=api_conf_name, option="API_PASSWORD")
 
 
-class DB_CONFIG_NAMES:
+# GETTING REDIS INI CONFIGS ############################################
+class REDIS_CONFIG_NAMES:
     REDIS_PRODUCT_ANY_IP = "Redis_any_ip_prod_configs"
 
 
+redis_ini_full_path = os.path.join(BASE_DIR, ".configs_redis.ini")
+redis_ini_normal_path = os.path.normpath(redis_ini_full_path)
+redis_conf_parser = ConfigParser()
+redis_conf_parser.read(filenames=redis_ini_normal_path)
+
 if cur_external_ip == "___.___.___.___":
-    redis_conf_name = DB_CONFIG_NAMES.REDIS_PRODUCT_ANY_IP  # Certain configs can be defined
+    redis_conf_name = REDIS_CONFIG_NAMES.REDIS_PRODUCT_ANY_IP  # Certain configs can be defined
 else:
-    redis_conf_name = DB_CONFIG_NAMES.REDIS_PRODUCT_ANY_IP
+    redis_conf_name = REDIS_CONFIG_NAMES.REDIS_PRODUCT_ANY_IP
 
-full_path = os.path.join(BASE_DIR, ".configs_db_redis.ini")
-normal_env_path = os.path.normpath(full_path)
-db_configs = ConfigParser()
-db_configs.read(filenames=normal_env_path)
-
-REDIS_HOST = db_configs.get(section=redis_conf_name, option="REDIS_HOST")
-REDIS_PORT = db_configs.get(section=redis_conf_name, option="REDIS_PORT")
-REDIS_DB = db_configs.get(section=redis_conf_name, option="REDIS_DATABASE")
-REDIS_PASSWORD = db_configs.get(section=redis_conf_name, option="REDIS_PASSWORD") or None
+REDIS_HOST = redis_conf_parser.get(section=redis_conf_name, option="REDIS_HOST")
+REDIS_PORT = redis_conf_parser.get(section=redis_conf_name, option="REDIS_PORT")
+REDIS_DB = redis_conf_parser.get(section=redis_conf_name, option="REDIS_DATABASE")
+REDIS_PASSWORD = redis_conf_parser.get(section=redis_conf_name, option="REDIS_PASSWORD") or None
 
 
+# GETTING POSTGRES INI CONFIGS #########################################
+class POSTGRES_CONFIG_NAMES:
+    POSTGRES_PRODUCT_SERVER_IP = "Postgres_production"
+    POSTGRES_HAKASIA_PROD_SERVER_IP = "Postgres_Hakasia_product_server"
+    POSTGRES_TEST_176_124_136_22_IP = "Postgres_prod_server_176_124_136_22"
+    POSTGRES_TEST_PORT_ANY_IP = "Postgres_port_all_ips_0_0_0_0_8000"
+    POSTGRES_TEST_WIN_LOCALHOST = "Postgres_win_localhost_127_0_0_1_8000"
+    POSTGRES_TEST_UNIX_LOCALHOST = "Postgres_unix_localhost_127_0_1_1_8000"
+    POSTGRES_TEST_DEXP_IP = "Postgres_dexp_ip_192_168_0_117_8000"
+
+
+postgres_ini_full_path = os.path.join(BASE_DIR, ".configs_postgres.ini")
+postgres_ini_normal_path = os.path.normpath(postgres_ini_full_path)
+print("AAAAAAAAAAAAAAAAAA postgres_ini_normal_path", postgres_ini_normal_path)
+postgres_conf_parser = ConfigParser()
+postgres_conf_parser.read(filenames=postgres_ini_normal_path)
+
+if cur_external_ip == "___.___.___.___":  # Just example
+    postgres_conf_name = POSTGRES_CONFIG_NAMES.POSTGRES_TEST_PORT_ANY_IP
+elif cur_external_ip == "172.19.201.24":
+    postgres_conf_name = POSTGRES_CONFIG_NAMES.POSTGRES_PRODUCT_SERVER_IP
+elif cur_external_ip == "172.19.201.24":
+    postgres_conf_name = POSTGRES_CONFIG_NAMES.POSTGRES_HAKASIA_PROD_SERVER_IP
+elif cur_external_ip == "176.124.136.22":
+    postgres_conf_name = POSTGRES_CONFIG_NAMES.POSTGRES_TEST_176_124_136_22_IP
+elif cur_external_ip == "192.168.0.117":
+    postgres_conf_name = POSTGRES_CONFIG_NAMES.POSTGRES_TEST_DEXP_IP
+elif sys.platform == "linux":
+    postgres_conf_name = POSTGRES_CONFIG_NAMES.POSTGRES_TEST_UNIX_LOCALHOST
+elif sys.platform == "win32":
+    postgres_conf_name = POSTGRES_CONFIG_NAMES.POSTGRES_TEST_WIN_LOCALHOST
+else:
+    postgres_conf_name = POSTGRES_CONFIG_NAMES.POSTGRES_TEST_PORT_ANY_IP
+print("AAAAAAAAAAAAAAAAAA postgres_conf_name", postgres_conf_name)
+
+POSTGRES_USER = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_USER")
+print("AAAAAAAAAAAAAAAAAA POSTGRES_USER", POSTGRES_USER)
+POSTGRES_PASSWORD = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_PASSWORD")
+print("AAAAAAAAAAAAAAAAAA POSTGRES_PASSWORD", POSTGRES_PASSWORD)
+POSTGRES_HOST = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_HOST")
+print("AAAAAAAAAAAAAAAAAA POSTGRES_HOST", POSTGRES_HOST)
+POSTGRES_PORT = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_PORT") or None
+print("AAAAAAAAAAAAAAAAAA POSTGRES_PORT", POSTGRES_PORT)
+POSTGRES_DB_NAME = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_DB_NAME")
+print("AAAAAAAAAAAAAAAAAA POSTGRES_DB_NAME", POSTGRES_DB_NAME)
+
+
+@dataclass
+class ALCHEMY_OPTIONS:
+    ALCHEMY_ORM_RAW_SQL_CONSOLE_LOGS: bool = True
+    ALCHEMY_USE_FUTURE_ALCHEMY: bool = True
+    ALCHEMY_POOL_PRE_PING: bool = True
+    ALCHEMY_CONST_CONN_POOL_SIZE: int = 20
+    ALCHEMY_TEMP_CONN_MAX_OVERFLOW: int = 30
+    ALCHEMY_POOL_RECYCLE: int = 600  # seconds
+    ALCHEMY_POOL_TIMEOUT: int = 30  # seconds
 
 
 @dataclass
