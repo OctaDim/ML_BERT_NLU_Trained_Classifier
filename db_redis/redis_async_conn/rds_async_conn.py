@@ -16,10 +16,10 @@ class RedisAsyncConnection:
                  socket_connect_timeout=None,
                  socket_keepalive=None,
                  **kwargs):
-        self.host = host if host else REDIS_HOST
-        self.port = port if port else REDIS_PORT
-        self.db = db if db else REDIS_DB
-        self.password = password if password else REDIS_PASSWORD
+        self.host = REDIS_HOST if host is None else host
+        self.port = REDIS_PORT if port is None else port
+        self.db = REDIS_DB if db is None else db
+        self.password = REDIS_PASSWORD if password is None else password
         self.extra_params = kwargs
         self.redis_connection = None
 
