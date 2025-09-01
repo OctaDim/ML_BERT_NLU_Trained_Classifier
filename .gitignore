@@ -243,6 +243,7 @@ data_outgoing/*
 .configs_api.ini
 .configs_redis.ini
 .configs_sqlalchemy.ini
+.configs_postgres.ini
 
 main_extra_train_backup.py
 
