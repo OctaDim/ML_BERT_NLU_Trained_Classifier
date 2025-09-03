@@ -204,7 +204,7 @@ class ClassifierBERT:
         REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
         redis_update = {
             "train_message": "Model training epochs process.....",
-            "start_training": datetime.now(),
+            "start_training": datetime.now().strftime("%d_%m_%Y__%H:%M:%S"),
             "max_training_epochs": max_training_epochs,
             "max_cont_100perc_epochs": max_cont_100perc_epochs,
             "batch_size": batch_size,
@@ -219,7 +219,7 @@ class ClassifierBERT:
         cont_100perc_epochs_counter = 0
         for cur_train_epoch_idx in range(max_training_epochs):
             redis_update = {
-                "start_cur_epoch": datetime.now(),
+                "start_cur_epoch": datetime.now().strftime("%d_%m_%Y__%H:%M:%S"),
                 "cur_train_epoch_idx": cur_train_epoch_idx, }
             redis_error = await redis_save_key_mapping_dict(
                 key_name="train_process",
@@ -259,7 +259,7 @@ class ClassifierBERT:
                 f"{cont_100perc_epochs_counter}/{max_cont_100perc_epochs}")
             redis_update = {
                 "train_epoch_log": train_epoch_log,
-                "end_cur_epoch": datetime.now(), }
+                "end_cur_epoch": datetime.now().strftime("%d_%m_%Y__%H:%M:%S"), }
             redis_error = await redis_save_key_mapping_dict(
                 key_name="train_process",
                 mapping_dict=redis_update,
