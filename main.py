@@ -1,7 +1,11 @@
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+
 import uvicorn
 from fastapi import FastAPI
 
-from configs.settings import API_HOST, API_PORT
+from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS
+from db_postgres.postgres_async_conn.db_tables_initialization import initialize_db_tables
 from fast_api.app_add_single_category.router_add_single_category import router_bert_add_single_category
 from fast_api.app_add_text_category.router_add_text_category import router_bert_add_text_category
 from fast_api.app_add_texts_categories_file.router_add_texts_categories_file import router_bert_add_text_category_file
@@ -52,8 +56,18 @@ routers_list = [
 ]
 
 
+@asynccontextmanager
+async def fast_api_lifespan(app: FastAPI) -> AsyncGenerator:
+    # Startup code
+    await initialize_db_tables()
+    print(">>>>>>> FastAPI Lifespan startup complete")
+    yield
+    # Shutdown code (optional)
+    print(">>>>>>> FastAPI Lifespan application shutting down")
+
+
 def create_fastapi_application() -> FastAPI:
-    fastapi_app = FastAPI()
+    fastapi_app = FastAPI(lifespan=fast_api_lifespan)
     for cur_router in routers_list:
         fastapi_app.include_router(router=cur_router, )
     return fastapi_app
@@ -66,12 +80,18 @@ def run_uvicorn_fastapi_server():
                 port=API_PORT,
                 # reload=True,
                 # factory=True,
-                use_colors=True, )
+                log_level=FASTAPI_OPTIONS.LOG_LEVEL,
+                use_colors=FASTAPI_OPTIONS.USE_COLORS, )
     print("Uvicorn and FastAPI server started [OK]")
 
 
 def run_redis():
     # TODO: Check Redis is available and start Redis if not
+    pass
+
+
+def run_postgres():
+    # TODO: Check Postgres is available and start Postgres if not
     pass
 
 
