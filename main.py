@@ -59,8 +59,13 @@ routers_list = [
 @asynccontextmanager
 async def fast_api_lifespan(app: FastAPI) -> AsyncGenerator:
     # Startup code
-    await initialize_db_tables()
-    print(">>>>>>> FastAPI Lifespan startup complete")
+    try:
+        await initialize_db_tables()
+        print(">>>>>>> FastAPI Lifespan startup complete")
+    except Exception as error:
+        print(f"Initializing DB tables, tables not created [ERROR]:"
+              f"error: {error}")
+        raise
     yield
     # Shutdown code (optional)
     print(">>>>>>> FastAPI Lifespan application shutting down")
