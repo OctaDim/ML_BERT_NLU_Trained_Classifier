@@ -25,7 +25,7 @@ cur_external_ip = get_cur_external_ip_via_google_dns(log_ip=True)
 
 
 # GETTING API INI CONFIGS ##############################################
-@dataclass
+@dataclass(frozen=True)
 class API_CONFIG_NAMES:
     API_PRODUCT_SERVER_IP = "API_production"
     API_HAKASIA_PROD_SERVER_IP = "API_Hakasia_product_server"
@@ -65,6 +65,7 @@ API_PASSWORD: str = api_conf_parser.get(section=api_conf_name, option="API_PASSW
 
 
 # GETTING REDIS INI CONFIGS ############################################
+@dataclass(frozen=True)
 class REDIS_CONFIG_NAMES:
     REDIS_PRODUCT_ANY_IP = "Redis_any_ip_prod_configs"
 
@@ -86,6 +87,7 @@ REDIS_PASSWORD = redis_conf_parser.get(section=redis_conf_name, option="REDIS_PA
 
 
 # GETTING POSTGRES INI CONFIGS #########################################
+@dataclass(frozen=True)
 class POSTGRES_CONFIG_NAMES:
     POSTGRES_PRODUCT_SERVER_IP = "Postgres_production"
     POSTGRES_HAKASIA_PROD_SERVER_IP = "Postgres_Hakasia_product_server"
@@ -98,7 +100,6 @@ class POSTGRES_CONFIG_NAMES:
 
 postgres_ini_full_path = os.path.join(BASE_DIR, ".configs_postgres.ini")
 postgres_ini_normal_path = os.path.normpath(postgres_ini_full_path)
-print("AAAAAAAAAAAAAAAAAA postgres_ini_normal_path", postgres_ini_normal_path)
 postgres_conf_parser = ConfigParser()
 postgres_conf_parser.read(filenames=postgres_ini_normal_path)
 
@@ -118,21 +119,21 @@ elif sys.platform == "win32":
     postgres_conf_name = POSTGRES_CONFIG_NAMES.POSTGRES_TEST_WIN_LOCALHOST
 else:
     postgres_conf_name = POSTGRES_CONFIG_NAMES.POSTGRES_TEST_PORT_ANY_IP
-print("AAAAAAAAAAAAAAAAAA postgres_conf_name", postgres_conf_name)
 
 POSTGRES_USER = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_USER")
-print("AAAAAAAAAAAAAAAAAA POSTGRES_USER", POSTGRES_USER)
 POSTGRES_PASSWORD = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_PASSWORD")
-print("AAAAAAAAAAAAAAAAAA POSTGRES_PASSWORD", POSTGRES_PASSWORD)
 POSTGRES_HOST = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_HOST")
-print("AAAAAAAAAAAAAAAAAA POSTGRES_HOST", POSTGRES_HOST)
 POSTGRES_PORT = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_PORT") or None
-print("AAAAAAAAAAAAAAAAAA POSTGRES_PORT", POSTGRES_PORT)
 POSTGRES_DB_NAME = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_DB_NAME")
-print("AAAAAAAAAAAAAAAAAA POSTGRES_DB_NAME", POSTGRES_DB_NAME)
 
 
-@dataclass
+@dataclass(frozen=True)
+class FASTAPI_OPTIONS:
+    LOG_LEVEL = "debug"
+    USE_COLORS = True
+
+
+@dataclass(frozen=True)
 class ALCHEMY_OPTIONS:
     ALCHEMY_ORM_RAW_SQL_CONSOLE_LOGS: bool = True
     ALCHEMY_USE_FUTURE_ALCHEMY: bool = True
@@ -143,7 +144,7 @@ class ALCHEMY_OPTIONS:
     ALCHEMY_POOL_TIMEOUT: int = 30  # seconds
 
 
-@dataclass
+@dataclass(frozen=True)
 class REDIS_OPTIONS:
     DECODE_RESPONSES = True
     SOCKET_CONNECTION_TIMEOUT = 5
@@ -152,12 +153,12 @@ class REDIS_OPTIONS:
     CHECKSET_TESTS_EXPIRY_DAYS = 90
 
 
-@dataclass
+@dataclass(frozen=True)
 class BERT_MODEL_NAMES:
     BERT_BASE_MULTILINGUAL_CASED: str = "bert-base-multilingual-cased"
 
 
-@dataclass
+@dataclass(frozen=True)
 class BERT_OPTIONS:
     # API
     BERT_API_URL_BASE_NAME: str = "bert"
@@ -191,7 +192,7 @@ class BERT_OPTIONS:
     BERT_UNIQUE_LEARNING_FILES_PATH: str = "WORKING_DATA/learn_files_unique"
 
 
-@dataclass
+@dataclass(frozen=True)
 class BERT_TRAIN_OPTIONS:
     """BERT_TOKEN_PADDING note
     str: "max_length" - add symbols till BERT_TOKEN_STR_MAX_LENGTH
@@ -212,7 +213,7 @@ class BERT_TRAIN_OPTIONS:
     BERT_RETURN_TENSOR: Union[Literal["pt", "tf", "np"], None] = "pt"
 
 
-@dataclass
+@dataclass(frozen=True)
 class STATUSES:
     STATUS_DATASET_CREATION_START_EN = "Preparing dataset tarted"
     STATUS_DATASET_CREATION_FINISH_EN = "Preparing dataset tarted"
