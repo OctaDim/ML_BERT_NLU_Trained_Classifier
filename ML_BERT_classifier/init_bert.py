@@ -1,4 +1,3 @@
-# from ML_BERT_train_datasets.test_init_train_datasets.test_labels_categories import labels_categories
 from typing import Dict
 
 from ML_BERT_classifier.class_bert import ClassifierBERT
@@ -91,97 +90,104 @@ def initialise_bert_model(labels_categories_dict: Dict[int, str],
     return model
 
 
-if BERT_OPTIONS.BERT_MODEL_INIT:
-    blue_color = CONSOLE_COLORS.BRIGHT_BLUE
-    yellow_color = CONSOLE_COLORS.BRIGHT_YELLOW
-    reset_color = CONSOLE_COLORS.RESET
+def init_and_start_bert_model():
+    if BERT_OPTIONS.BERT_MODEL_INIT:
+        blue_color = CONSOLE_COLORS.BRIGHT_BLUE
+        yellow_color = CONSOLE_COLORS.BRIGHT_YELLOW
+        reset_color = CONSOLE_COLORS.RESET
 
-    print("\nGetting last dataset directory path:")
-    last_saved_dataset_dir_path = get_last_saved_dataset_dir_path()
-    initial_dataset_dir_path = None
-    if last_saved_dataset_dir_path:
-        bert_init_dataset_dir = last_saved_dataset_dir_path
-    else:
-        initial_dataset_dir_path = get_initial_dataset_dir_path()
-        if initial_dataset_dir_path:
-            bert_init_dataset_dir = initial_dataset_dir_path
+        print("\nGetting last dataset directory path:")
+        last_saved_dataset_dir_path = get_last_saved_dataset_dir_path()
+        initial_dataset_dir_path = None
+        if last_saved_dataset_dir_path:
+            bert_init_dataset_dir = last_saved_dataset_dir_path
         else:
-            bert_init_dataset_dir = ""
+            initial_dataset_dir_path = get_initial_dataset_dir_path()
+            if initial_dataset_dir_path:
+                bert_init_dataset_dir = initial_dataset_dir_path
+            else:
+                bert_init_dataset_dir = ""
 
-    print("\nGetting csv label-category train file path:")
-    if bert_init_dataset_dir:
-        last_saved_lab_cat_csv_path = get_full_file_normal_path(
-            all_dir_str_parts=[bert_init_dataset_dir],
-            file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
-        print(f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}")
+        print("\nGetting csv label-category train file path:")
+        if bert_init_dataset_dir:
+            last_saved_lab_cat_csv_path = get_full_file_normal_path(
+                all_dir_str_parts=[bert_init_dataset_dir],
+                file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
+            print(f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}")
 
-        print("\nGetting csv label-category file data:")
-        with open(file=last_saved_lab_cat_csv_path,
-                  mode="r", encoding="utf-8") as lab_cat_csv_file:
-            csf_text_lab = CsvLabelCategory(lab_cat_csv_file)
-            new_lab_cat_dict = csf_text_lab.get_label_category_dict()
-            print(f"new_lab_cat_dict [{len(new_lab_cat_dict)}]: "
-                  f"{new_lab_cat_dict}")
+            print("\nGetting csv label-category file data:")
+            with open(file=last_saved_lab_cat_csv_path,
+                      mode="r", encoding="utf-8") as lab_cat_csv_file:
+                csf_text_lab = CsvLabelCategory(lab_cat_csv_file)
+                new_lab_cat_dict = csf_text_lab.get_label_category_dict()
+                print(f"new_lab_cat_dict [{len(new_lab_cat_dict)}]: "
+                      f"{new_lab_cat_dict}")
 
-        if new_lab_cat_dict:
-            labels_categories = new_lab_cat_dict
+            if new_lab_cat_dict:
+                labels_categories = new_lab_cat_dict
+            else:
+                labels_categories = {0: "api initial category"}
+                print(f"Empty or wrong label-category csv data [ERROR]:\n"
+                      f"last_saved_dataset_dir: {bert_init_dataset_dir}\n"
+                      f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}\n"
+                      f"new_lab_cat_dict: {new_lab_cat_dict}\n")
         else:
             labels_categories = {0: "api initial category"}
-            print(f"Empty or wrong label-category csv data [ERROR]:\n"
-                  f"last_saved_dataset_dir: {bert_init_dataset_dir}\n"
-                  f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}\n"
-                  f"new_lab_cat_dict: {new_lab_cat_dict}\n")
-    else:
-        labels_categories = {0: "api initial category"}
-        print(f"BERT Last saved or initial dataset dir, files not found [ERROR]:\n"
-            f"last_saved_dataset_dir_path: {last_saved_dataset_dir_path}\n"
-            f"initial_dataset_dir_path: {initial_dataset_dir_path}\n"
-            f"initial_dataset_dir_path: {initial_dataset_dir_path}\n")
+            print(f"BERT Last saved or initial dataset dir, files not found [ERROR]:\n"
+                  f"last_saved_dataset_dir_path: {last_saved_dataset_dir_path}\n"
+                  f"initial_dataset_dir_path: {initial_dataset_dir_path}\n"
+                  f"initial_dataset_dir_path: {initial_dataset_dir_path}\n")
 
-    print("\nGetting last model directory path:")
-    last_saved_model_dir_path = get_last_saved_model_dir_path()
-    initial_model_dir_path = get_initial_model_dir_path()
-    # load_error_log = ""
+        print("\nGetting last model directory path:")
+        last_saved_model_dir_path = get_last_saved_model_dir_path()
+        initial_model_dir_path = get_initial_model_dir_path()
+        # load_error_log = ""
 
-    print(">>>>>>> last_saved_model_dir_path => ", last_saved_model_dir_path)
-    print(">>>>>>> initial_model_dir_path => ", initial_model_dir_path)
-    print(">>>>>>> last_saved_model_dir_path => ", last_saved_model_dir_path)
-    print(">>>>>>> last_saved_dataset_dir_path => ", last_saved_dataset_dir_path)
-    print(">>>>>>> labels_categories => ", labels_categories)
+        print(">>>>>>> last_saved_model_dir_path => ", last_saved_model_dir_path)
+        print(">>>>>>> initial_model_dir_path => ", initial_model_dir_path)
+        print(">>>>>>> last_saved_model_dir_path => ", last_saved_model_dir_path)
+        print(">>>>>>> last_saved_dataset_dir_path => ", last_saved_dataset_dir_path)
+        print(">>>>>>> labels_categories => ", labels_categories)
 
-    if last_saved_model_dir_path and initial_model_dir_path:
-        bert_model_inst = initialise_bert_model(
-            labels_categories_dict=labels_categories,
-            model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
-            model_cache_dir=get_initial_model_dir_path(),
-            token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
-            use_singleton=True,
-            use_hard_singleton=True)
+        bert_model_inst = None
+        if last_saved_model_dir_path and initial_model_dir_path:
+            bert_model_inst = initialise_bert_model(
+                labels_categories_dict=labels_categories,
+                model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
+                model_cache_dir=get_initial_model_dir_path(),
+                token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
+                use_singleton=True,
+                use_hard_singleton=True)
 
-        load_error_log = bert_model_inst.load_model(
-            dir_full_path=last_saved_model_dir_path)
-        if not load_error_log:
-            print(f"Last Saved BERT Model initialised and loaded [OK]:\n"
-                  f"last_saved_model_dir_path: "
-                  f"{blue_color}{last_saved_model_dir_path}{reset_color}\n"
-                  f"initial_model_dir_path: {initial_model_dir_path}\n")
+            load_error_log = bert_model_inst.load_model(
+                dir_full_path=last_saved_model_dir_path)
+            if not load_error_log:
+                print(f"Last Saved BERT Model initialised and loaded [OK]:\n"
+                      f"last_saved_model_dir_path: "
+                      f"{blue_color}{last_saved_model_dir_path}{reset_color}\n"
+                      f"initial_model_dir_path: {initial_model_dir_path}\n")
+            else:
+                print(f"Last Saved BERT Model load [ERROR]: error: {load_error_log}\n"
+                      f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
+                      f"initial_model_dir_path: {initial_model_dir_path}\n")
+        elif initial_model_dir_path:
+            bert_model_inst = initialise_bert_model(
+                labels_categories_dict=labels_categories,
+                model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
+                model_cache_dir=get_initial_model_dir_path(),
+                token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
+                use_singleton=True,
+                use_hard_singleton=True)
+            print(f"Pretrained Init BERT Model initialised [OK]:\n"
+                  f"initial_model_dir_path: "
+                  f"{blue_color}{initial_model_dir_path}{reset_color}\n"
+                  f"last_saved_model_dir_path: {last_saved_model_dir_path}\n")
         else:
-            print(f"Last Saved BERT Model load [ERROR]: error: {load_error_log}\n"
+            print(f"BERT Model initialise [ERROR]:\n"
                   f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
                   f"initial_model_dir_path: {initial_model_dir_path}\n")
-    elif initial_model_dir_path:
-        bert_model_inst = initialise_bert_model(
-            labels_categories_dict=labels_categories,
-            model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
-            model_cache_dir=get_initial_model_dir_path(),
-            token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
-            use_singleton=True,
-            use_hard_singleton=True)
-        print(f"Pretrained Init BERT Model initialised [OK]:\n"
-              f"initial_model_dir_path: "
-              f"{blue_color}{initial_model_dir_path}{reset_color}\n"
-              f"last_saved_model_dir_path: {last_saved_model_dir_path}\n")
-    else:
-        print(f"BERT Model initialise [ERROR]:\n"
-              f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
-              f"initial_model_dir_path: {initial_model_dir_path}\n")
+        return bert_model_inst
+
+
+bert_model_inst = init_and_start_bert_model()
+print(">>>>>>> hash(bert_model_inst)", hash(bert_model_inst))
