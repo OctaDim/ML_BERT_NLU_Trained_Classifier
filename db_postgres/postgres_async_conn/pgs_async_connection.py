@@ -88,17 +88,3 @@ class PostgresConnection:
         """Close all database connections"""
         await self.engine.dispose()
         print(f"Postgres CONNECTION CLOSED successfully [OK]")
-
-# # ####################### DEBUG CODE (start) #########################
-# # ####################################################################
-# async def test_connection():
-#     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-#     pgs_connection = PostgresConnection()
-#     async with pgs_connection.async_session() as pgs_session:
-#         print(f"pgs_conn: {pgs_session}")
-#     print(f"pgs_conn", {await pgs_connection.db_health_check()})
-#     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-# import asyncio
-# asyncio.run(main=test_connection(), debug=True)
-# # ######################## DEBUG CODE (end) ##########################
-# # ####################################################################
