@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS
-from db_postgres.postgres_async_conn.db_tables_initialization import initialize_db_tables
+from db_postgres.postgres_init.db_tables_initialization import initialize_db_tables
 from fast_api.app_add_single_category.router_add_single_category import router_bert_add_single_category
 from fast_api.app_add_text_category.router_add_text_category import router_bert_add_text_category
 from fast_api.app_add_texts_categories_file.router_add_texts_categories_file import router_bert_add_text_category_file
@@ -60,7 +60,8 @@ routers_list = [
 async def fast_api_lifespan(app: FastAPI) -> AsyncGenerator:
     # Startup code
     try:
-        await initialize_db_tables()
+        from ML_BERT_classifier.init_bert import init_and_start_bert_model  # Init BERT inst
+        await initialize_db_tables()  # Create DB tables
         print(">>>>>>> FastAPI Lifespan startup complete")
     except Exception as error:
         print(f"Initializing DB tables, tables not created [ERROR]:"
