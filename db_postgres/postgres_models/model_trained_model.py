@@ -7,10 +7,14 @@ from sqlalchemy.orm import Mapped, mapped_column
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
 
 
-class CustomerModel(Base):
-    __tablename__ = "customer"
+class TrainedModelModel(Base):
+    __tablename__ = "trained_model"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    # dataset_id: Mapped[int] = mapped_column(ForeignKey("dataset.id"))
+
+    last_saved_directory: Mapped[str] = mapped_column()
+    dataset_name: Mapped[str] = mapped_column()
 
     username: Mapped[Optional[str]]
     account_id: Mapped[Optional[str]]
