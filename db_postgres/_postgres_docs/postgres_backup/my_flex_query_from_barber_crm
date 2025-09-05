@@ -1,0 +1,91 @@
+def get_trained_models_flex_query(
+        required_date: date,
+        worktime_id: Union[int, "all"] = "all",
+        master_id: Union[int, "all"] = "all",
+        masters_ids_list: Union[List[int], "all"] = "all",
+        work_time_client_id: Union[int, "all"] = "all",
+        work_time_services_ids: Union[List[int], "all"] = "all",
+        reserved: Union[bool, "all"] = "all",
+        active: Union[bool, "all"] = "all",
+        admin_only: Union[bool, "all"] = "all",
+        order_by_fields: Optional[Union[str, Tuple[str, ...], None]] = (
+                "master_id", "time_start",)
+) -> list[WorkTime]:
+    with (DBConnection(db_url=db_engine_url) as session):
+        base_query = session.query(
+            Master.full_name.label("master_fullname"),
+            WorkTime.id,
+            cast(extract(
+                "DAY", WorkTime.time_start), Integer).label("day_of_month"),
+            WorkTime.master_id,
+            WorkTime.time_start,
+            WorkTime.time_end,
+            WorkTime.slot_duration,
+            # (WorkTime.time_end - WorkTime.time_start).label("slot_duration"),
+            WorkTime.active,
+            WorkTime.reserved,
+            func.lag(WorkTime.time_end).over(
+                partition_by=WorkTime.master_id,
+                order_by=(
+                    WorkTime.master_id,
+                    WorkTime.time_start)
+            ).label("prior_slot_time_end"),
+
+            # ##### For the future
+            # case((WorkTime.time_start == func.lag(WorkTime.time_end).over(
+            #     partition_by=(
+            #         WorkTime.master_id),
+            #     order_by=(
+            #         WorkTime.master_id,
+            #         WorkTime.time_start)), True),
+            #      else_=False
+            #      ).label("slots_time_continuing")
+
+        ).join(
+            Master, Master.id == WorkTime.master_id)
+
+        filter_query = base_query.filter(
+            WorkTime.time_start >= datetime.now(),
+            func.date(WorkTime.time_start) == required_date)
+
+        if worktime_id != "all":
+            filter_query = filter_query.filter(
+                WorkTime.id == worktime_id)
+
+        if master_id != "all":
+            filter_query = filter_query.filter(
+                WorkTime.master_id == master_id)
+
+        if masters_ids_list != "all":
+            filter_query = filter_query.filter(
+                WorkTime.master_id.in_(masters_ids_list))
+
+        if work_time_client_id != "all":
+            filter_query = filter_query.filter(
+                WorkTime.work_time_clients.any(
+                    User.id == work_time_client_id))
+
+        if work_time_services_ids != "all":
+            filter_query = filter_query.filter(
+                WorkTime.work_time_services.any(
+                    Service.id.in_(work_time_services_ids)))
+
+        if reserved != "all":
+            filter_query = filter_query.filter(
+                WorkTime.reserved.is_(reserved))
+
+        if active != "all":
+            filter_query = filter_query.filter(
+                WorkTime.active.is_(active))
+
+        if admin_only != "all":
+            filter_query = filter_query.filter(
+                WorkTime.admin_only.is_(admin_only))
+
+        order_query = create_order_by_partial_query(
+            orm_model_class=WorkTime,
+            prior_orm_query=filter_query,
+            order_by_fields=order_by_fields)
+
+        slot_records_for_date = order_query.all()
+        return slot_records_for_date
