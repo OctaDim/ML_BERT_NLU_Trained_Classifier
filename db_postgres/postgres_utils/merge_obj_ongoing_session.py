@@ -5,9 +5,9 @@ from db_postgres.postgres_utils.model_object_attrs_update import (
 
 
 async def merge_obj_to_ongoing_session(object_to_merge,
-                                 new_update_data: dict,
-                                 ongoing_session: Session) -> None:
-    update_model_obj_no_commit(model_object=object_to_merge,
+                                       new_update_data: dict,
+                                       ongoing_session: Session) -> None:
+    update_model_obj_no_commit(orm_model_object=object_to_merge,
                                new_update_data=new_update_data)
     try:
         await ongoing_session.merge(object_to_merge)
