@@ -1,8 +1,8 @@
 async def test_get_model_records_via_flex_query():
     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    from db_postgres.postgres_queries.query_get_trained_models import (
+    from db_postgres.postgres_queries.query_all_trained_models import (
         get_model_records_flex_query)
-    from db_postgres.postgres_models.model_customer import CustomerModel
+    from db_postgres.postgres_models.customer_model import CustomerModel
     from db_postgres.postgres_async_conn.pgs_async_connection import PostgresConnection
 
     pgs_conn = PostgresConnection()
