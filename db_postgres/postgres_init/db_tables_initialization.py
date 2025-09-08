@@ -5,8 +5,8 @@ from db_postgres.postgres_async_conn.pgs_async_connection import (
 
 
 async def initialize_db_tables():
-    from db_postgres.postgres_init import db_tables_init_imports as model_imports
-    model_imports = model_imports  # DO NOT REMOVE!!!: for staying import above when auto linter
+    from db_postgres.postgres_init import db_tables_init_imports as imports
+    model_imports = imports  # DO NOT REMOVE!!!: for staying import above when auto linter
     pgs_conn = PostgresConnection()
     if not await pgs_conn.db_health_check():
         print(await pgs_conn.db_health_check())
