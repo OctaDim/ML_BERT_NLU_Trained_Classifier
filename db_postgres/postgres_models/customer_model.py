@@ -1,20 +1,19 @@
 from datetime import datetime
 from typing import Optional
 
+from sqlalchemy import UniqueConstraint
 # from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
 
 
-class TrainedModelModel(Base):
-    __tablename__ = "trained_model"
+class CustomerModel(Base):
+    __tablename__ = "customer"
+    __table_args__ = (UniqueConstraint("username", "account_id",
+                                       name="uq_username_account_id"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    # dataset_id: Mapped[int] = mapped_column(ForeignKey("dataset.id"))
-
-    last_saved_directory: Mapped[str] = mapped_column()
-    dataset_name: Mapped[str] = mapped_column()
 
     username: Mapped[Optional[str]]
     account_id: Mapped[Optional[str]]

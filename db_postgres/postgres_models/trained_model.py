@@ -1,19 +1,20 @@
 from datetime import datetime
-from typing import Optional
 
-# from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
 
 
-class CustomerModel(Base):
-    __tablename__ = "customer"
+class TrainedModelModel(Base):
+    __tablename__ = "trained_model"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"),
+                                             nullable=True)
 
-    username: Mapped[Optional[str]]
-    account_id: Mapped[Optional[str]]
+    model_directory: Mapped[str] = mapped_column()
+    dataset_name: Mapped[str] = mapped_column(nullable=True)
 
     active: Mapped[bool] = mapped_column(default=True)
     created: Mapped[datetime] = mapped_column(default=datetime.now(),
