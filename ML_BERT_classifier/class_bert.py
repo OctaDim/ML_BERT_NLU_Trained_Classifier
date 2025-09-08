@@ -111,8 +111,8 @@ class ClassifierBERT:
         "tf" returns TensorFlow tensors, "np" returns NumPy arrays,
         None returns lists"""
 
-        print(f"####### texts_list: {texts_list}\n"
-              f"####### labels_list: {labels_list}\n"
+        print(f"####### texts_list: {texts_list[:25]},..........\n"
+              f"####### labels_list: {labels_list[:25]},..........\n"
               f"####### truncation: {truncation}\n"
               f"####### padding: {padding}\n"
               f"####### return_tensors: {return_tensors}\n")
@@ -268,7 +268,16 @@ class ClassifierBERT:
                 print(redis_error)
 
             if cont_100perc_epochs_counter == max_cont_100perc_epochs:
+                redis_update = {
+                    "cont_100perc_epochs_counter": cont_100perc_epochs_counter, }
+                redis_error = await redis_save_key_mapping_dict(
+                    key_name="train_process",
+                    mapping_dict=redis_update,
+                    expiry_seconds=REDIS_KEY_EXPIRE_TIME)
+                if redis_error:
+                    print(redis_error)
                 return
+        return
 
     def save_model(self, dir_full_path: str) -> None | str:
         """Save model and tokeniser"""
