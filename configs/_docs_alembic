@@ -1,0 +1,149 @@
+1) Установка Alembic:
+pip install alembic
+
+2) Инициализация Alembic в проекте:
+# Перейдите в корневую директорию вашего проекта
+cd your-project-directory
+
+3) Инициализируйте Alembic
+alembic init alembic
+
+эта команда создаст структуру:
+your-project/
+├── alembic/
+│   ├── env.py
+│   ├── README
+│   ├── script.py.mako
+│   └── versions/
+└── alembic.ini
+
+4) Настройка подключения к БД (Отредактируйте alembic.ini):
+# Измените строку подключения
+sqlalchemy.url = driver://user:pass@localhost/dbname
+
+# Например, для PostgreSQL:
+sqlalchemy.url = postgresql+asyncpg://username:password@localhost/mydatabase
+sqlalchemy.url = postgresql://username:password@localhost/mydatabase
+
+# Или SQLite:
+sqlalchemy.url = sqlite:///app.db
+
+5) Настройка env.py (Отредактируйте alembic/env.py):
+python
+
+from logging.config import fileConfig
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
+from alembic import context
+
+# Импортируйте ваши модели
+from app.models import Base  # Импортируйте ваш Base
+
+from alembic import context
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from db_postgres.postgres_async_conn.pgs_async_connection import Base
+from models.trained_model import TrainedModelModel
+
+config = context.config
+target_metadata = Base.metadata
+
+def run_migrations_offline():
+    """Run migrations in 'offline' mode."""
+    url = config.get_main_option("sqlalchemy.url")
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+async def run_migrations_online():
+    """Run migrations in 'online' mode."""
+    connectable = create_async_engine(
+        config.get_main_option("sqlalchemy.url"),
+        future=True,
+    )
+
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
+
+def do_run_migrations(connection):
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    import asyncio
+    asyncio.run(run_migrations_online())
+
+6) Создание первой миграции
+# Создайте автоматическую миграцию на основе моделей (bash)
+alembic revision --autogenerate -m "Initial migration"
+
+7) Применение миграций к БД (bash)
+alembic upgrade head
+
+8) Основные команды Alembic (bash)
+# Показать текущую версию
+alembic current
+
+# Показать историю миграций
+alembic history
+
+# Откат на одну миграцию
+alembic downgrade -1
+
+# Откат к конкретной версии
+alembic downgrade <revision_id>
+
+# Создать пустую миграцию (для ручного написания)
+alembic revision -m "Add new column"
+
+9) Интеграция с приложением (python):
+# app/database.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.models import Base
+
+DATABASE_URL = "sqlite:///app.db"
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def init_db():
+    Base.metadata.create_all(bind=engine)
+
+
+9) Автоматизация миграций (python):
+Создайте скрипт для управления миграциями:
+
+# migrate.py
+import os
+import sys
+from alembic.config import Config
+from alembic import command
+
+def run_migrations():
+    alembic_cfg = Config("alembic.ini")
+    command.upgrade(alembic_cfg, "head")
+
+if __name__ == "__main__":
+    run_migrations()
+
+10) Полезные советы:
+    Всегда проверяйте сгенерированные миграции перед применением
+    Тестируйте миграции на тестовой БД перед продакшеном
+    Используйте ветки миграций для сложных изменений
+    Храните миграции в системе контроля версий
