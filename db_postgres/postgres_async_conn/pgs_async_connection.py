@@ -62,14 +62,16 @@ class PostgresConnection:
                 print("Postgres SESSION COMMIT successfully [OK]")
             except Exception as error:
                 await session.rollback()
-                print(f"Postgres SESSION ROLLBACK dut to error [ERROR]:\n"
-                      f"error: {error}\n"
-                      f"self.db_user: {self.db_user}\n"
-                      f"self.db_password: ***\n"
-                      f"self.db_host: {self.db_host}\n"
-                      f"self.db_port: {self.db_port}\n"
-                      f"self.db_name: {self.db_name}\n")
-                raise
+                error_log = (
+                    f"Postgres SESSION ROLLBACK dut to error [ERROR]:\n"
+                    f"error: {error}\n"
+                    f"self.db_user: {self.db_user}\n"
+                    f"self.db_password: ***\n"
+                    f"self.db_host: {self.db_host}\n"
+                    f"self.db_port: {self.db_port}\n"
+                    f"self.db_name: {self.db_name}\n")
+                print(error_log)
+                raise type(error)(error_log)
             finally:
                 await session.close()
                 print("Postgres SESSION CLOSED successfully [OK]")
@@ -81,8 +83,10 @@ class PostgresConnection:
                 await engine_conn.execute(text("SELECT 1"))
             return True
         except Exception as error:
-            print(f"Postgres Database HEALTH check [ERROR]: error: {error}")
-            return False
+            error_log = (f"Postgres Database HEALTH check [ERROR]: "
+                         f"error: {error}")
+            print(error_log)
+            raise type(error)(error_log)
 
     async def dispose(self) -> None:
         """Close all database connections"""
