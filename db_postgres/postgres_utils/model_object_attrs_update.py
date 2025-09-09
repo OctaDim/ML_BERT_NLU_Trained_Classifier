@@ -1,9 +1,9 @@
 from typing import Dict
 
-from db_postgres.postgres_async_conn.pgs_async_connection import Base
+from sqlalchemy.orm import DeclarativeBase
 
 
-def update_model_obj_no_commit(orm_model_object: Base,
+def update_model_obj_no_commit(orm_model_object: DeclarativeBase,
                                new_update_data: Dict[str, any]):
     invalid_attributes = []
     model_class_name = orm_model_object.__class__.__name__

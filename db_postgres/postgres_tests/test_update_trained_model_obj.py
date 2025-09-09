@@ -3,12 +3,12 @@
 async def update_model_object_test():
     from db_postgres.postgres_utils.merge_obj_ongoing_session import merge_obj_to_ongoing_session
     from db_postgres.postgres_async_conn.pgs_async_connection import PostgresConnection
-    from db_postgres.postgres_models.trained_model import TrainedModelModel
+    from db_postgres.postgres_models.trained_bert_model import TrainedBertModel
     from db_postgres.postgres_models.customer_model import CustomerModel
     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     pgs_conn = PostgresConnection()
     print(f"pgs_conn", {await pgs_conn.db_health_check()})
-    new_customer = TrainedModelModel()
+    new_customer = TrainedBertModel()
     new_update_data = [
         {"customer_id": 11,
          "model_directory": "/usr/local/ML_BERT_NLU_Training_Classifier/WORKING_DATA/trained_product_bert_models/trained_bert_06_09_2025_13_28_58_835504-19760", },

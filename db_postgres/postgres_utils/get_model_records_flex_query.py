@@ -1,8 +1,10 @@
 from typing import Union, Optional, Tuple, List, Type
 
+from fastapi import HTTPException
 from sqlalchemy import select, UnaryExpression
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
+from starlette import status
 
 from configs.settings import ALCHEMY_OPTIONS
 from db_postgres.postgres_utils.create_order_by_partial_query import (
@@ -25,18 +27,29 @@ async def get_model_objs_flex_query(
 ) -> List[Type[DeclarativeBase]]:
     orm_query = select(orm_model_class)
 
-    # Creating filter flex query part
-    orm_query = create_where_for_partial_query(
-        orm_model_class=orm_model_class,
-        prior_orm_query=orm_query,
-        fields_values_filter=fields_values_filter)
+    try:
+        # Creating filter flex query part
+        orm_query = create_where_for_partial_query(
+            orm_model_class=orm_model_class,
+            prior_orm_query=orm_query,
+            fields_values_filter=fields_values_filter)
 
-    # Creating order flex query part
-    orm_query = create_order_for_partial_query(
-        orm_model_class=orm_model_class,
-        prior_orm_query=orm_query,
-        order_by_fields=order_by_fields)
+        # Creating order flex query part
+        orm_query = create_order_for_partial_query(
+            orm_model_class=orm_model_class,
+            prior_orm_query=orm_query,
+            order_by_fields=order_by_fields)
 
-    result = await ongoing_session.execute(orm_query)
-    model_records = list(result.scalars().all())
-    return model_records
+        result = await ongoing_session.execute(orm_query)
+        model_records = list(result.scalars().all())
+        return model_records
+    except Exception as error:
+        log_text = (f"Getting model objs flex query [ERROR]:\n"
+                    f"error: {error}\n"
+                    f"orm_model_class: {orm_model_class}\n"
+                    f"fields_values_filter: {fields_values_filter}\n"
+                    f"order_by_fields: {order_by_fields}\n")
+        print(log_text)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=log_text)

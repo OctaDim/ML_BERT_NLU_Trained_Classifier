@@ -10,7 +10,7 @@ def create_where_for_partial_query(
         prior_orm_query: Select,
         fields_values_filter: Dict[str, any | List[any] | Tuple[any]]):
     if prior_orm_query is None:
-        log_error = (f"\tDB creating where for partition query [ERROR]:\n"
+        log_error = (f"DB creating where for partition query [ERROR]:\n"
                      f"orm_query: {prior_orm_query}\n"
                      f"fields_values_filter: {fields_values_filter}\n")
         raise ValueError(log_error)
@@ -20,7 +20,7 @@ def create_where_for_partial_query(
         if not hasattr(orm_model_class, field_name):
             invalid_attributes.append(field_name)
     if invalid_attributes:
-        log_error = (f"\tDB Filter by field(s) [ERROR]: "
+        log_error = (f"DB Filter by field(s) [ERROR]: "
                      f"Attribute(s) string name not found in model class\n"
                      f"orm_model_class: {orm_model_class}\n"
                      f"invalid_attributes: {invalid_attributes}\n"

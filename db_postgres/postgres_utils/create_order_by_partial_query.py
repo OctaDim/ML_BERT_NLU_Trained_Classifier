@@ -24,12 +24,12 @@ def create_order_for_partial_query(
      if order_by_fields was defined wrong and model has no such attributes
     """
     if prior_orm_query is None:
-        print(f"\tDB creating order for partition query [ERROR]:\n"
+        print(f"DB creating order for partition query [ERROR]:\n"
               f"prior_orm_query: {prior_orm_query}\n")
         return prior_orm_query
 
     if order_by_fields is None:
-        print(f"\tDB creating order for partition query skipped [ERROR]:\n"
+        print(f"DB creating order for partition query skipped [WARNING]:\n"
               f"order_by_fields: {order_by_fields}\n")
         return prior_orm_query
 
@@ -46,7 +46,7 @@ def create_order_for_partial_query(
                 if hasattr(orm_model_class, order_field):
                     order_query = order_query.order_by(order_field)
                 else:
-                    print(f"\tDB Order by field '{order_field}' skipped [ERROR]: "
+                    print(f"DB Order by field '{order_field}' skipped [ERROR]: "
                           f"Attribute string name not found in model class\n"
                           f"orm_model_class: {orm_model_class}\n"
                           f"order_field: {order_field}\n"
