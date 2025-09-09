@@ -2,11 +2,13 @@ from datetime import datetime, timedelta
 
 from torch.utils.data import TensorDataset
 
-from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
-    REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, STATUSES, BERT_TRAIN_OPTIONS)
-from db_redis.redis_funcs.func_redis_save_key_mapping import redis_save_key_mapping_dict
+    REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, STATUSES)
+from db_redis.redis_funcs.func_redis_save_key_mapping import (
+    redis_save_key_mapping_dict)
+from fast_api.app_account_data.scheme_account_data import (
+    AccountDataBert)
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_save_model.router_bert_save_model import (
     bert_save_model)
@@ -18,6 +20,7 @@ from fast_api.app_bert_train_model.scheme_bert_train_model import (
 
 async def background_train_save_model(
         auth_data: AuthDataBert,
+        account_data: AccountDataBert,
         train_model_data: TrainModelDataBert,
         new_train_dataset: TensorDataset,
         dataset_name: str,
@@ -45,15 +48,15 @@ async def background_train_save_model(
     # time.sleep(60)
     # print("\n\n******* MODEL TRAINING TEMPORARY SWITCHED OFF (end) *******")
 
-    print("\n\n***********************************************************")
+    print("***********************************************************")
     print("********* MODEL TRAINING SWITCHED ON (start) **************")
-    await bert_model_inst.train(
-        train_dataset=new_train_dataset,
-        max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
-        max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
-        batch_size=BERT_TRAIN_OPTIONS.BERT_TRAIN_BATCH_SUZE,
-        learning_rate=BERT_TRAIN_OPTIONS.BERT_TRAIN_LEARNING_RATE)
-    print("\n\n********** MODEL TRAINING SWITCHED ON (end) ***************")
+    # await bert_model_inst.train(
+    #     train_dataset=new_train_dataset,
+    #     max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
+    #     max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
+    #     batch_size=BERT_TRAIN_OPTIONS.BERT_TRAIN_BATCH_SUZE,
+    #     learning_rate=BERT_TRAIN_OPTIONS.BERT_TRAIN_LEARNING_RATE)
+    print("********** MODEL TRAINING SWITCHED ON (end) ***************")
     print("***********************************************************")
     training_time = (datetime.now() - datetime_start).total_seconds()
     hours, remainder = [int(el) for el in divmod(training_time, 3600)]
@@ -115,6 +118,7 @@ async def background_train_save_model(
         # Redirecting to bert_save_model router view with necessary params
         await bert_save_model(
             auth_data=auth_data,
+            account_data=account_data,
             save_model_data=save_model_data_bert,
             save_model_after_train_data=save_model_after_train_bert,
             dataset_name=dataset_name, )
@@ -134,8 +138,7 @@ async def background_train_save_model(
         redis_update = {
             "train_status": STATUSES.STATUS_TRAIN_WITHOUT_SAVE_COMPLETE_EN,
             "train_complete_status": "complete",
-            "train_step_1212_training_without_saving_complete": "[OK]",
-        }
+            "train_step_1212_training_without_saving_complete": "[OK]", }
         redis_error = await redis_save_key_mapping_dict(
             key_name=dataset_name,
             mapping_dict=redis_update,

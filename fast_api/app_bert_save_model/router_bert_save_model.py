@@ -9,8 +9,6 @@ from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, REDIS_OPTIONS, STATUSES)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
 from db_postgres.postgres_models.trained_bert_model import (
     TrainedBertModel)
 from db_postgres.postgres_utils.merge_obj_ongoing_session import (
@@ -49,14 +47,9 @@ async def bert_save_model(auth_data: AuthDataBert,
     print("\nGetting or creating customer record and customer id:")
     account_username = account_data.account_username
     account_id = account_data.account_id
-    print(f"####### account_username: {account_username}")
-    print(f"####### account_id: {account_id}")
-    pgs_conn = PostgresConnection()
-    async with pgs_conn.async_session() as pgs_session:
-        customer_id = await verify_create_customer(
-            ongoing_session=pgs_session,
-            account_username=account_username,
-            account_id=account_id)
+    customer_id = await verify_create_customer(
+        account_username=account_username,
+        account_id=account_id)
 
     print("\nBERT saving model without train or after train process:")
     save_after_train_flag = save_model_after_train_data.trained_model_redirected_save_flag
