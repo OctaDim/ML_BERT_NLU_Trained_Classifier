@@ -1,26 +1,21 @@
-from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
+from db_postgres.postgres_models.active_create_upd_mixins import (
+    ActiveMixin, CreateUpdateMixin, StatusMixin)
 
 
-class TrainedModelModel(Base):
+class TrainedBertModel(Base, ActiveMixin, CreateUpdateMixin, StatusMixin):
     __tablename__ = "trained_model"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"),
-                                             nullable=True)
+    customer_id: Mapped[Optional[int]] = mapped_column(ForeignKey("customer.id"))
 
     model_directory: Mapped[str] = mapped_column()
-    dataset_name: Mapped[str] = mapped_column(nullable=True)
-
-    active: Mapped[bool] = mapped_column(default=True)
-    created: Mapped[datetime] = mapped_column(default=datetime.now(),
-                                              nullable=True)
-    updated: Mapped[datetime] = mapped_column(onupdate=datetime.now(),
-                                              nullable=True)
+    dataset_name: Mapped[Optional[str]] = mapped_column()
 
     # category_services: Mapped['Service'] = relationship(
     #     argument='Service',
