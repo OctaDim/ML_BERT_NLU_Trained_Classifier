@@ -13,3 +13,10 @@ async def initialize_db_tables():
 
     model_init = DBTablesManager(pgs_async_engine=pgs_conn.engine)
     await model_init.create_tables(metadata=Base.metadata)
+
+
+# Manual DB tables initialization
+if __name__ == "__main__":
+    import asyncio
+
+    asyncio.run(main=initialize_db_tables(), debug=True)
