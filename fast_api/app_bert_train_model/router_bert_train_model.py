@@ -12,6 +12,8 @@ from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS, BERT_TRAIN_OPTIONS, BERT_MODEL_NAMES,
     REDIS_OPTIONS, BASE_DIR, STATUSES)
+from db_postgres.postgres_async_conn.pgs_async_connection import (
+    PostgresConnection)
 from db_postgres.postgres_models.before_reinit_bert_model import (
     BeforeReinitBertModel)
 from db_postgres.postgres_utils.merge_obj_ongoing_session import (
@@ -189,6 +191,7 @@ async def bert_train_model(
             #         detail=error_log)
 
             print("\nDB Postgres saving before_reinit_model table data:")
+            pgs_conn = PostgresConnection()
             async with pgs_conn.async_session() as pgs_session:
                 new_model_obj = BeforeReinitBertModel()
                 update_data = {
