@@ -46,6 +46,9 @@ async def bert_get_train_tasks_list(auth_data: AuthDataBert):
             content=json_content,
             status_code=status.HTTP_200_OK)
 
+        tasks_sorted_list_print = sorted(tasks_sorted_list,
+                                         key=lambda x: x["dataset_name"],
+                                         reverse=True)
         print(f"BERT response message: {json_content.get('message')}\n"
               f"BERT response.body keys: {json_content.keys()}\n"
               # f"BERT response.body: {json_response.body}\n"  # Long to log
@@ -53,7 +56,7 @@ async def bert_get_train_tasks_list(auth_data: AuthDataBert):
               f"username: {auth_data.username}\n"
               f"getting_time: {getting_time}\n"
               f"type(tasks_sorted_list): {type(tasks_sorted_list)}\n"
-              f"tasks_sorted_list: {tasks_sorted_list}\n")
+              f"tasks_sorted_list: {tasks_sorted_list_print[:3]},..........\n")
         return json_response
     except Exception as error:
         log_text = (f"BERT router train model tasks list [ERROR]: "
