@@ -1,6 +1,5 @@
 from typing import Optional
 
-from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
@@ -8,17 +7,13 @@ from db_postgres.postgres_models.active_create_upd_mixins import (
     ActiveMixin, CreateUpdateMixin)
 
 
-class CustomerModel(Base, ActiveMixin, CreateUpdateMixin):
-    __tablename__ = "customer"
-    __table_args__ = (
-        UniqueConstraint("account_username", "account_id",
-                         name="uq_username_account_id"),
-    )
+class DatasetModel(Base, ActiveMixin, CreateUpdateMixin):
+    __tablename__ = "dataset"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    account_username: Mapped[Optional[str]] = mapped_column()
-    account_id: Mapped[Optional[str]] = mapped_column()
+    customer_id: Mapped[Optional[int]] = mapped_column(unique=True)
+    dataset_name: Mapped[str] = mapped_column()
 
     # category_services: Mapped['Service'] = relationship(
     #     argument='Service',
