@@ -23,7 +23,7 @@ def update_model_obj_no_commit(orm_model_object: DeclarativeBase,
         try:
             setattr(orm_model_object, attr_name, attr_value)
         except Exception as error:
-            log_error = (f"DB Failed to set model object attribute [ERROR]: "
+            log_error = (f"DB Failed to set model object attribute [ERROR]: \n"
                          f"error: {error}\n"
                          f"attr_name: {attr_name}\n"
                          f"attr_value: {attr_value}\n"

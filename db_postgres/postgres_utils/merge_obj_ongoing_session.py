@@ -14,7 +14,7 @@ async def merge_obj_to_ongoing_session(object_to_merge: DeclarativeBase,
     try:
         await ongoing_session.merge(object_to_merge)
     except Exception as error:
-        log_error = (f"DB Merging object to ongoing session [ERROR]: "
+        log_error = (f"DB Merging object to ongoing session [ERROR]: \n"
                      f"error: {error}\n"
                      f"object_to_merge: {object_to_merge}\n"
                      f"model_class: {object_to_merge.__class__.__name__}\n"

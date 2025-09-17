@@ -1,4 +1,4 @@
-from typing import Tuple, Type, Union, Any
+from typing import Tuple, Type, Union
 
 from sqlalchemy import UnaryExpression
 from sqlalchemy.orm import Query
@@ -24,12 +24,14 @@ def create_order_for_partial_query(
      if order_by_fields was defined wrong and model has no such attributes
     """
     if prior_orm_query is None:
-        print(f"DB creating order for partition query [ERROR]:\n"
-              f"prior_orm_query: {prior_orm_query}\n")
-        return prior_orm_query
+        log_error = (f"DB creating ORDER BY for partition query [ERROR]:\n"
+                     f"orm_query: {prior_orm_query}\n"
+                     f"order_by_fields: {order_by_fields}\n")
+        print(log_error)
+        raise ValueError(log_error)
 
     if order_by_fields is None:
-        print(f"DB creating order for partition query skipped [WARNING]:\n"
+        print(f"DB creating order for partition query skipped [ERROR]:\n"
               f"order_by_fields: {order_by_fields}\n")
         return prior_orm_query
 
@@ -40,17 +42,25 @@ def create_order_for_partial_query(
     else:
         order_by_fields_validated = (order_by_fields,)
 
-    if order_by_fields_validated:
-        for order_field in order_by_fields_validated:
-            if isinstance(order_field, str):
-                if hasattr(orm_model_class, order_field):
-                    order_query = order_query.order_by(order_field)
+    try:
+        if order_by_fields_validated:
+            for order_field in order_by_fields_validated:
+                if isinstance(order_field, str):
+                    if hasattr(orm_model_class, order_field):
+                        order_query = order_query.order_by(order_field)
+                    else:
+                        print(f"DB Order by field '{order_field}' skipped [ERROR]: "
+                              f"Attribute string name not found in model class\n"
+                              f"orm_model_class: {orm_model_class}\n"
+                              f"order_field: {order_field}\n"
+                              f"order_by_fields: {order_by_fields}\n")
                 else:
-                    print(f"DB Order by field '{order_field}' skipped [ERROR]: "
-                          f"Attribute string name not found in model class\n"
-                          f"orm_model_class: {orm_model_class}\n"
-                          f"order_field: {order_field}\n"
-                          f"order_by_fields: {order_by_fields}\n")
-            else:
-                order_query = order_query.order_by(order_field)
+                    order_query = order_query.order_by(order_field)
+    except Exception as error:
+        log_error = (f"Creating ORDER BY query by adding ORDER BY part [ERROR]: \n"
+                     f"error: {error} \n"
+                     f"orm_model_class: {orm_model_class} \n"
+                     f"order_by_fields: {order_by_fields} \n")
+        print(log_error)
+        raise
     return order_query
