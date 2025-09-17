@@ -71,3 +71,4 @@ scikit-learn==1.7.1
 SQLAlchemy==2.0.43
 asyncpg==0.30.0
 alembic==1.16.5
+async-timeout==5.0.1
