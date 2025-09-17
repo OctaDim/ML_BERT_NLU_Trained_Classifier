@@ -1,19 +1,19 @@
-from contextlib import asynccontextmanager
-from typing import Union, AsyncIterator
+from typing import Union
 
 from sqlalchemy.ext.asyncio import (
-    create_async_engine, AsyncSession, async_sessionmaker)
+    create_async_engine)
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import text
 
 from configs.settings import (
     POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT,
     POSTGRES_DB_NAME, ALCHEMY_OPTIONS)
+from meta_classes.singlton_meta import SingletonMeta
 
 Base = declarative_base()
 
 
-class PostgresConnection:
+class PostgresConnection(metaclass=SingletonMeta):
     def __init__(self,
                  user: str = None,
                  password: Union[str, None] = None,
@@ -43,50 +43,18 @@ class PostgresConnection:
             pool_recycle=ALCHEMY_OPTIONS.ALCHEMY_POOL_RECYCLE,
             pool_timeout=ALCHEMY_OPTIONS.ALCHEMY_POOL_TIMEOUT, )
 
-        self.AsyncSessionMaker = async_sessionmaker(
-            bind=self.engine,
-            class_=AsyncSession,
-            expire_on_commit=False,
-            autoflush=False,
-            info={"any_attribute": "any session available attribute data"}, )
-
-    @asynccontextmanager
-    async def async_session(self) -> AsyncIterator[AsyncSession]:
-        """Hardly controlled Session via decorator, yield and try-except.
-        Let's carefully control execution before and after the session"""
-        async with self.AsyncSessionMaker() as session:
-            try:
-                print(f"\nPostgres SESSION CREATED [OK]")
-                yield session
-                await session.commit()
-                print("Postgres SESSION COMMIT successfully [OK]")
-            except Exception as error:
-                await session.rollback()
-                error_log = (
-                    f"Postgres SESSION ROLLBACK dut to error [ERROR]:\n"
-                    f"error: {error}\n"
-                    f"self.db_user: {self.db_user}\n"
-                    f"self.db_password: ***\n"
-                    f"self.db_host: {self.db_host}\n"
-                    f"self.db_port: {self.db_port}\n"
-                    f"self.db_name: {self.db_name}\n")
-                print(error_log)
-                raise type(error)(error_log)
-            finally:
-                await session.close()
-                print("Postgres SESSION CLOSED successfully [OK]")
-
     async def db_health_check(self) -> bool:
         """Check database connection availability (health status)"""
         try:
             async with self.engine.connect() as engine_conn:
                 await engine_conn.execute(text("SELECT 1"))
+            print("Postgres Database HEALTH check [OK]")
             return True
         except Exception as error:
             error_log = (f"Postgres Database HEALTH check [ERROR]: "
                          f"error: {error}")
             print(error_log)
-            raise type(error)(error_log)
+            return False
 
     async def dispose(self) -> None:
         """Close all database connections"""

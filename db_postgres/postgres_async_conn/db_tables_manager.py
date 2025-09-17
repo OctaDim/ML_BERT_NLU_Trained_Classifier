@@ -26,7 +26,6 @@ class DBTablesManager:
                 result = await pgs_conn.execute(
                     text(sql_query),
                     {"table_name": table_name})
-                exists = result.scalar()
-                if not exists:
+                if not result.scalar():
                     return False
         return True
