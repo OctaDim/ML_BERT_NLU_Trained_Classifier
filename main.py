@@ -1,10 +1,12 @@
+import asyncio
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 import uvicorn
 from fastapi import FastAPI
 
-from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS
+from ML_BERT_classifier.init_bert import init_and_start_bert_model
+from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS, ALCHEMY_OPTIONS
 from db_postgres.postgres_init.db_tables_initialization import initialize_db_tables
 from fast_api.app_add_single_category.router_add_single_category import router_bert_add_single_category
 from fast_api.app_add_text_category.router_add_text_category import router_bert_add_text_category
@@ -52,24 +54,40 @@ routers_list = [
 
     # Test end-point (debug time)
     router_develop_test_endpoint,
-
 ]
+
+
+def run_redis():
+    # TODO: Check Redis is available and start Redis if not
+    print("TODO: Check Redis is available and start Redis if not")
+    pass
+
+
+def run_postgres():
+    # TODO: Check Postgres is available and start Postgres if not
+    print("TODO: Check Postgres is available and start Postgres if not")
+    pass
+
+
+async def lifespan_on_startup():
+    print(">>>>>>> FastAPI Lifespan (startup):")
+    run_redis()
+    run_postgres()
+    if ALCHEMY_OPTIONS.POSTGRES_INIT:
+        await initialize_db_tables()  # Creating postgres db tables
+    await init_and_start_bert_model()  # Initializing Bert model
+
+
+async def lifespan_on_shutdown():
+    print(">>>>>>> FastAPI Lifespan (shutdown):")
+    return
 
 
 @asynccontextmanager
 async def fast_api_lifespan(app: FastAPI) -> AsyncGenerator:
-    # Startup code
-    try:
-        from ML_BERT_classifier.init_bert import init_and_start_bert_model  # Init BERT inst
-        await initialize_db_tables()  # Create DB tables
-        print(">>>>>>> FastAPI Lifespan startup complete")
-    except Exception as error:
-        print(f"Initializing DB tables, tables not created [ERROR]:"
-              f"error: {error}")
-        raise
-    yield
-    # Shutdown code (optional)
-    print(">>>>>>> FastAPI Lifespan application shutting down")
+    await lifespan_on_startup()
+    yield  # FastAPI lifespan yield  (Execution fastapi application)
+    await lifespan_on_shutdown()
 
 
 def create_fastapi_application() -> FastAPI:
@@ -89,16 +107,6 @@ def run_uvicorn_fastapi_server():
                 log_level=FASTAPI_OPTIONS.LOG_LEVEL,
                 use_colors=FASTAPI_OPTIONS.USE_COLORS, )
     print("Uvicorn and FastAPI server started [OK]")
-
-
-def run_redis():
-    # TODO: Check Redis is available and start Redis if not
-    pass
-
-
-def run_postgres():
-    # TODO: Check Postgres is available and start Postgres if not
-    pass
 
 
 if __name__ == "__main__":
