@@ -27,7 +27,6 @@ async def update_model_object_test():
 
 if __name__ == "__main__":
     import asyncio
-
     asyncio.run(main=update_model_object_test(), debug=True)
 # ########################## DEBUG CODE (end) ##########################
 # ######################################################################

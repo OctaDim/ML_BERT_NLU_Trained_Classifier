@@ -4,7 +4,6 @@ async def update_model_object_test():
     from db_postgres.postgres_utils.merge_obj_ongoing_session import merge_obj_to_ongoing_session
     from db_postgres.postgres_async_conn.pgs_async_connection import PostgresConnection
     from db_postgres.postgres_models.trained_bert_model import TrainedBertModel
-    from db_postgres.postgres_models.customer_model import CustomerModel
     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     pgs_conn = PostgresConnection()
     print(f"pgs_conn", {await pgs_conn.db_health_check()})
@@ -28,7 +27,6 @@ async def update_model_object_test():
 
 if __name__ == "__main__":
     import asyncio
-
     asyncio.run(main=update_model_object_test(), debug=True)
 # ########################## DEBUG CODE (end) ##########################
 # ######################################################################
