@@ -1,5 +1,7 @@
 # ####################### DEBUG CODE (start) ###########################
 # ######################################################################
+
+
 async def get_records():
     from db_postgres.postgres_async_conn.pgs_async_connection import (
         PostgresConnection)
@@ -30,5 +32,7 @@ if __name__ == "__main__":
     import asyncio
 
     asyncio.run(main=get_records(), debug=True)
+
+
 # ########################## DEBUG CODE (end) ##########################
 # ######################################################################
