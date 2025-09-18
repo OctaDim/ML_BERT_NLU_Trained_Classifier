@@ -1,4 +1,3 @@
-import asyncio
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
@@ -7,6 +6,7 @@ from fastapi import FastAPI
 
 from ML_BERT_classifier.init_bert import init_and_start_bert_model
 from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS, ALCHEMY_OPTIONS
+from db_postgres.postgres_async_conn.pgs_async_connection import close_all_db_connections
 from db_postgres.postgres_init.db_tables_initialization import initialize_db_tables
 from fast_api.app_add_single_category.router_add_single_category import router_bert_add_single_category
 from fast_api.app_add_text_category.router_add_text_category import router_bert_add_text_category
@@ -80,7 +80,7 @@ async def lifespan_on_startup():
 
 async def lifespan_on_shutdown():
     print(">>>>>>> FastAPI Lifespan (shutdown):")
-    return
+    await close_all_db_connections()
 
 
 @asynccontextmanager
