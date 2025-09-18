@@ -14,9 +14,13 @@ class PostgresSession:
             info={"any_attribute": "any session available attribute data"}, )
 
     async def __aenter__(self):
-        self.session = self.AsyncSessionMaker()
-        print(f"Postgres SESSION CREATED successfully [OK]")
-        return self.session
+        try:
+            self.session = self.AsyncSessionMaker()
+            print(f"Postgres SESSION CREATED successfully [OK]")
+            return self.session
+        except Exception as error:
+            print(f"Postgres SESSION CREATING [ERROR]")
+            raise
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if not exc_type:  # No session context manager error
