@@ -25,9 +25,10 @@ async def save_pgs_label_category_data(
                     object_to_merge=new_lab_cat_model_obj,
                     ongoing_session=pgs_session,
                     new_update_data=lab_cat_update_data)
+        print(f"DB Postgres saving label-category data [OK]")
     except Exception as error:
-        error_log = (f"DB Postgres saving label-category data [ERROR]: \n"
-                     f"error: {error} \n"
-                     f"label_category_dict: {label_category_dict} \n")
+        error_log = (f"DB Postgres saving label-category data [ERROR]: "
+                     f"error: {error}\n"
+                     f"label_category_dict: {label_category_dict}\n")
         print(error_log)
         raise
