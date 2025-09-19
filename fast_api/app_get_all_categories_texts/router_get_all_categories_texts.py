@@ -82,13 +82,15 @@ async def bert_get_categories_texts_dict(auth_data: AuthDataBert):
         # print(f"dataset_lab_txt_dict => {dataset_lab_txt_dict}")  # Too long
         print(f"len(dataset_lab_txt_dict) => {len(dataset_lab_txt_dict)}")
 
+        # TODO: Decide which option (double loop or single) is faster and keep it
+
         # Single loop
         category_texts_dict = {}
         for cur_text, cur_text_label in dataset_lab_txt_dict.items():
             category_name = dataset_lab_cat_dict[cur_text_label]
-            cur_category_texts_list = category_texts_dict.setdefault(category_name, [])
-            cur_category_texts_list.append(cur_text)
-            category_texts_dict[category_name] = cur_category_texts_list
+            cur_cat_texts_list = category_texts_dict.get(category_name, [])
+            cur_cat_texts_list.append(cur_text)
+            category_texts_dict[category_name] = cur_cat_texts_list
 
         # Double loop
         # category_texts_dict = {}
