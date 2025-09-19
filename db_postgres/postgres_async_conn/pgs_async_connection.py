@@ -64,7 +64,7 @@ class PostgresConnection(metaclass=SingletonMeta):
             print(error_log)
             return False
 
-    async def dispose(self) -> None:
+    async def dispose_connection(self) -> None:
         """Close all database connections"""
         try:
             await self.engine.dispose()
@@ -72,3 +72,8 @@ class PostgresConnection(metaclass=SingletonMeta):
         except Exception as error:
             print(f"Postgres DB CONNECTIONS CLOSING [ERROR]: "
                   f"error: {error}")
+
+
+async def close_all_db_connections():
+    pgs_conn = PostgresConnection()
+    await pgs_conn.dispose_connection()
