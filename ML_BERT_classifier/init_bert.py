@@ -4,13 +4,16 @@ from typing import Dict
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_OPTIONS, BERT_TRAIN_OPTIONS
-from db_postgres.postgres_async_conn.pgs_async_connection import PostgresConnection
-from db_postgres.postgres_async_conn.postgres_async_session import PostgresSession
+from db_postgres.postgres_async_conn.pgs_async_connection import (
+    PostgresConnection)
+from db_postgres.postgres_async_conn.postgres_async_session import (
+    PostgresSession)
 from db_postgres.postgres_init.db_tables_initialization import (
     initialize_db_tables)
-from db_postgres.postgres_models.dataset_model import DatasetModel
 from db_postgres.postgres_models.trained_bert_model import (
     TrainedBertModel)
+from db_postgres.postgres_queries.qry_find_create_dataset import (
+    find_create_dataset_qry)
 from db_postgres.postgres_queries.qry_get_label_category_data import (
     get_label_category_data_qry)
 from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
@@ -19,7 +22,6 @@ from db_postgres.postgres_queries.qry_save_label_category_dict import (
     save_label_category_data_qry)
 from db_postgres.postgres_queries.qry_save_new_model_data import (
     save_new_model_data_qry)
-from db_postgres.postgres_utils.model_object_attrs_update import update_model_obj_no_commit
 from utils_common.exec_time_decorator import execution_time_decorator
 from utils_common.normalized_path import get_full_file_normal_path
 from utils_specific.class_csv_labels_categories import CsvLabelCategory
@@ -32,7 +34,7 @@ from utils_specific.get_last_saved_dataset_path import (
 from utils_specific.get_last_saved_model_dir import (
     get_last_saved_model_dir_path)
 
-print("000")
+print("🚀 LET'S GO !!! 🚀")
 bert_model_inst = None
 print("bert_model_inst => ", bert_model_inst)
 
@@ -168,9 +170,14 @@ async def init_and_start_bert_model():
                       f"bert_start_init_dataset_dir: {bert_start_init_dataset_dir}\n")
 
             pgs_conn = PostgresConnection()
-            with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+            async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+                dataset_id = await find_create_dataset_qry(
+                    ongoing_session=pgs_session,
+                    dataset_name=start_init_dataset_name)
+
                 await save_label_category_data_qry(
                     ongoing_session=pgs_session,
+                    dataset_id=dataset_id,
                     label_category_dict=labels_categories)
                 print(f"Postgres DB labels categories saved [OK]:\n"
                       f"labels_categories: {labels_categories}\n")
@@ -202,21 +209,15 @@ async def init_and_start_bert_model():
                 use_hard_singleton=True)
 
             pgs_conn = PostgresConnection()
-            with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
-                new_dataset_obj = DatasetModel()
-                dataset_new_data = {
-                    "customer_id": None,
-                    "dataset_name": start_init_dataset_name}
-                update_model_obj_no_commit(
-                    orm_model_object=new_dataset_obj,
-                    new_update_data=dataset_new_data)
-                pgs_session.add(new_dataset_obj)
-                await pgs_session.flush()
-                new_dataset_id = new_dataset_obj.id
+            async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+                dataset_id = await find_create_dataset_qry(
+                    ongoing_session=pgs_session,
+                    dataset_name=start_init_dataset_name)
 
                 new_trained_model_data = {
-                    "dataset_id": new_dataset_id,
-                    "model_directory": initial_model_dir_path}
+                    "dataset_id": dataset_id,
+                    "model_directory": initial_model_dir_path,
+                    "creation_reason": "model initialized"}
                 await save_new_model_data_qry(
                     ModelClassORM=TrainedBertModel,
                     ongoing_session=pgs_session,
@@ -227,21 +228,15 @@ async def init_and_start_bert_model():
 
             if not load_error_log:
                 pgs_conn = PostgresConnection()
-                with PostgresSession(async_engine=pgs_conn.engine) as pgs_sess:
-                    new_dataset_obj = DatasetModel()
-                    dataset_new_data = {
-                        "customer_id": None,
-                        "dataset_name": start_init_dataset_name}
-                    update_model_obj_no_commit(
-                        orm_model_object=new_dataset_obj,
-                        new_update_data=dataset_new_data)
-                    pgs_session.add(new_dataset_obj)
-                    await pgs_session.flush()
-                    new_dataset_id = new_dataset_obj.id
+                async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+                    dataset_id = await find_create_dataset_qry(
+                        ongoing_session=pgs_session,
+                        dataset_name=start_init_dataset_name)
 
                     new_trained_model_data = {
-                        "dataset_id": new_dataset_id,
-                        "model_directory": initial_model_dir_path}
+                        "dataset_id": dataset_id,
+                        "model_directory": initial_model_dir_path,
+                        "creation_reason": "weights loaded"}
                     await save_new_model_data_qry(
                         ModelClassORM=TrainedBertModel,
                         ongoing_session=pgs_session,
@@ -266,9 +261,14 @@ async def init_and_start_bert_model():
 
             pgs_conn = PostgresConnection()
             with PostgresSession(async_engine=pgs_conn.engine) as pgs_sess:
+                dataset_id = await find_create_dataset_qry(
+                    ongoing_session=pgs_session,
+                    dataset_name=start_init_dataset_name)
+
                 new_trained_model_data = {
                     "dataset_id": bert_start_init_dataset_dir,
-                    "model_directory": initial_model_dir_path}
+                    "model_directory": initial_model_dir_path,
+                    "creation_reason": "model initialized"}
                 await save_new_model_data_qry(
                     ModelClassORM=TrainedBertModel,
                     ongoing_session=pgs_sess,
