@@ -1,23 +1,25 @@
+import os
 from typing import Dict
-
-from sqlalchemy import MetaData
 
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_OPTIONS, BERT_TRAIN_OPTIONS
-from db_postgres.postgres_async_conn.db_tables_manager import DBTablesManager
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection, Base)
+from db_postgres.postgres_async_conn.pgs_async_connection import PostgresConnection
+from db_postgres.postgres_async_conn.postgres_async_session import PostgresSession
 from db_postgres.postgres_init.db_tables_initialization import (
     initialize_db_tables)
-from db_postgres.postgres_models.label_category_model import (
-    LabelCategoryModel)
-from db_postgres.postgres_queries.save_label_category_dict import (
-    save_pgs_label_category_data)
-from db_postgres.postgres_utils.convert_orm_rows_to_dict import (
-    convert_orm_rows_to_dicts, convert_model_recs_to_dicts)
-from db_postgres.postgres_utils.get_model_records_flex_query import (
-    get_model_rows_flex_query)
+from db_postgres.postgres_models.dataset_model import DatasetModel
+from db_postgres.postgres_models.trained_bert_model import (
+    TrainedBertModel)
+from db_postgres.postgres_queries.qry_get_label_category_data import (
+    get_label_category_data_qry)
+from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
+    get_last_saved_model_dir_qry)
+from db_postgres.postgres_queries.qry_save_label_category_dict import (
+    save_label_category_data_qry)
+from db_postgres.postgres_queries.qry_save_new_model_data import (
+    save_new_model_data_qry)
+from db_postgres.postgres_utils.model_object_attrs_update import update_model_obj_no_commit
 from utils_common.exec_time_decorator import execution_time_decorator
 from utils_common.normalized_path import get_full_file_normal_path
 from utils_specific.class_csv_labels_categories import CsvLabelCategory
@@ -29,8 +31,6 @@ from utils_specific.get_last_saved_dataset_path import (
     get_last_saved_dataset_dir_path)
 from utils_specific.get_last_saved_model_dir import (
     get_last_saved_model_dir_path)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
 
 print("000")
 bert_model_inst = None
@@ -90,28 +90,17 @@ def initialise_bert_model(labels_categories_dict: Dict[int, str],
     print(f"Model Name: {green_color}{model_name}{reset_color}\n"
           f"Model Cached Dir: {green_color}{model_cache_dir}{reset_color}")
 
-    # TODO: Use common data with unpacking instead of params for creating model bellow
-    # bert_init_data = {"labels": label_category_dict,
-    #                   "model_name": model_name,
-    #                   "cache_dir": model_cache_dir,
-    #                   "max_len": token_str_max_len}
-
+    bert_init_data = {"labels": labels_categories_dict,
+                      "model_name": model_name,
+                      "cache_dir": model_cache_dir,
+                      "max_len": token_str_max_len}
     if use_singleton:
         if use_hard_singleton:
-            model = HardSingletonBERT(labels=labels_categories_dict,
-                                      model_name=model_name,
-                                      cache_dir=model_cache_dir,
-                                      max_len=token_str_max_len)
+            model = HardSingletonBERT(**bert_init_data)
         else:
-            model = SimpleSingletonBERT(labels=labels_categories_dict,
-                                        model_name=model_name,
-                                        cache_dir=model_cache_dir,
-                                        max_len=token_str_max_len)
+            model = SimpleSingletonBERT(**bert_init_data)
     else:
-        model = ClassifierBERT(labels=labels_categories_dict,
-                               model_name=model_name,
-                               cache_dir=model_cache_dir,
-                               max_len=token_str_max_len)
+        model = ClassifierBERT(**bert_init_data)
     return model
 
 
@@ -123,32 +112,15 @@ async def init_and_start_bert_model():
         reset_color = CONSOLE_COLORS.RESET
 
         print("\nDB Postgres getting labels categories data:")
-        pgs_conn = PostgresConnection()
-        print(f">>>>>>> DB HEALTH CHECK: {await pgs_conn.db_health_check()}")
+        pgs_lab_cat_data = await get_label_category_data_qry()
+        print(f"pgs_lab_cat_data [{len(pgs_lab_cat_data)}] => {pgs_lab_cat_data}")
 
-        async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
-            pgs_lab_cat_recs = await get_model_rows_flex_query(
-                orm_model_class=LabelCategoryModel,
-                ongoing_session=pgs_session,
-                fields_values_filter=None,
-                order_by_fields=None,
-                return_scalars=True)
-            pgs_lab_cat_dicts = await convert_model_recs_to_dicts(
-                model_records_list=pgs_lab_cat_recs)
-            print(f"####### type(pgs_lab_cat_dicts): {type(pgs_lab_cat_dicts)}")
-            print(f"####### len(pgs_lab_cat_dicts): {len(pgs_lab_cat_dicts)}")
-            print(f"####### pgs_lab_cat_dicts: {pgs_lab_cat_dicts}")
-
-        pgs_lab_cat_data = {}
-        for cur_record_dict in pgs_lab_cat_dicts:
-            label_index = cur_record_dict["label_index"]
-            category_name = cur_record_dict["category_name"]
-            pgs_lab_cat_data[label_index] = category_name
-        print(f"####### pgs_lab_cat_data [{len(pgs_lab_cat_data)}] => {pgs_lab_cat_data}")
-
-
-        last_saved_dataset_dir_path = ""
-        if not pgs_lab_cat_data:
+        last_saved_dataset_dir_path = None
+        bert_start_init_dataset_dir = None
+        start_init_dataset_name = None
+        if pgs_lab_cat_data:  # DB labels-categories exist
+            labels_categories = pgs_lab_cat_data
+        else:  # No labels-categories data in DB
             print("\nGetting last dataset directory path:")
             last_saved_dataset_dir_path = get_last_saved_dataset_dir_path()
             initial_dataset_dir_path = None
@@ -159,7 +131,11 @@ async def init_and_start_bert_model():
                 if initial_dataset_dir_path:
                     bert_start_init_dataset_dir = initial_dataset_dir_path
                 else:
-                    bert_start_init_dataset_dir = ""
+                    bert_start_init_dataset_dir = None
+            start_init_dataset_dirs = bert_start_init_dataset_dir.split(os.sep)
+            start_init_dataset_name = start_init_dataset_dirs[-1]
+            print(f"bert_start_init_dataset_dir: {bert_start_init_dataset_dir}")
+            print(f"start_init_dataset_name: {start_init_dataset_name}")
 
             print("\nGetting csv label-category train file path:")
             if bert_start_init_dataset_dir:
@@ -177,50 +153,100 @@ async def init_and_start_bert_model():
                           f"{saved_lab_cat_dict}")
                 if saved_lab_cat_dict:
                     labels_categories = saved_lab_cat_dict
-                    await save_pgs_label_category_data(
-                        label_category_dict=saved_lab_cat_dict)
+                    print(f"labels_categories: {labels_categories}")
                 else:
                     labels_categories = {0: "api initial category"}
-                    await save_pgs_label_category_data(
-                        label_category_dict=labels_categories)
                     print(f"Empty or wrong label-category csv data [ERROR]:\n"
-                          f"last_saved_dataset_dir: {bert_start_init_dataset_dir}\n"
-                          f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}\n"
+                          f"last_saved_dataset_dir_path: {last_saved_dataset_dir_path}\n"
+                          f"bert_start_init_dataset_dir: {bert_start_init_dataset_dir}\n"
                           f"saved_lab_cat_dict: {saved_lab_cat_dict}\n")
             else:
                 labels_categories = {0: "api initial category"}
-                await save_pgs_label_category_data(
-                    label_category_dict=labels_categories)
                 print(f"BERT Last saved or initial dataset dir, files not found [ERROR]:\n"
                       f"last_saved_dataset_dir_path: {last_saved_dataset_dir_path}\n"
                       f"initial_dataset_dir_path: {initial_dataset_dir_path}\n"
-                      f"initial_dataset_dir_path: {initial_dataset_dir_path}\n")
-        else:  # if pgs_lab_cat_data:
-            labels_categories = pgs_lab_cat_data
+                      f"bert_start_init_dataset_dir: {bert_start_init_dataset_dir}\n")
 
-        print("\nGetting last model directory path:")
-        last_saved_model_dir_path = get_last_saved_model_dir_path()
+            pgs_conn = PostgresConnection()
+            with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+                await save_label_category_data_qry(
+                    ongoing_session=pgs_session,
+                    label_category_dict=labels_categories)
+                print(f"Postgres DB labels categories saved [OK]:\n"
+                      f"labels_categories: {labels_categories}\n")
+
+        print("\nDB Postgres getting last model directory path:")
+        pgs_saved_model_dir_path = await get_last_saved_model_dir_qry()
+        if pgs_saved_model_dir_path:  # DB last saved model dir exists
+            last_saved_model_dir_path = pgs_saved_model_dir_path
+        else:  # No last saved model dir in DB or not found
+            print("\nGetting last model directory path from file:")
+            file_saved_model_dir_path = get_last_saved_model_dir_path()
+            last_saved_model_dir_path = file_saved_model_dir_path
+
+        print("\nGetting initial model directory path:")
         initial_model_dir_path = get_initial_model_dir_path()
-        # load_error_log = ""
 
-        print(">>>>>>> last_saved_model_dir_path => ", last_saved_model_dir_path)
-        print(">>>>>>> initial_model_dir_path => ", initial_model_dir_path)
-        print(">>>>>>> last_saved_model_dir_path => ", last_saved_model_dir_path)
-        print(">>>>>>> last_saved_dataset_dir_path => ", last_saved_dataset_dir_path)
-        print(">>>>>>> labels_categories => ", labels_categories)
+        print(f">>>>>>> last_saved_model_dir_path => {last_saved_model_dir_path}")
+        print(f">>>>>>> initial_model_dir_path => {initial_model_dir_path}")
+        print(f">>>>>>> last_saved_dataset_dir_path => {last_saved_dataset_dir_path}")
+        print(f">>>>>>> labels_categories => {labels_categories}")
 
         if last_saved_model_dir_path and initial_model_dir_path:
             bert_model_inst = initialise_bert_model(
                 labels_categories_dict=labels_categories,
                 model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
-                model_cache_dir=get_initial_model_dir_path(),
+                model_cache_dir=initial_model_dir_path,
                 token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
                 use_singleton=True,
                 use_hard_singleton=True)
 
+            pgs_conn = PostgresConnection()
+            with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+                new_dataset_obj = DatasetModel()
+                dataset_new_data = {
+                    "customer_id": None,
+                    "dataset_name": start_init_dataset_name}
+                update_model_obj_no_commit(
+                    orm_model_object=new_dataset_obj,
+                    new_update_data=dataset_new_data)
+                pgs_session.add(new_dataset_obj)
+                await pgs_session.flush()
+                new_dataset_id = new_dataset_obj.id
+
+                new_trained_model_data = {
+                    "dataset_id": new_dataset_id,
+                    "model_directory": initial_model_dir_path}
+                await save_new_model_data_qry(
+                    ModelClassORM=TrainedBertModel,
+                    ongoing_session=pgs_session,
+                    new_data=new_trained_model_data)
+
             load_error_log = bert_model_inst.load_model(
                 dir_full_path=last_saved_model_dir_path)
+
             if not load_error_log:
+                pgs_conn = PostgresConnection()
+                with PostgresSession(async_engine=pgs_conn.engine) as pgs_sess:
+                    new_dataset_obj = DatasetModel()
+                    dataset_new_data = {
+                        "customer_id": None,
+                        "dataset_name": start_init_dataset_name}
+                    update_model_obj_no_commit(
+                        orm_model_object=new_dataset_obj,
+                        new_update_data=dataset_new_data)
+                    pgs_session.add(new_dataset_obj)
+                    await pgs_session.flush()
+                    new_dataset_id = new_dataset_obj.id
+
+                    new_trained_model_data = {
+                        "dataset_id": new_dataset_id,
+                        "model_directory": initial_model_dir_path}
+                    await save_new_model_data_qry(
+                        ModelClassORM=TrainedBertModel,
+                        ongoing_session=pgs_session,
+                        new_data=new_trained_model_data)
+
                 print(f"Last Saved BERT Model initialised and loaded [OK]:\n"
                       f"last_saved_model_dir_path: "
                       f"{blue_color}{last_saved_model_dir_path}{reset_color}\n"
@@ -233,10 +259,21 @@ async def init_and_start_bert_model():
             bert_model_inst = initialise_bert_model(
                 labels_categories_dict=labels_categories,
                 model_name=BERT_OPTIONS.BERT_ACTIVE_MODEL_NAME,
-                model_cache_dir=get_initial_model_dir_path(),
+                model_cache_dir=initial_model_dir_path,
                 token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
                 use_singleton=True,
                 use_hard_singleton=True)
+
+            pgs_conn = PostgresConnection()
+            with PostgresSession(async_engine=pgs_conn.engine) as pgs_sess:
+                new_trained_model_data = {
+                    "dataset_id": bert_start_init_dataset_dir,
+                    "model_directory": initial_model_dir_path}
+                await save_new_model_data_qry(
+                    ModelClassORM=TrainedBertModel,
+                    ongoing_session=pgs_sess,
+                    new_data=new_trained_model_data)
+
             print(f"Pretrained Init BERT Model initialised [OK]:\n"
                   f"initial_model_dir_path: "
                   f"{blue_color}{initial_model_dir_path}{reset_color}\n"
@@ -246,22 +283,19 @@ async def init_and_start_bert_model():
                   f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
                   f"initial_model_dir_path: {initial_model_dir_path}\n")
 
-        print(">>>>>>> bert_model_inst", bert_model_inst)
-        print(">>>>>>> hash(bert_model_inst)", hash(bert_model_inst))
-        print(">>>>>>> bert_model_inst.labels", bert_model_inst.labels)
-
-        print("bert_model_inst => ", bert_model_inst)
+        print(f">>>>>>> bert_model_inst => {bert_model_inst}")
+        print(f">>>>>>> hash(bert_model_inst) => {hash(bert_model_inst)}")
+        print(f">>>>>>> bert_model_inst.labels => {bert_model_inst.labels}")
         return bert_model_inst
 
-
-# bert_model_inst = init_and_start_bert_model()
-# # print(">>>>>>> hash(bert_model_inst)", hash(bert_model_inst))
 
 if __name__ == "__main__":
     async def main_loop_func():
         await initialize_db_tables()
         await init_and_start_bert_model()
 
+
     import asyncio
+
     asyncio.run(main=main_loop_func(), debug=True)
-    print(bert_model_inst)
+    print(f"bert_model_inst: {bert_model_inst}")
