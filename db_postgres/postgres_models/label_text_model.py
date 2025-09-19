@@ -12,8 +12,8 @@ class LabelTextModel(Base, ActiveMixin, CreateUpdateMixin):
     __tablename__ = "label_text"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    dataset_id: Mapped[Optional[int]] = mapped_column(ForeignKey("dataset.id"))
-    label_id: Mapped[Optional[int]] = mapped_column(ForeignKey("label_category.id"))
+    # dataset_id: Mapped[Optional[int]] = mapped_column(ForeignKey("dataset.id"))
+    label_category_id: Mapped[Optional[int]] = mapped_column(ForeignKey("label_category.id"))
 
     text: Mapped[str] = mapped_column()
 

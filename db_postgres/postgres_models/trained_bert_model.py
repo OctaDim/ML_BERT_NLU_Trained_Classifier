@@ -12,10 +12,10 @@ class TrainedBertModel(Base, ActiveMixin, CreateUpdateMixin, StatusMixin):
     __tablename__ = "trained_model"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    customer_id: Mapped[Optional[int]] = mapped_column(ForeignKey("customer.id"))
+    dataset_id: Mapped[Optional[int]] = mapped_column(ForeignKey("dataset.id"))
 
     model_directory: Mapped[str] = mapped_column()
-    dataset_name: Mapped[Optional[str]] = mapped_column()
+    # dataset_name: Mapped[Optional[str]] = mapped_column()
 
     # category_services: Mapped['Service'] = relationship(
     #     argument='Service',
