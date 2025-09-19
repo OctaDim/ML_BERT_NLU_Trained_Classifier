@@ -1,5 +1,6 @@
 from typing import Optional
 
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
@@ -12,8 +13,8 @@ class DatasetModel(Base, ActiveMixin, CreateUpdateMixin):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    customer_id: Mapped[Optional[int]] = mapped_column(unique=True)
-    dataset_name: Mapped[str] = mapped_column()
+    customer_id: Mapped[Optional[int]] = mapped_column(ForeignKey("customer.id"))
+    dataset_name: Mapped[str] = mapped_column(unique=True)
 
     # category_services: Mapped['Service'] = relationship(
     #     argument='Service',

@@ -15,6 +15,7 @@ class TrainedBertModel(Base, ActiveMixin, CreateUpdateMixin, StatusMixin):
     dataset_id: Mapped[Optional[int]] = mapped_column(ForeignKey("dataset.id"))
 
     model_directory: Mapped[str] = mapped_column()
+    creation_reason: Mapped[Optional[str]] = mapped_column()
     # dataset_name: Mapped[Optional[str]] = mapped_column()
 
     # category_services: Mapped['Service'] = relationship(
