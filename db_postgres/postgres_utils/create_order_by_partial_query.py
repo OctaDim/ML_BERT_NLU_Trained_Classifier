@@ -45,15 +45,21 @@ def create_order_for_partial_query(
     try:
         if order_by_fields_validated:
             for order_field in order_by_fields_validated:
+                if order_field in ["field_name", "ModelClass.field_obj",
+                                   "ModelClass.field_obj.desc()"]:
+                    continue
                 if isinstance(order_field, str):
                     if hasattr(orm_model_class, order_field):
                         order_query = order_query.order_by(order_field)
                     else:
-                        print(f"DB Order by field '{order_field}' skipped [ERROR]: "
-                              f"Attribute string name not found in model class\n"
-                              f"orm_model_class: {orm_model_class}\n"
-                              f"order_field: {order_field}\n"
-                              f"order_by_fields: {order_by_fields}\n")
+                        error_log = (
+                            f"DB Order by field '{order_field}' [ERROR]: "
+                            f"Attribute string name not found in model class\n"
+                            f"orm_model_class: {orm_model_class}\n"
+                            f"order_field: {order_field}\n"
+                            f"order_by_fields: {order_by_fields}\n")
+                        print(error_log)
+                        raise AttributeError(error_log)
                 else:
                     order_query = order_query.order_by(order_field)
     except Exception as error:
