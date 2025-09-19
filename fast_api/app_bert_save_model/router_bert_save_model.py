@@ -11,6 +11,7 @@ from configs.settings import (
     BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, REDIS_OPTIONS, STATUSES)
 from db_postgres.postgres_async_conn.pgs_async_connection import (
     PostgresConnection)
+from db_postgres.postgres_async_conn.postgres_async_session import PostgresSession
 from db_postgres.postgres_models.trained_bert_model import (
     TrainedBertModel)
 from db_postgres.postgres_utils.merge_obj_ongoing_session import (
@@ -129,7 +130,7 @@ async def bert_save_model(auth_data: AuthDataBert,
             pgs_status = "saved"
 
         pgs_conn = PostgresConnection()
-        async with pgs_conn.async_session() as pgs_session:
+        async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
             new_trained_model_obj = TrainedBertModel()
             trained_model_upd_data = {
                 "customer_id": customer_id,

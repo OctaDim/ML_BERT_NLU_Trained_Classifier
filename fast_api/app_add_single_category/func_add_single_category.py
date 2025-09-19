@@ -8,50 +8,93 @@ from fastapi import HTTPException, status
 from ML_BERT_classifier.init_bert import bert_model_inst
 from configs.settings import (
     BASE_DIR, BERT_OPTIONS)
+from db_postgres.postgres_async_conn.pgs_async_connection import (
+    PostgresConnection)
+from db_postgres.postgres_async_conn.postgres_async_session import PostgresSession
+from db_postgres.postgres_models.label_category_model import (
+    LabelCategoryModel)
+from db_postgres.postgres_utils.get_model_records_flex_query import (
+    get_model_rows_flex_query)
 from utils_common.normalized_path import (
-    get_full_dir_normal_path, get_full_file_normal_path)
+    get_full_file_normal_path)
 from utils_specific.class_csv_labels_categories import CsvLabelCategory
+from utils_specific.get_initial_dataset_dir_path import (
+    get_initial_dataset_dir_path)
+from utils_specific.get_last_saved_dataset_path import (
+    get_last_saved_dataset_dir_path)
 from utils_specific.new_dataset_dir_path import get_new_dataset_dir_path
 
 
-def add_save_single_category(update_category: str) -> dict:
-    last_saved_dataset_ini_dir = ""
-    last_saved_dataset_ini_path = ""
+async def add_save_single_category(update_category: str) -> dict:
+    # last_saved_dataset_ini_dir = ""
+    # last_saved_dataset_ini_path = ""
+    # try:
+    #     last_saved_dataset_ini_path = get_full_file_normal_path(
+    #         all_dir_str_parts=[BASE_DIR],
+    #         file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FILE_PATH)
+    #
+    #     if os.path.isfile(last_saved_dataset_ini_path):
+    #         with open(file=last_saved_dataset_ini_path,
+    #                   mode="r", encoding="utf-8") as dataset_ini_file:
+    #             dataset_ini_file.seek(0)
+    #             dataset_file_saved_path = dataset_ini_file.read()
+    #     else:
+    #         dataset_file_saved_path = ""
+    # except Exception as error:
+    #     dataset_file_saved_path = ""  # not necessary, for reliability
+    #     print(f"Read last model saved ini file [ERROR]: error: {error}, "
+    #           f"last_saved_dataset_ini_dir: {last_saved_dataset_ini_dir}, "
+    #           f"last_saved_dataset_ini_path: {last_saved_dataset_ini_path}")
+    #
+    # if bert_model_inst.last_saved_dataset_dir:
+    #     prev_dataset_dir_path = bert_model_inst.last_saved_dataset_dir
+    # elif dataset_file_saved_path:
+    #     prev_dataset_dir_path = dataset_file_saved_path
+    # else:
+    #
+    #     initial_dataset_dir = BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH
+    #     prev_dataset_dir_path = get_full_dir_normal_path(
+    #         [BASE_DIR, initial_dataset_dir])
+    #
+    # if not os.path.isdir(prev_dataset_dir_path):
+    #     log_text = (f"Data-set initial or saved dir path not found [ERROR]: "
+    #                 f"prev_dataset_dir_path: {prev_dataset_dir_path}")
+    #     print(log_text)
+    #     raise HTTPException(
+    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         detail=log_text)
 
-    try:
-        last_saved_dataset_ini_path = get_full_file_normal_path(
-            all_dir_str_parts=[BASE_DIR],
-            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FILE_PATH)
+    pgs_conn = PostgresConnection()
+    async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+        previous_dataset_objs = await get_model_rows_flex_query(
+            orm_model_class=LabelCategoryModel,
+            ongoing_session=pgs_session,
+            fields_values_filter=None,
+            order_by_fields=None)
+    prev_lab_cat_dict = {}
+    if previous_dataset_objs:
+        for cur_obj in previous_dataset_objs:
+            prev_lab_cat_dict[cur_obj.label_index] = cur_obj.category_name
 
-        if os.path.isfile(last_saved_dataset_ini_path):
-            with open(file=last_saved_dataset_ini_path,
-                      mode="r", encoding="utf-8") as dataset_ini_file:
-                dataset_ini_file.seek(0)
-                dataset_file_saved_path = dataset_ini_file.read()
-        else:
-            dataset_file_saved_path = ""
-    except Exception as error:
-        dataset_file_saved_path = ""  # not necessary, for reliability
-        print(f"Read last model saved ini file [ERROR]: error: {error}, "
-              f"last_saved_dataset_ini_dir: {last_saved_dataset_ini_dir}, "
-              f"last_saved_dataset_ini_path: {last_saved_dataset_ini_path}")
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+    print("type(prev_lab_cat_dict)", type(prev_lab_cat_dict))
+    print("prev_lab_cat_dict", prev_lab_cat_dict)
+    print("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
+    print("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
 
     if bert_model_inst.last_saved_dataset_dir:
         prev_dataset_dir_path = bert_model_inst.last_saved_dataset_dir
-    elif dataset_file_saved_path:
-        prev_dataset_dir_path = dataset_file_saved_path
     else:
-        initial_dataset_dir = BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH
-        prev_dataset_dir_path = get_full_dir_normal_path(
-            [BASE_DIR, initial_dataset_dir])
-
-    if not os.path.isdir(prev_dataset_dir_path):
-        log_text = (f"Data-set initial or saved dir path not found [ERROR]: "
-                    f"prev_dataset_dir_path: {prev_dataset_dir_path}")
-        print(log_text)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=log_text)
+        last_saved_dataset_dir = get_last_saved_dataset_dir_path()
+        if last_saved_dataset_dir:
+            prev_dataset_dir_path = last_saved_dataset_dir
+        else:
+            initial_dataset_dir = get_initial_dataset_dir_path()
+            if initial_dataset_dir:
+                prev_dataset_dir_path = initial_dataset_dir
+            else:
+                prev_dataset_dir_path = ""
 
     try:
         print("\nGetting previous label-category dictionary:")
@@ -63,6 +106,13 @@ def add_save_single_category(update_category: str) -> dict:
                   mode="r", encoding="utf-8") as prev_lab_cat_csv_f:
             csf_lab_cat = CsvLabelCategory(prev_lab_cat_csv_f)
             prev_lab_cat_dict = csf_lab_cat.get_label_category_dict()
+
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+        print("type(prev_lab_cat_dict)", type(prev_lab_cat_dict))
+        print("prev_lab_cat_dict", prev_lab_cat_dict)
+        print("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
+        print("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
 
         if not prev_lab_cat_dict:
             log_text = (f"Empty or wrong label-category csv data [ERROR]: "

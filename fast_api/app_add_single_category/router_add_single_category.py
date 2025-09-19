@@ -39,7 +39,7 @@ async def bert_add_single_category(auth_data: AuthDataBert,
 
     try:
         datetime_start = datetime.now()
-        new_csv_files_data = add_save_single_category(
+        new_csv_files_data = await add_save_single_category(
             update_category=upd_single_category)
         adding_time = (datetime.now() - datetime_start).total_seconds()
         adding_time = round(adding_time, 1)

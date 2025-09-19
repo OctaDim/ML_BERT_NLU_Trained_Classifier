@@ -3,9 +3,10 @@ from starlette import status
 
 from db_postgres.postgres_async_conn.pgs_async_connection import (
     PostgresConnection)
+from db_postgres.postgres_async_conn.postgres_async_session import PostgresSession
 from db_postgres.postgres_models.customer_model import CustomerModel
 from db_postgres.postgres_utils.get_model_records_flex_query import (
-    get_model_objs_flex_query)
+    get_model_rows_flex_query)
 from db_postgres.postgres_utils.model_object_attrs_update import (
     update_model_obj_no_commit)
 
@@ -19,8 +20,8 @@ async def verify_create_customer(account_username: str,
                      "account_id": account_id}
 
     pgs_conn = PostgresConnection()
-    async with pgs_conn.async_session() as pgs_session:
-        customer_obj = await get_model_objs_flex_query(
+    async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+        customer_obj = await get_model_rows_flex_query(
             orm_model_class=CustomerModel,
             ongoing_session=pgs_session,
             fields_values_filter=fields_filter,
