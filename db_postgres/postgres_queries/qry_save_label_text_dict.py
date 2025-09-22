@@ -19,9 +19,6 @@ async def save_label_text_dict_qry(
     try:
         new_lab_text_model_obj = LabelTextModel()
         for cur_text, cur_label_index in label_text_dict.items():
-            print(f"type(cur_label_index) => {type(cur_label_index)}")
-            print(f"cur_label_index => {cur_label_index}")
-            print(f"cur_text => {cur_text}")
             label_category_objs = await get_model_rows_flex_query(
                 orm_model_class=LabelCategoryModel,
                 ongoing_session=ongoing_session,
@@ -29,8 +26,6 @@ async def save_label_text_dict_qry(
                 fields_values_filter={"label_index": cur_label_index},
                 order_by_fields=None,
                 return_scalars=True)
-            print(f"len(label_category_objs): {len(label_category_objs)}")
-            print(f"label_category_objs: {label_category_objs}")
             label_category_obj_id = label_category_objs[0].id
 
             label_text_new_data = {

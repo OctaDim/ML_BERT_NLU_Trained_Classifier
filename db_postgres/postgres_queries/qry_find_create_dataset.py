@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from db_postgres.postgres_models.dataset_model import DatasetModel
-from db_postgres.postgres_utils.get_model_records_flex_query import (
+from db_postgres.postgres_queries.get_model_records_flex_query import (
     get_model_rows_flex_query)
 from db_postgres.postgres_utils.model_object_attrs_update import (
     update_model_obj_no_commit)
@@ -17,14 +17,14 @@ async def find_create_dataset_qry(
         return None
 
     filter_fields = {"dataset_name": dataset_name}
-    dataset_obj = await get_model_rows_flex_query(
+    dataset_objs = await get_model_rows_flex_query(
         orm_model_class=DatasetModel,
         ongoing_session=ongoing_session,
         selected_fields=None,
         fields_values_filter=filter_fields,
         order_by_fields=None)
     try:
-        found_dataset_id = dataset_obj[0].id if dataset_obj else None
+        found_dataset_id = dataset_objs[0].id if dataset_objs else None
         if found_dataset_id:
             return found_dataset_id
         new_dataset_obj = DatasetModel()

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from db_postgres.postgres_models.customer_model import CustomerModel
-from db_postgres.postgres_utils.get_model_records_flex_query import (
+from db_postgres.postgres_queries.get_model_records_flex_query import (
     get_model_rows_flex_query)
 from db_postgres.postgres_utils.model_object_attrs_update import (
     update_model_obj_no_commit)
@@ -20,14 +20,14 @@ async def find_create_customer_qry(
     filter_fields = {"account_username": account_username,
                      "account_id": account_id}
 
-    customer_obj = await get_model_rows_flex_query(
+    customer_objs = await get_model_rows_flex_query(
         orm_model_class=CustomerModel,
         ongoing_session=ongoing_session,
         selected_fields=None,
         fields_values_filter=filter_fields,
         order_by_fields=None)
     try:
-        found_customer_id = customer_obj[0].id if customer_obj else None
+        found_customer_id = customer_objs[0].id if customer_objs else None
         if found_customer_id:
             return found_customer_id
         new_customer_obj = CustomerModel()
