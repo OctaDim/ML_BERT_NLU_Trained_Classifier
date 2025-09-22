@@ -19,12 +19,15 @@ from db_postgres.postgres_queries.qry_get_label_category_data import (
 from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
     get_last_saved_model_dir_qry)
 from db_postgres.postgres_queries.qry_save_label_category_dict import (
-    save_label_category_data_qry)
+    cache_label_category_dict_qry)
+from db_postgres.postgres_queries.qry_save_label_text_dict import (
+    save_label_text_dict_qry)
 from db_postgres.postgres_queries.qry_save_new_model_data import (
     save_new_model_data_qry)
 from utils_common.exec_time_decorator import execution_time_decorator
 from utils_common.normalized_path import get_full_file_normal_path
 from utils_specific.class_csv_labels_categories import CsvLabelCategory
+from utils_specific.class_csv_texts_labels import CsvTextLabel
 from utils_specific.get_initial_dataset_dir_path import (
     get_initial_dataset_dir_path)
 from utils_specific.get_initial_model_dir_path import (
@@ -169,18 +172,37 @@ async def init_and_start_bert_model():
                       f"initial_dataset_dir_path: {initial_dataset_dir_path}\n"
                       f"bert_start_init_dataset_dir: {bert_start_init_dataset_dir}\n")
 
+            print("\nGetting csv label-text train file path:")
+            lab_txt_file_name = BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME
+            csv_lab_txt_file_path = get_full_file_normal_path(
+                all_dir_str_parts=[bert_start_init_dataset_dir],
+                file_name_with_ext=lab_txt_file_name)
+
+            print("\nGetting csv label-text file data:")
+            with open(file=csv_lab_txt_file_path,
+                      mode="r", encoding="utf-8") as csv_lab_txt_file:
+                csf_lab_txt = CsvTextLabel(csv_file_obj=csv_lab_txt_file)
+                dataset_lab_text_dict = csf_lab_txt.get_text_label_dict()
+            # print(f"dataset_lab_text_dict => {dataset_lab_text_dict}")  # Too long
+            print(f"len(dataset_lab_text_dict) => {len(dataset_lab_text_dict)}")
+
             pgs_conn = PostgresConnection()
             async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
                 dataset_id = await find_create_dataset_qry(
                     ongoing_session=pgs_session,
                     dataset_name=start_init_dataset_name)
 
-                await save_label_category_data_qry(
+                await cache_label_category_dict_qry(
+                    # await save_label_category_dict_qry(
                     ongoing_session=pgs_session,
                     dataset_id=dataset_id,
                     label_category_dict=labels_categories)
                 print(f"Postgres DB labels categories saved [OK]:\n"
                       f"labels_categories: {labels_categories}\n")
+
+                await save_label_text_dict_qry(
+                    ongoing_session=pgs_session,
+                    label_text_dict=dataset_lab_text_dict)
 
         print("\nDB Postgres getting last model directory path:")
         pgs_saved_model_dir_path = await get_last_saved_model_dir_qry()
@@ -236,7 +258,7 @@ async def init_and_start_bert_model():
                     new_trained_model_data = {
                         "dataset_id": dataset_id,
                         "model_directory": initial_model_dir_path,
-                        "creation_reason": "weights loaded"}
+                        "creation_reason": "model weights loaded"}
                     await save_new_model_data_qry(
                         ModelClassORM=TrainedBertModel,
                         ongoing_session=pgs_session,
@@ -266,7 +288,7 @@ async def init_and_start_bert_model():
                     dataset_name=start_init_dataset_name)
 
                 new_trained_model_data = {
-                    "dataset_id": bert_start_init_dataset_dir,
+                    "dataset_id": dataset_id,
                     "model_directory": initial_model_dir_path,
                     "creation_reason": "model initialized"}
                 await save_new_model_data_qry(
