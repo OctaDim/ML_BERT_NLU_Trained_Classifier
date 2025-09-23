@@ -3,7 +3,8 @@ from typing import Dict
 
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
-from configs.settings import BERT_OPTIONS, BERT_TRAIN_OPTIONS
+from configs.settings import (
+    BERT_OPTIONS, BERT_TRAIN_OPTIONS, ALCHEMY_OPTIONS)
 from db_postgres.postgres_async_conn.pgs_async_connection import (
     PostgresConnection)
 from db_postgres.postgres_async_conn.postgres_async_session import (
@@ -116,16 +117,16 @@ async def init_and_start_bert_model():
         blue_color = CONSOLE_COLORS.BRIGHT_BLUE
         reset_color = CONSOLE_COLORS.RESET
 
-        print("\nDB Postgres getting labels categories data:")
-        pgs_lab_cat_data = await get_label_category_data_qry()
-        print(f"pgs_lab_cat_data [{len(pgs_lab_cat_data)}] => {pgs_lab_cat_data}")
+        if ALCHEMY_OPTIONS.USE_POSTGRES_DB:
+            print("\nDB Postgres Getting labels categories data:")
+            pgs_lab_cat_data = await get_label_category_data_qry()
+            print(f"pgs_lab_cat_data [{len(pgs_lab_cat_data)}]: {pgs_lab_cat_data}")
+        else:
+            pgs_lab_cat_data = None
 
         last_saved_dataset_dir_path = None
-        bert_start_init_dataset_dir = None
         start_init_dataset_name = None
-        if pgs_lab_cat_data:  # DB labels-categories exist
-            labels_categories = pgs_lab_cat_data
-        else:  # No labels-categories data in DB
+        if not pgs_lab_cat_data:  # No labels-categories data in Postgres DB
             print("\nGetting last dataset directory path:")
             last_saved_dataset_dir_path = get_last_saved_dataset_dir_path()
             initial_dataset_dir_path = None
@@ -186,26 +187,34 @@ async def init_and_start_bert_model():
             # print(f"dataset_lab_text_dict => {dataset_lab_text_dict}")  # Too long
             print(f"len(dataset_lab_text_dict) => {len(dataset_lab_text_dict)}")
 
-            pgs_conn = PostgresConnection()
-            async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
-                dataset_id = await find_create_dataset_qry(
-                    ongoing_session=pgs_session,
-                    dataset_name=start_init_dataset_name)
+            if ALCHEMY_OPTIONS.USE_POSTGRES_DB:
+                print("\nPostgres DB saving label-category, label-text file data:")
+                pgs_conn = PostgresConnection()
+                async with PostgresSession(
+                        async_engine=pgs_conn.engine) as pgs_session:
+                    dataset_id = await find_create_dataset_qry(
+                        ongoing_session=pgs_session,
+                        dataset_name=start_init_dataset_name)
 
-                await cache_label_category_dict_qry(
-                    # await save_label_category_dict_qry(
-                    ongoing_session=pgs_session,
-                    dataset_id=dataset_id,
-                    label_category_dict=labels_categories)
-                print(f"Postgres DB labels categories saved [OK]:\n"
-                      f"labels_categories: {labels_categories}\n")
+                    await cache_label_category_dict_qry(
+                        ongoing_session=pgs_session,
+                        dataset_id=dataset_id,
+                        label_category_dict=labels_categories)
+                    print(f"Postgres DB labels categories saved [OK]:\n"
+                          f"labels_categories: {labels_categories}\n")
 
-                await save_label_text_dict_qry(
-                    ongoing_session=pgs_session,
-                    label_text_dict=dataset_lab_text_dict)
+                    await save_label_text_dict_qry(
+                        ongoing_session=pgs_session,
+                        label_text_dict=dataset_lab_text_dict)
+        else:  # Labels-categories data exists in Postgres DB
+            labels_categories = pgs_lab_cat_data
 
-        print("\nDB Postgres getting last model directory path:")
-        pgs_saved_model_dir_path = await get_last_saved_model_dir_qry()
+        if ALCHEMY_OPTIONS.USE_POSTGRES_DB:
+            print("\nDB Postgres getting last model directory path:")
+            pgs_saved_model_dir_path = await get_last_saved_model_dir_qry()
+        else:
+            pgs_saved_model_dir_path = None
+
         if pgs_saved_model_dir_path:  # DB last saved model dir exists
             last_saved_model_dir_path = pgs_saved_model_dir_path
         else:  # No last saved model dir in DB or not found
@@ -230,27 +239,10 @@ async def init_and_start_bert_model():
                 use_singleton=True,
                 use_hard_singleton=True)
 
-            pgs_conn = PostgresConnection()
-            async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
-                dataset_id = await find_create_dataset_qry(
-                    ongoing_session=pgs_session,
-                    dataset_name=start_init_dataset_name)
-
-                new_trained_model_data = {
-                    "dataset_id": dataset_id,
-                    "model_directory": initial_model_dir_path,
-                    "creation_reason": "model initialized"}
-                await save_new_model_data_qry(
-                    ModelClassORM=TrainedBertModel,
-                    ongoing_session=pgs_session,
-                    new_data=new_trained_model_data)
-
-            load_error_log = bert_model_inst.load_model(
-                dir_full_path=last_saved_model_dir_path)
-
-            if not load_error_log:
+            if ALCHEMY_OPTIONS.USE_POSTGRES_DB:
                 pgs_conn = PostgresConnection()
-                async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+                async with PostgresSession(
+                        async_engine=pgs_conn.engine) as pgs_session:
                     dataset_id = await find_create_dataset_qry(
                         ongoing_session=pgs_session,
                         dataset_name=start_init_dataset_name)
@@ -258,11 +250,32 @@ async def init_and_start_bert_model():
                     new_trained_model_data = {
                         "dataset_id": dataset_id,
                         "model_directory": initial_model_dir_path,
-                        "creation_reason": "model weights loaded"}
+                        "creation_reason": "model initialized"}
                     await save_new_model_data_qry(
                         ModelClassORM=TrainedBertModel,
                         ongoing_session=pgs_session,
                         new_data=new_trained_model_data)
+
+            load_error_log = bert_model_inst.load_model(
+                dir_full_path=last_saved_model_dir_path)
+
+            if not load_error_log:
+                if ALCHEMY_OPTIONS.USE_POSTGRES_DB:
+                    pgs_conn = PostgresConnection()
+                    async with PostgresSession(
+                            async_engine=pgs_conn.engine) as pgs_session:
+                        dataset_id = await find_create_dataset_qry(
+                            ongoing_session=pgs_session,
+                            dataset_name=start_init_dataset_name)
+
+                        new_trained_model_data = {
+                            "dataset_id": dataset_id,
+                            "model_directory": initial_model_dir_path,
+                            "creation_reason": "model weights loaded"}
+                        await save_new_model_data_qry(
+                            ModelClassORM=TrainedBertModel,
+                            ongoing_session=pgs_session,
+                            new_data=new_trained_model_data)
 
                 print(f"Last Saved BERT Model initialised and loaded [OK]:\n"
                       f"last_saved_model_dir_path: "
@@ -281,20 +294,21 @@ async def init_and_start_bert_model():
                 use_singleton=True,
                 use_hard_singleton=True)
 
-            pgs_conn = PostgresConnection()
-            with PostgresSession(async_engine=pgs_conn.engine) as pgs_sess:
-                dataset_id = await find_create_dataset_qry(
-                    ongoing_session=pgs_session,
-                    dataset_name=start_init_dataset_name)
+            if ALCHEMY_OPTIONS.USE_POSTGRES_DB:
+                pgs_conn = PostgresConnection()
+                with PostgresSession(async_engine=pgs_conn.engine) as pgs_sess:
+                    dataset_id = await find_create_dataset_qry(
+                        ongoing_session=pgs_session,
+                        dataset_name=start_init_dataset_name)
 
-                new_trained_model_data = {
-                    "dataset_id": dataset_id,
-                    "model_directory": initial_model_dir_path,
-                    "creation_reason": "model initialized"}
-                await save_new_model_data_qry(
-                    ModelClassORM=TrainedBertModel,
-                    ongoing_session=pgs_sess,
-                    new_data=new_trained_model_data)
+                    new_trained_model_data = {
+                        "dataset_id": dataset_id,
+                        "model_directory": initial_model_dir_path,
+                        "creation_reason": "model initialized"}
+                    await save_new_model_data_qry(
+                        ModelClassORM=TrainedBertModel,
+                        ongoing_session=pgs_sess,
+                        new_data=new_trained_model_data)
 
             print(f"Pretrained Init BERT Model initialised [OK]:\n"
                   f"initial_model_dir_path: "

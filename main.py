@@ -75,7 +75,7 @@ async def lifespan_on_startup():
     print(">>>>>>> FastAPI Lifespan (startup):")
     run_redis()
     run_postgres()
-    if ALCHEMY_OPTIONS.POSTGRES_INIT:
+    if ALCHEMY_OPTIONS.USE_POSTGRES_DB:
         await initialize_db_tables()  # Creating postgres db tables
     await init_and_start_bert_model()  # Initializing Bert model
 
