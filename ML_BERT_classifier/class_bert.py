@@ -9,7 +9,8 @@ from transformers import BertForSequenceClassification, BertTokenizer
 
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import REDIS_OPTIONS
-from db_redis.redis_funcs.func_redis_save_key_mapping import redis_save_key_mapping_dict
+from db_redis.redis_funcs.func_redis_save_key_mapping import (
+    redis_save_key_mapping_dict)
 
 
 class ClassifierBERT:
@@ -325,17 +326,19 @@ class ClassifierBERT:
             self.model = BertForSequenceClassification.from_pretrained(
                 model_path).to(self.device)
             self.tokenizer = BertTokenizer.from_pretrained(model_path)
+            self.last_saved_model_dir = model_path
         except Exception as error:
             error_log = f"BERT Model loading [ERROR]: error: {error}"
             print(error_log)
             return error_log
 
-    def reinitialize_with_new_labels(self, new_labels: Dict[int, str]
+    def reinitialize_with_new_labels(self,
+                                     new_labels_categories: Dict[int, str]
                                      ) -> None | str:
         """Reinitialize the model with a new set (dictionary) of labels.
         This preserves the original model_name, cache_dir and max_len parameters,
         but adjusts the model's classification head to accommodate the new number of labels.
-        arg: new_labels: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}"""
+        arg: new_labels_categories: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}"""
         try:
             print(f"*** BEFORE MODEL REINITIALIZING:\n"
                   f"*** self: {self}\n"
@@ -344,9 +347,10 @@ class ClassifierBERT:
                   f"*** hash(self.model): {hash(self.model)}\n"
                   f"*** self.model.config.num_labels: {self.model.config.num_labels}\n"
                   f"*** self.labels [{len(self.labels)}]: {self.labels}\n"
-                  f"*** new_labels [{len(new_labels)}]: {new_labels}\n")
-            self.model = self.__get_bert_for_sequence_classification(new_labels)
-            self.labels = new_labels  # Update the labels number
+                  f"*** new_labels_categories {new_labels_categories}\n"
+                  f"*** len(new_labels_categories): {len(new_labels_categories)}\n")
+            self.model = self.__get_bert_for_sequence_classification(new_labels_categories)
+            self.labels = new_labels_categories  # Update the labels number
             print(f"### AFTER MODEL REINITIALIZING:\n"
                   f"### self: {self}\n"
                   f"### hash(self): {hash(self)}\n"
@@ -354,7 +358,8 @@ class ClassifierBERT:
                   f"### hash(self.model): {hash(self.model)}\n"
                   f"### self.model.config.num_labels: {self.model.config.num_labels}\n"
                   f"### self.labels [{len(self.labels)}]: {self.labels}\n"
-                  f"### new_labels [{len(new_labels)}]: {new_labels}\n")
+                  f"### new_labels_categories {new_labels_categories}\n"
+                  f"### len(new_labels_categories): {len(new_labels_categories)}\n")
         except Exception as error:
             error_log = f"BERT Model reinitialising [ERROR]: error: {error}"
             print(error_log)
