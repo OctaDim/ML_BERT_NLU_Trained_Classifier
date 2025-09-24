@@ -4,27 +4,37 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db_postgres.postgres_models.label_category_model import (
     LabelCategoryModel)
+from db_postgres.postgres_queries.qry_get_label_category_dict import (
+    get_label_category_dict_qry)
 from db_postgres.postgres_utils.merge_obj_ongoing_session import (
     merge_obj_to_ongoing_session)
 from db_postgres.postgres_utils.model_object_attrs_update import (
     update_model_obj_no_commit)
 
 
-async def cache_label_category_dict_qry(
+async def cache_unique_label_categ_dict_qry(
         ongoing_session: AsyncSession,
         dataset_id: int,
         label_category_dict: Dict[int, str],
-        orm_flush_caching: bool = False
 ) -> Dict[int, int]:
-    cur_label_index, cur_category_name = None, None
+    cur_label_idx, cur_cat_name = None, None
     try:
+
+        old_lab_cat_dict = await get_label_category_dict_qry(
+            ongoing_session=ongoing_session)
+        unique_lab_cat_dict = {}
+        for cur_lab_index, cur_cat_name in label_category_dict.items():
+            if cur_cat_name not in old_lab_cat_dict.values():
+                unique_lab_cat_dict[cur_lab_index] = cur_cat_name
+        print(f"unique_lab_cat_dict: {unique_lab_cat_dict}")
+
         cached_lab_idxs_ids_dict = {}
-        for cur_label_index, cur_category_name in label_category_dict.items():
+        for cur_label_idx, cur_cat_name in unique_lab_cat_dict.items():
             cur_new_lab_cat_obj = LabelCategoryModel()
             lab_cat_new_data = {
-                "label_index": cur_label_index,
+                "label_index": cur_label_idx,
                 "dataset_id": dataset_id,
-                "category_name": cur_category_name}
+                "category_name": cur_cat_name}
 
             update_model_obj_no_commit(
                 orm_model_object=cur_new_lab_cat_obj,
@@ -32,7 +42,7 @@ async def cache_label_category_dict_qry(
             ongoing_session.add(cur_new_lab_cat_obj)
             await ongoing_session.flush()
             new_lab_cat_obj_id = cur_new_lab_cat_obj.id
-            cached_lab_idxs_ids_dict[cur_label_index] = new_lab_cat_obj_id
+            cached_lab_idxs_ids_dict[cur_label_idx] = new_lab_cat_obj_id
         print(f"cached_lab_idxs_ids_dict: {cached_lab_idxs_ids_dict}")
         print(f"DB Postgres caching label-category data with getting ids [OK]")
         return cached_lab_idxs_ids_dict
@@ -40,8 +50,8 @@ async def cache_label_category_dict_qry(
         error_log = (f"DB Postgres caching label-category with getting ids [ERROR]: "
                      f"error: {error}\n"
                      f"dataset_id: {dataset_id}\n"
-                     f"cur_label_index: {cur_label_index}\n"
-                     f"cur_category_name: {cur_category_name}\n"
+                     f"cur_label_idx: {cur_label_idx}\n"
+                     f"cur_cat_name: {cur_cat_name}\n"
                      f"label_category_dict: {label_category_dict}\n")
         print(error_log)
         raise

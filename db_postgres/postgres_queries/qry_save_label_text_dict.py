@@ -5,20 +5,27 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db_postgres.postgres_models.label_category_model import (
     LabelCategoryModel)
 from db_postgres.postgres_models.label_text_model import LabelTextModel
-from db_postgres.postgres_queries.get_model_records_flex_query import (
+from db_postgres.postgres_queries.qry_get_text_label_dict import get_text_label_dict_qry
+from db_postgres.postgres_utils.get_model_records_flex_query import (
     get_model_rows_flex_query)
 from db_postgres.postgres_utils.merge_obj_ongoing_session import (
     merge_obj_to_ongoing_session)
 
 
-async def save_label_text_dict_qry(
+async def save_text_label_dict_qry(
         ongoing_session: AsyncSession,
-        label_text_dict: Dict[int, str]
+        text_label_dict: Dict[int, str]
 ) -> None:
     label_category_obj_id, cur_label_index, cur_text = None, None, None
     try:
-        new_lab_text_model_obj = LabelTextModel()
-        for cur_text, cur_label_index in label_text_dict.items():
+        old_text_lab_dict = await get_text_label_dict_qry(
+            ongoing_session=ongoing_session)
+        unique_keys = text_label_dict.keys() - old_text_lab_dict.keys()
+        unique_text_lab_dict = {key: text_label_dict[key] for key in unique_keys}
+        print(f"unique_lab_cat_dict: {unique_text_lab_dict}")
+
+        new_lab_text_model_obj = LabelTextModel()  # Not in loop to save memory
+        for cur_text, cur_label_index in unique_text_lab_dict.items():
             label_category_objs = await get_model_rows_flex_query(
                 orm_model_class=LabelCategoryModel,
                 ongoing_session=ongoing_session,
@@ -43,6 +50,6 @@ async def save_label_text_dict_qry(
                      f"label_category_obj_id: {label_category_obj_id}\n"
                      f"cur_label_index: {cur_label_index}\n"
                      f"cur_text: {cur_text}\n"
-                     f"label_text_dict: {label_text_dict}\n")
+                     f"text_label_dict: {text_label_dict}\n")
         print(error_log)
         raise
