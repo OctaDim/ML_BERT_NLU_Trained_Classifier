@@ -135,9 +135,10 @@ class FASTAPI_OPTIONS:
 
 @dataclass(frozen=True)
 class ALCHEMY_OPTIONS:
-    USE_POSTGRES_DB: bool = True
+    USE_POSTGRES_DATA_BASE: bool = True
     ALCHEMY_ORM_RAW_SQL_CONSOLE_LOGS: bool = False
-    ALCHEMY_QUERY_EXEC_TIME_LOGS: bool = True
+    ALCHEMY_QUERY_EXEC_TIME_LOGS: bool = False
+    ALCHEMY_SESSION_OK_ACTIONS_LOGS: bool = False
     ALCHEMY_USE_FUTURE_ALCHEMY: bool = True
     ALCHEMY_POOL_PRE_PING: bool = True
     ALCHEMY_CONST_CONN_POOL_SIZE: int = 20
