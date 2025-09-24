@@ -15,6 +15,8 @@ class DatasetModel(Base, ActiveMixin, CreateUpdateMixin):
 
     customer_id: Mapped[Optional[int]] = mapped_column(ForeignKey("customer.id"))
     dataset_name: Mapped[str] = mapped_column(unique=True)
+    dataset_csv_dir: Mapped[Optional[str]] = mapped_column(unique=True)
+    creation_reason: Mapped[Optional[str]] = mapped_column()
 
     # category_services: Mapped['Service'] = relationship(
     #     argument='Service',

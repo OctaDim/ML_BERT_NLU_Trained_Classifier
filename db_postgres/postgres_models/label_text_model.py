@@ -1,7 +1,7 @@
 from typing import Optional
 
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
 from db_postgres.postgres_models.active_create_upd_mixins import (
@@ -18,12 +18,7 @@ class LabelTextModel(Base, ActiveMixin, CreateUpdateMixin):
     label_index_hint: Mapped[Optional[int]] = mapped_column()
     text: Mapped[str] = mapped_column()
 
-    # category_services: Mapped['Service'] = relationship(
-    #     argument='Service',
-    #     order_by='Service.name',
-    #     back_populates="service_categories")
-    #
-    # category_masters: Mapped['Master'] = relationship(
-    #     argument='Master',
-    #     order_by='Master.full_name',
-    #     back_populates="master_categories")
+    rel_label_category: Mapped["LabelCategoryModel"] = relationship(
+        argument="LabelCategoryModel",
+        order_by='LabelCategoryModel.category_name',
+        back_populates="rel_labels_texts")
