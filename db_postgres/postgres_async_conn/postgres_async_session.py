@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import (
 
 
 class PostgresSession:
-    def __init__(self, async_engine: AsyncEngine):
+    def __init__(self, async_engine: AsyncEngine,
+                 log_good_ops: bool = False):
         self.engine = async_engine
-
         self.AsyncSessionMaker = async_sessionmaker(
             bind=self.engine,
             class_=AsyncSession,
@@ -13,10 +13,13 @@ class PostgresSession:
             autoflush=False,
             info={"any_attribute": "any session available attribute data"}, )
 
+        self.logging_ok_ops = log_good_ops
+
     async def __aenter__(self) -> AsyncSession:
         try:
             self.session = self.AsyncSessionMaker()
-            print(f"Postgres SESSION CREATED successfully [OK]")
+            ok_log = f"Postgres SESSION CREATED successfully [OK]"
+            print(ok_log) if self.logging_ok_ops else None
             return self.session
         except Exception as error:
             print(f"Postgres SESSION CREATING [ERROR]")
@@ -26,7 +29,8 @@ class PostgresSession:
         if not exc_type:  # No session context manager error
             try:
                 await self.session.commit()
-                print(f"Postgres SESSION COMMIT success [OK]")
+                ok_log = f"Postgres SESSION COMMIT success [OK]"
+                print(ok_log) if self.logging_ok_ops else None
             except Exception as error:
                 await self.session.rollback()
                 print(f"Postgres SESSION ROLLBACK "
@@ -50,7 +54,8 @@ class PostgresSession:
         try:
             if self.session.is_active:
                 await self.session.close()
-                print(f"Postgres SESSION CLOSED successfully [OK]")
+                ok_log = f"Postgres SESSION CLOSED successfully [OK]"
+                print(ok_log) if self.logging_ok_ops else None
         except Exception as error:
             print(f"Postgres SESSION CLOSING error [ERROR]:\n"
                   f"error: {error}")
