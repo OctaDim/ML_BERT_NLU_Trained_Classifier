@@ -11,12 +11,12 @@ async def get_records():
         LabelCategoryModel)
     from db_postgres.postgres_utils.convert_orm_rows_to_dict import (
         convert_model_recs_to_dicts)
-    from db_postgres.postgres_queries.get_model_records_flex_query import (
+    from db_postgres.postgres_utils.get_model_records_flex_query import (
         get_model_rows_flex_query)
+
     pgs_conn = PostgresConnection()
     async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
         print(pgs_session)
-
         pgs_lab_cat_recs = await get_model_rows_flex_query(
             orm_model_class=LabelCategoryModel,
             ongoing_session=pgs_session,
@@ -32,7 +32,6 @@ if __name__ == "__main__":
     import asyncio
 
     asyncio.run(main=get_records(), debug=True)
-
 
 # ########################## DEBUG CODE (end) ##########################
 # ######################################################################

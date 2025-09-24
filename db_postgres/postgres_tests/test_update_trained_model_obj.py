@@ -18,6 +18,7 @@ async def update_model_object_test():
         # {"username": "тест_1", "account_id": "111", },
         # {"username": "тест_2", "account_id": "222", },
     ]
+    pgs_conn = PostgresConnection()
     async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
         print(f"pgs_conn: {pgs_session}")
         for cur_data in new_update_data:
@@ -30,6 +31,7 @@ async def update_model_object_test():
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main=update_model_object_test(), debug=True)
 # ########################## DEBUG CODE (end) ##########################
 # ######################################################################
