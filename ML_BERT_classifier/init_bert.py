@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+from typing import Dict, Optional
 
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
@@ -9,8 +9,6 @@ from db_postgres.postgres_async_conn.pgs_async_connection import (
     PostgresConnection)
 from db_postgres.postgres_async_conn.postgres_async_session import (
     PostgresSession)
-from db_postgres.postgres_init.db_tables_initialization import (
-    initialize_db_tables)
 from db_postgres.postgres_models.trained_bert_model import (
     TrainedBertModel)
 from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
@@ -42,9 +40,15 @@ from utils_specific.get_last_saved_dataset_path import (
 from utils_specific.get_last_saved_model_dir import (
     get_last_saved_model_dir_path)
 
-print("🚀 LET'S GO !!! 🚀")
-bert_model_inst = None
-print("bert_model_inst => ", bert_model_inst)
+print("🚀 LET'S START !!! 🚀")
+bert_model_inst: Optional[ClassifierBERT] # Global. Lazy init in func. Get via func. Just annotation
+
+
+def get_global_bert_model_inst():
+    """Very important function to get global variable. If not used
+    the value may be None depending on import order"""
+    global bert_model_inst
+    return bert_model_inst
 
 
 class HardSingletonBERT(ClassifierBERT):
@@ -304,6 +308,8 @@ async def init_and_start_bert_model():
             token_str_max_len=BERT_TRAIN_OPTIONS.BERT_TOKEN_STR_MAX_LENGTH,
             use_singleton=True,
             use_hard_singleton=True)
+        bert_model_inst.last_saved_dataset_dir = last_saved_dataset_dir_path
+        bert_model_inst.last_saved_dataset_dir = start_init_dataset_dir
         print(f"Pretrained Init BERT Model initialised [OK]:\n"
               f"initial_model_dir_path: "
               f"{blue_color}{initial_model_dir_path}{reset_color}\n"
@@ -332,7 +338,8 @@ async def init_and_start_bert_model():
     if last_saved_model_dir_path:
         model_load_error_log = bert_model_inst.load_model(
             dir_full_path=last_saved_model_dir_path)
-        bert_model_inst.last_saved_dataset_dir = last_saved_model_dir_path
+        bert_model_inst.last_saved_dataset_dir = last_saved_dataset_dir_path
+        bert_model_inst.last_saved_dataset_dir = start_init_dataset_dir
         print(f"Last Saved BERT Model initialised preliminary and loaded [OK]:\n"
               f"last_saved_model_dir_path: "
               f"{blue_color}{last_saved_model_dir_path}{reset_color}\n"
@@ -372,22 +379,8 @@ async def init_and_start_bert_model():
               f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
               f"initial_model_dir_path: {initial_model_dir_path}\n")
 
+    print("🚀 LET'S GO !!! 🚀")
     print(f">>>>>>> bert_model_inst => {bert_model_inst}")
     print(f">>>>>>> hash(bert_model_inst) => {hash(bert_model_inst)}")
-    print(f">>>>>>> bert_model_inst.labels => {bert_model_inst.labels}")
-
+    print(f">>>>>>> bert_model_inst.labels => {bert_model_inst.labels}\n")
     return bert_model_inst
-
-
-if __name__ == "__main__":
-    async def main_loop_func():
-        await initialize_db_tables()
-        await init_and_start_bert_model()
-
-
-    import asyncio
-
-    asyncio.run(main=main_loop_func(), debug=True)
-    print(f"bert_model_inst: {bert_model_inst}")
-    print(f"bert_model_inst.last_saved_model_dir: {bert_model_inst.last_saved_model_dir}")
-    print(f"bert_model_inst.last_saved_dataset_dir: {bert_model_inst.last_saved_dataset_dir}")
