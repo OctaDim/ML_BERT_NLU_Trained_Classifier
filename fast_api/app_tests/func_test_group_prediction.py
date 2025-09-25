@@ -1,11 +1,13 @@
-from ML_BERT_classifier.init_bert import bert_model_inst
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
-from fast_api.app_tests.test_phrases import test_phrases
 from fast_api.app_tests.test_labels_categories import (
     labels_categories)
+from fast_api.app_tests.test_phrases import test_phrases
 
 
-def test_group_prediction():
+def test_group_prediction(
+        bert_model_inst: ClassifierBERT
+):
     print("#" * 65)
     all_categories_lens = [len(cat) for cat in labels_categories.values()]
     categories_max_len = max(all_categories_lens)

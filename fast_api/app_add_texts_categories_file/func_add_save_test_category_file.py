@@ -6,9 +6,7 @@ from datetime import datetime
 
 from fastapi import HTTPException, status
 
-from ML_BERT_classifier.init_bert import bert_model_inst
-from configs.settings import (
-    BASE_DIR, BERT_OPTIONS)
+from configs.settings import BASE_DIR, BERT_OPTIONS
 from utils_common.normalized_path import (
     get_full_dir_normal_path, get_full_file_normal_path)
 from utils_specific.class_csv_labels_categories import CsvLabelCategory

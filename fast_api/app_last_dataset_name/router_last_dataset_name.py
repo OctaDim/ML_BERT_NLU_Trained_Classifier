@@ -2,17 +2,22 @@
 # from functools import partial
 import os
 from datetime import datetime
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 
-from ML_BERT_classifier.init_bert import bert_model_inst
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
-from utils_specific.get_initial_dataset_dir_path import get_initial_dataset_dir_path
-from utils_specific.get_last_saved_dataset_path import get_last_saved_dataset_dir_path
+from utils_specific.get_initial_dataset_dir_path import (
+    get_initial_dataset_dir_path)
+from utils_specific.get_last_saved_dataset_path import (
+    get_last_saved_dataset_dir_path)
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_last_dataset_name = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -22,7 +27,11 @@ router_bert_last_dataset_name = APIRouter(prefix=f"/{bert_base_url_name}",
 @router_bert_last_dataset_name.post(path="/bert_get_last_dataset_name/",
                                     # TODO: Describe responses here
                                     response_model=None)
-async def bert_get_last_dataset_name(auth_data: AuthDataBert):
+async def bert_get_last_dataset_name(
+        auth_data: AuthDataBert,
+        bert_model_inst: Annotated[
+            ClassifierBERT, Depends(get_bert_model_instance_dep)]
+) -> JSONResponse:
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
     try:

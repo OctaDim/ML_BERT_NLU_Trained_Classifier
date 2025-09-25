@@ -3,25 +3,30 @@
 import os
 import uuid
 from datetime import datetime, timedelta
+from typing import Annotated
 
-from fastapi import APIRouter, status, BackgroundTasks, HTTPException
+from fastapi import APIRouter, status, BackgroundTasks, HTTPException, Depends
 from fastapi.responses import JSONResponse
 
-from ML_BERT_classifier.init_bert import bert_model_inst
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS, BERT_TRAIN_OPTIONS, BERT_MODEL_NAMES,
     REDIS_OPTIONS, BASE_DIR, STATUSES)
 from db_postgres.postgres_async_conn.pgs_async_connection import (
     PostgresConnection)
+from db_postgres.postgres_async_conn.postgres_async_session import (
+    PostgresSession)
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
 from db_postgres.postgres_models.before_reinit_bert_model import (
     BeforeReinitBertModel)
+from db_postgres.postgres_queries.qry_find_create_customer import (
+    find_create_customer_qry)
 from db_postgres.postgres_utils.merge_obj_ongoing_session import (
     merge_obj_to_ongoing_session)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
     redis_save_key_mapping_dict)
-from fast_api.app_account_data.func_verify_create_customer import (
-    verify_create_customer)
 from fast_api.app_account_data.scheme_account_data import (
     AccountDataBert)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
@@ -51,19 +56,24 @@ async def bert_train_model(
         auth_data: AuthDataBert,
         account_data: AccountDataBert,
         train_model_data: TrainModelDataBert,
-        background_tasks: BackgroundTasks  # FastAPI Class for background tasks
-):
+        background_tasks: BackgroundTasks,  # FastAPI Class for background tasks
+        bert_model_inst: Annotated[
+            ClassifierBERT, Depends(get_bert_model_instance_dep)]
+) -> JSONResponse:
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
 
-    print("\nGetting or creating customer record and customer id:")
+    print("\nFinding or creating customer record and customer id:")
     account_username = account_data.account_username
     account_id = account_data.account_id
-    customer_id = await verify_create_customer(
-        account_username=account_username,
-        account_id=account_id)
+    pgs_conn = PostgresConnection()
+    async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+        customer_id = await find_create_customer_qry(
+            ongoing_session=pgs_session,
+            account_username=account_username,
+            account_id=account_id)
 
     print("\nGetting last saved dataset directory name:")
     inst_last_saved_dataset_path = bert_model_inst.last_saved_dataset_dir
@@ -174,7 +184,7 @@ async def bert_train_model(
 
             labels_before = bert_model_inst.model.config.num_labels
             error_log = bert_model_inst.reinitialize_with_new_labels(
-                new_labels=new_lab_cat_dict)  # Model reinitialising
+                new_labels_categories=new_lab_cat_dict)  # Model reinitialising
             if error_log:
                 print(error_log)
                 raise HTTPException(

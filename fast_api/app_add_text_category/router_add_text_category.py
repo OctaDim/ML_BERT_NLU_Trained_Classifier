@@ -1,19 +1,22 @@
 # import asyncio
 # from functools import partial
 from datetime import datetime
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
-from configs.settings import (
-    BERT_OPTIONS)
-from fast_api.app_add_text_category.func_add_save_test_category import add_save_single_text_category
+from configs.settings import BERT_OPTIONS
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
+from fast_api.app_add_text_category.func_add_save_test_category import (
+    add_save_single_text_category)
 from fast_api.app_add_text_category.scheme_add_text_category import (
     TextCategoryDataBert)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
-
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_add_text_category = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -23,8 +26,12 @@ router_bert_add_text_category = APIRouter(prefix=f"/{bert_base_url_name}",
 @router_bert_add_text_category.post(path="/bert_add_text_category/",
                                     # TODO: Describe responses here
                                     response_model=None)
-async def bert_add_text_category(auth_data: AuthDataBert,
-                                 text_category_data: TextCategoryDataBert):
+async def bert_add_text_category(
+        auth_data: AuthDataBert,
+        text_category_data: TextCategoryDataBert,
+        bert_model_inst: Annotated[
+            ClassifierBERT, Depends(get_bert_model_instance_dep)]
+) -> JSONResponse:
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
@@ -43,7 +50,8 @@ async def bert_add_text_category(auth_data: AuthDataBert,
         datetime_start = datetime.now()
         new_csv_files_data = add_save_single_text_category(
             update_text=update_text,
-            update_category=update_category)
+            update_category=update_category,
+            bert_model_inst=bert_model_inst)
         adding_time = (datetime.now() - datetime_start).total_seconds()
         adding_time = round(adding_time, 1)
 

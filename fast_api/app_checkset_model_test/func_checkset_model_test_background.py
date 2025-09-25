@@ -3,11 +3,12 @@ import json
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
-from ML_BERT_classifier.init_bert import bert_model_inst
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, STATUSES)
-from db_redis.redis_funcs.func_redis_save_key_mapping import redis_save_key_mapping_dict
+from db_redis.redis_funcs.func_redis_save_key_mapping import (
+    redis_save_key_mapping_dict)
 from fast_api.app_auth.scheme_auth import AuthDataBert
 
 
@@ -15,7 +16,8 @@ async def background_checkset_test_model(
         auth_data: AuthDataBert,
         checkset_data_list: List[Tuple[str, str]],
         checkset_file_name: str,
-        checkset_redis_name: str,
+        bert_model_inst: ClassifierBERT,
+        checkset_redis_name: str
 ) -> None:
     cur_func_name = inspect.currentframe().f_code.co_name
 

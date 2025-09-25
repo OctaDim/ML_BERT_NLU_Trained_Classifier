@@ -1,25 +1,29 @@
 import os
 import random
 from datetime import datetime, timedelta
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 
-from ML_BERT_classifier.init_bert import bert_model_inst
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, REDIS_OPTIONS, STATUSES)
 from db_postgres.postgres_async_conn.pgs_async_connection import (
     PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import PostgresSession
+from db_postgres.postgres_async_conn.postgres_async_session import (
+    PostgresSession)
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
 from db_postgres.postgres_models.trained_bert_model import (
     TrainedBertModel)
+from db_postgres.postgres_queries.qry_find_create_customer import (
+    find_create_customer_qry)
 from db_postgres.postgres_utils.merge_obj_ongoing_session import (
     merge_obj_to_ongoing_session)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
     redis_save_key_mapping_dict)
-from fast_api.app_account_data.func_verify_create_customer import (
-    verify_create_customer)
 from fast_api.app_account_data.scheme_account_data import (
     AccountDataBert)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
@@ -37,11 +41,15 @@ router_bert_save_model = APIRouter(prefix=f"/{bert_base_url_name}",
 @router_bert_save_model.post(path="/bert_save_model/",
                              # TODO: Describe responses here
                              response_model=None)
-async def bert_save_model(auth_data: AuthDataBert,
-                          account_data: AccountDataBert,
-                          save_model_data: SaveModelDataBert,
-                          save_model_after_train_data: SaveModelAfterTrainBert,
-                          dataset_name: str = None):
+async def bert_save_model(
+        auth_data: AuthDataBert,
+        account_data: AccountDataBert,
+        save_model_data: SaveModelDataBert,
+        save_model_after_train_data: SaveModelAfterTrainBert,
+        bert_model_inst: Annotated[
+            ClassifierBERT, Depends(get_bert_model_instance_dep)],
+        dataset_name: str = None,
+) -> JSONResponse:
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
@@ -50,9 +58,13 @@ async def bert_save_model(auth_data: AuthDataBert,
     print("\nGetting or creating customer record and customer id:")
     account_username = account_data.account_username
     account_id = account_data.account_id
-    customer_id = await verify_create_customer(
-        account_username=account_username,
-        account_id=account_id)
+
+    pgs_conn = PostgresConnection()
+    async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+        customer_id = await find_create_customer_qry(
+            ongoing_session=pgs_session,
+            account_username=account_username,
+            account_id=account_id)
 
     print("\nBERT saving model without train or after train process:")
     save_after_train_flag = save_model_after_train_data.trained_model_redirected_save_flag

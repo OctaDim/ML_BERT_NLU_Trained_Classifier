@@ -1,16 +1,19 @@
 import random
 from datetime import datetime
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 
-from ML_BERT_classifier.init_bert import bert_model_inst
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
 from fast_api.app_auth.funcs_auth import verify_test_username_password
-from fast_api.app_tests.schemes_test import AuthDataTest, SaveModelDataTest
+from fast_api.app_tests.schemes_test import (
+    AuthDataTest, SaveModelDataTest)
 from utils_common.normalized_path import get_full_dir_normal_path
-
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_test_save_model = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -19,8 +22,12 @@ router_test_save_model = APIRouter(prefix=f"/{bert_base_url_name}",
 
 @router_test_save_model.post(path="/test_save_model/",
                              response_model=None)
-async def bert_test_save_model(auth_data: AuthDataTest,
-                               save_model_data: SaveModelDataTest):
+async def bert_test_save_model(
+        auth_data: AuthDataTest,
+        save_model_data: SaveModelDataTest,
+        bert_model_inst: Annotated[
+            ClassifierBERT, Depends(get_bert_model_instance_dep)]
+) -> JSONResponse:
     verify_test_username_password(username=auth_data.username,
                                   password=auth_data.password)
 

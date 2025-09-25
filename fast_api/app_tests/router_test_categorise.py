@@ -1,13 +1,17 @@
 from datetime import datetime
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
 from fast_api.app_auth.funcs_auth import verify_test_username_password
-from fast_api.app_tests.func_test_group_prediction import test_group_prediction
+from fast_api.app_tests.func_test_group_prediction import (
+    test_group_prediction)
 from fast_api.app_tests.schemes_test import AuthDataTest
-
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_test_categorise = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -16,14 +20,18 @@ router_test_categorise = APIRouter(prefix=f"/{bert_base_url_name}",
 
 @router_test_categorise.post(path="/test_categorise/",
                              response_model=None)
-async def bert_test_categorise(auth_data: AuthDataTest):
+async def bert_test_categorise(
+        auth_data: AuthDataTest,
+        bert_model_inst: Annotated[
+            ClassifierBERT, Depends(get_bert_model_instance_dep)]
+) -> JSONResponse:
     verify_test_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
     try:
         print("\nPrediction results without model training:")
         datetime_start = datetime.now()
-        test_group_prediction()
+        test_group_prediction(bert_model_inst=bert_model_inst)
         prediction_time = (datetime.now() - datetime_start).total_seconds()
         prediction_time = round(prediction_time, 1)
 

@@ -1,17 +1,19 @@
 # import asyncio
 from datetime import datetime
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 
-from ML_BERT_classifier.init_bert import bert_model_inst
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_MODEL_NAMES, BERT_OPTIONS)
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_predict_text.schemes_predict import PredictDataBert
-
 
 # from functools import partial
 
@@ -24,8 +26,12 @@ router_bert_predict_single_text = APIRouter(prefix=f"/{bert_base_url_name}",
 @router_bert_predict_single_text.post(path="/bert_predict_single_text/",
                                       # TODO: Describe responses here
                                       response_model=None)
-async def bert_predict_single_text(auth_data: AuthDataBert,
-                                   predict_data: PredictDataBert):
+async def bert_predict_single_text(
+        auth_data: AuthDataBert,
+        predict_data: PredictDataBert,
+        bert_model_inst: Annotated[
+            ClassifierBERT, Depends(get_bert_model_instance_dep)]
+) -> JSONResponse:
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 

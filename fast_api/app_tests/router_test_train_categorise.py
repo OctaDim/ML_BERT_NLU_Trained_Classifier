@@ -1,17 +1,20 @@
 from datetime import datetime
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 
-from ML_BERT_classifier.init_bert import bert_model_inst
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.settings import (
     BERT_MODEL_NAMES, BERT_OPTIONS, BERT_TRAIN_OPTIONS)
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
 from fast_api.app_auth.funcs_auth import verify_test_username_password
-from fast_api.app_tests.func_test_group_prediction import test_group_prediction
+from fast_api.app_tests.func_test_group_prediction import (
+    test_group_prediction)
 from fast_api.app_tests.schemes_test import AuthDataTest
 from fast_api.app_tests.test_texts_labels import (
     texts_labels)
-
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_test_train_categorise = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -20,12 +23,16 @@ router_test_train_categorise = APIRouter(prefix=f"/{bert_base_url_name}",
 
 @router_test_train_categorise.post(path="/test_train_categorise/",
                                    response_model=None)
-async def bert_test_train_categorise(auth_data: AuthDataTest):
+async def bert_test_train_categorise(
+        auth_data: AuthDataTest,
+        bert_model_inst: Annotated[
+            ClassifierBERT, Depends(get_bert_model_instance_dep)]
+) -> JSONResponse:
     verify_test_username_password(username=auth_data.username,
                                   password=auth_data.password)
     try:
         print("\nPrediction results without model training:")
-        test_group_prediction()
+        test_group_prediction(bert_model_inst=bert_model_inst)
 
         print("Preparing training data set:")
         train_dataset_unique = {}
@@ -56,7 +63,7 @@ async def bert_test_train_categorise(auth_data: AuthDataTest):
 
         print("Model training:")
         datetime_start = datetime.now()
-        bert_model_inst.train(
+        await bert_model_inst.train(
             train_dataset=new_train_dataset,
             max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
             max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,

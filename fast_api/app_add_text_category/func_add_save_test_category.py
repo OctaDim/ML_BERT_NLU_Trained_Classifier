@@ -5,9 +5,8 @@ import shutil
 
 from fastapi import HTTPException, status
 
-from ML_BERT_classifier.init_bert import bert_model_inst
-from configs.settings import (
-    BASE_DIR, BERT_OPTIONS)
+from ML_BERT_classifier.class_bert import ClassifierBERT
+from configs.settings import BASE_DIR, BERT_OPTIONS
 from utils_common.normalized_path import (
     get_full_dir_normal_path, get_full_file_normal_path)
 from utils_specific.class_csv_labels_categories import CsvLabelCategory
@@ -15,8 +14,11 @@ from utils_specific.class_csv_texts_labels import CsvTextLabel
 from utils_specific.new_dataset_dir_path import get_new_dataset_dir_path
 
 
-def add_save_single_text_category(update_text: str,
-                                  update_category: str) -> dict:
+def add_save_single_text_category(
+        update_text: str,
+        update_category: str,
+        bert_model_inst: ClassifierBERT
+) -> dict:
     last_saved_dataset_ini_dir = ""
     last_saved_dataset_ini_path = ""
 

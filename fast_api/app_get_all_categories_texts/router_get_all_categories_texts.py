@@ -1,13 +1,16 @@
 # import asyncio
 # from functools import partial
 from datetime import datetime
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 
-from ML_BERT_classifier.init_bert import bert_model_inst
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from utils_common.normalized_path import get_full_file_normal_path
@@ -26,7 +29,11 @@ router_bert_get_all_categories_texts = APIRouter(prefix=f"/{bert_base_url_name}"
 @router_bert_get_all_categories_texts.post(path="/bert_get_categories_texts_dict/",
                                            # TODO: Describe responses here
                                            response_model=None)
-async def bert_get_categories_texts_dict(auth_data: AuthDataBert):
+async def bert_get_categories_texts_dict(
+        auth_data: AuthDataBert,
+        bert_model_inst: Annotated[
+            ClassifierBERT, Depends(get_bert_model_instance_dep)]
+) -> JSONResponse:
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
     try:

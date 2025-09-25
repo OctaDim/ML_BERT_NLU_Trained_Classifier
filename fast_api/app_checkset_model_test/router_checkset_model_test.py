@@ -6,21 +6,26 @@ from datetime import timedelta
 from typing import Annotated
 
 from fastapi import (APIRouter, File, Form, HTTPException, UploadFile,
-                     status, BackgroundTasks)
+                     status, BackgroundTasks, Depends)
 from fastapi.responses import JSONResponse
 
-from ML_BERT_classifier.init_bert import bert_model_inst
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS, REDIS_OPTIONS, STATUSES, BERT_MODEL_NAMES)
-from db_redis.redis_funcs.func_redis_save_key_mapping import redis_save_key_mapping_dict
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
+from db_redis.redis_funcs.func_redis_save_key_mapping import (
+    redis_save_key_mapping_dict)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_checkset_model_test.func_checkset_model_test_background import (
     background_checkset_test_model)
 from utils_common.class_file_validate_read import FileValidateRead
-from utils_specific.get_initial_model_dir_path import get_initial_model_dir_path
-from utils_specific.get_last_saved_model_dir import get_last_saved_model_dir_path
+from utils_specific.get_initial_model_dir_path import (
+    get_initial_model_dir_path)
+from utils_specific.get_last_saved_model_dir import (
+    get_last_saved_model_dir_path)
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_checkset_model_test = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -34,8 +39,10 @@ async def bert_start_checkset_model_test(
         upload_file: Annotated[UploadFile, File(description="file .xls, .xlsx, or .txt")],
         username: Annotated[str, Form()],
         password: Annotated[str, Form()],
-        background_tasks: BackgroundTasks  # FastAPI Class for background tasks
-):
+        background_tasks: BackgroundTasks,  # FastAPI Class for background tasks
+        bert_model_inst: Annotated[
+            ClassifierBERT, Depends(get_bert_model_instance_dep)]
+) -> JSONResponse:
     verify_prod_username_password(username=username,
                                   password=password)
 
@@ -188,6 +195,7 @@ async def bert_start_checkset_model_test(
                                   auth_data,
                                   checkset_data_list,
                                   checkset_file_name,
+                                  bert_model_inst,
                                   checkset_redis_name)
         print("####### AFTER BACKGROUND CHECK-SET MODEL TEST")
 
