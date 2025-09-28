@@ -9,8 +9,12 @@ from fastapi.responses import JSONResponse
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_OPTIONS
+from db_postgres.postgres_async_conn.pgs_async_connection import PostgresConnection
+from db_postgres.postgres_async_conn.postgres_async_session import PostgresSession
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
+from db_postgres.postgres_queries.qry_find_create_customer import find_create_customer_qry
+from fast_api.app_account_data.scheme_account_data import AccountDataBert
 from fast_api.app_add_single_category.func_add_single_category import (
     add_save_single_category)
 from fast_api.app_add_single_category.scheme_add_single_category import (
@@ -28,9 +32,10 @@ router_bert_add_single_category = APIRouter(prefix=f"/{bert_base_url_name}",
                                       response_model=None)
 async def bert_add_single_category(
         auth_data: AuthDataBert,
+        account_data: AccountDataBert,
         category_data: SingleCategoryDataBert,
         bert_model_inst: Annotated[
-            ClassifierBERT, Depends(get_bert_model_instance_dep)]
+            ClassifierBERT, Depends(get_bert_model_instance_dep)],
 ) -> JSONResponse:
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
@@ -48,6 +53,7 @@ async def bert_add_single_category(
     try:
         datetime_start = datetime.now()
         new_csv_files_data = await add_save_single_category(
+            account_data=account_data,
             update_category=upd_single_category,
             bert_model_inst=bert_model_inst)
         adding_time = (datetime.now() - datetime_start).total_seconds()

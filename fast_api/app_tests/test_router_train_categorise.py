@@ -10,9 +10,9 @@ from configs.settings import (
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from fast_api.app_auth.funcs_auth import verify_test_username_password
-from fast_api.app_tests.func_test_group_prediction import (
+from fast_api.app_tests.test_func_group_prediction import (
     test_group_prediction)
-from fast_api.app_tests.schemes_test import AuthDataTest
+from fast_api.app_tests.test_schemes import AuthDataTest
 from fast_api.app_tests.test_texts_labels import (
     texts_labels)
 

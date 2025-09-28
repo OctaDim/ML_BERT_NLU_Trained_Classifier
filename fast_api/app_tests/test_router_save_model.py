@@ -11,7 +11,7 @@ from configs.settings import BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from fast_api.app_auth.funcs_auth import verify_test_username_password
-from fast_api.app_tests.schemes_test import (
+from fast_api.app_tests.test_schemes import (
     AuthDataTest, SaveModelDataTest)
 from utils_common.normalized_path import get_full_dir_normal_path
 
