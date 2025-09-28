@@ -14,18 +14,23 @@ from db_postgres.postgres_queries_utils.merge_obj_ongoing_session import (
 
 async def save_text_label_dict_qry(
         ongoing_session: AsyncSession,
-        text_label_dict: Dict[int, str]
+        text_label_dict: Dict[int, str],
+        save_only_unique: bool = False
 ) -> None:
     label_category_obj_id, cur_label_index, cur_text = None, None, None
     try:
         old_text_lab_dict = await get_text_label_dict_qry(
             ongoing_session=ongoing_session)
-        unique_keys = text_label_dict.keys() - old_text_lab_dict.keys()
-        unique_text_lab_dict = {key: text_label_dict[key] for key in unique_keys}
-        print(f"unique_lab_cat_dict: {unique_text_lab_dict}")
+        if save_only_unique:
+            unique_keys = text_label_dict.keys() - old_text_lab_dict.keys()
+            unique_text_lab_dict = {key: text_label_dict[key] for key in unique_keys}
+            print(f"unique_lab_cat_dict: {unique_text_lab_dict}")
+            text_lab_dict = unique_text_lab_dict
+        else:
+            text_lab_dict = old_text_lab_dict
 
         new_lab_text_model_obj = LabelTextModel()  # Not in loop to save memory
-        for cur_text, cur_label_index in unique_text_lab_dict.items():
+        for cur_text, cur_label_index in text_lab_dict.items():
             label_category_objs = await get_model_rows_flex_query(
                 orm_model_class=LabelCategoryModel,
                 ongoing_session=ongoing_session,

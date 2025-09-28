@@ -219,7 +219,8 @@ async def init_and_start_bert_model():
 
                 await save_text_label_dict_qry(
                     ongoing_session=pgs_session,
-                    text_label_dict=text_label_dict)
+                    text_label_dict=text_label_dict,
+                    save_only_unique=True)
     else:  # All Postgres DB data exists
         label_category_dict = pgs_bert_model_data["lab_cat_dict"]
         text_label_dict = pgs_bert_model_data["text_lab_dict"]
@@ -247,7 +248,8 @@ async def init_and_start_bert_model():
 
                 await save_text_label_dict_qry(
                     ongoing_session=pgs_session,
-                    text_label_dict=text_label_dict)
+                    text_label_dict=text_label_dict,
+                    save_only_unique=True)
     print("Getting initial model directory path:")
     initial_model_dir_path = get_initial_model_dir_path()
 

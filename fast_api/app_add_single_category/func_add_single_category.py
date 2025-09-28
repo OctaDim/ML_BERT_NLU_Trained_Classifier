@@ -238,10 +238,6 @@ async def add_save_single_category(
                 print(f"Postgres DB label-category data saved [OK]:\n"
                       f"label_category_dict: {new_lab_cat_dict}\n")
 
-                # await save_text_label_dict_qry(
-                #     ongoing_session=pgs_session,
-                #     text_label_dict=new_text_lab_dict)
-
         new_csv_files_data = {
             "lab_cat_csv_path": lab_cat_csv_path,
             "text_lab_csv_path": text_lab_csv_path,

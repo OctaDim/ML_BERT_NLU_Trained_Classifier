@@ -275,7 +275,8 @@ async def add_save_single_text_category(
 
                 await save_text_label_dict_qry(
                     ongoing_session=pgs_session,
-                    text_label_dict=new_text_lab_dict)
+                    text_label_dict=new_text_lab_dict,
+                    save_only_unique=False)
 
         new_csv_files_data = {
             "lab_cat_csv_path": lab_cat_csv_path,
