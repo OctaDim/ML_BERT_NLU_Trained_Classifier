@@ -5,7 +5,7 @@ from sqlalchemy.orm import DeclarativeMeta
 
 from db_postgres.postgres_async_conn.pgs_async_connection import (
     Base)
-from db_postgres.postgres_utils.merge_obj_ongoing_session import (
+from db_postgres.postgres_queries_utils.merge_obj_ongoing_session import (
     merge_obj_to_ongoing_session)
 
 

@@ -6,7 +6,7 @@ from db_postgres.postgres_async_conn.pgs_async_connection import (
     PostgresConnection)
 from db_postgres.postgres_models.label_category_model import (
     LabelCategoryModel)
-from db_postgres.postgres_utils.get_model_records_flex_query import (
+from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
     get_model_rows_flex_query)
 
 

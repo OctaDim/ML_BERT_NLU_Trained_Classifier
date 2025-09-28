@@ -7,7 +7,7 @@ from db_postgres.postgres_async_conn.pgs_async_connection import (
 from db_postgres.postgres_async_conn.postgres_async_session import (
     PostgresSession)
 from db_postgres.postgres_models.dataset_model import DatasetModel
-from db_postgres.postgres_utils.get_model_records_flex_query import (
+from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
     get_model_rows_flex_query)
 
 

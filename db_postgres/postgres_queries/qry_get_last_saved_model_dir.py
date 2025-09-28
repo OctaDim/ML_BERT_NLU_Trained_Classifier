@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db_postgres.postgres_models.trained_bert_model import (
     TrainedBertModel)
-from db_postgres.postgres_utils.get_model_records_flex_query import (
+from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
     get_model_rows_flex_query)
 
 

@@ -6,9 +6,9 @@ from db_postgres.postgres_models.label_category_model import (
     LabelCategoryModel)
 from db_postgres.postgres_models.label_text_model import LabelTextModel
 from db_postgres.postgres_queries.qry_get_text_label_dict import get_text_label_dict_qry
-from db_postgres.postgres_utils.get_model_records_flex_query import (
+from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
     get_model_rows_flex_query)
-from db_postgres.postgres_utils.merge_obj_ongoing_session import (
+from db_postgres.postgres_queries_utils.merge_obj_ongoing_session import (
     merge_obj_to_ongoing_session)
 
 
