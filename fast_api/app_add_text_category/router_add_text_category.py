@@ -11,7 +11,8 @@ from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_OPTIONS
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
-from fast_api.app_add_text_category.func_add_save_test_category import (
+from fast_api.app_account_data.scheme_account_data import AccountDataBert
+from fast_api.app_add_text_category.func_add_save_text_category import (
     add_save_single_text_category)
 from fast_api.app_add_text_category.scheme_add_text_category import (
     TextCategoryDataBert)
@@ -28,6 +29,7 @@ router_bert_add_text_category = APIRouter(prefix=f"/{bert_base_url_name}",
                                     response_model=None)
 async def bert_add_text_category(
         auth_data: AuthDataBert,
+        account_data: AccountDataBert,
         text_category_data: TextCategoryDataBert,
         bert_model_inst: Annotated[
             ClassifierBERT, Depends(get_bert_model_instance_dep)]
@@ -48,7 +50,8 @@ async def bert_add_text_category(
 
     try:
         datetime_start = datetime.now()
-        new_csv_files_data = add_save_single_text_category(
+        new_csv_files_data = await add_save_single_text_category(
+            account_data=account_data,
             update_text=update_text,
             update_category=update_category,
             bert_model_inst=bert_model_inst)
