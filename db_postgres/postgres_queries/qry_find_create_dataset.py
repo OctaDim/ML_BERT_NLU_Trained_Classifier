@@ -3,15 +3,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from db_postgres.postgres_models.dataset_model import DatasetModel
-from db_postgres.postgres_utils.get_model_records_flex_query import (
+from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
     get_model_rows_flex_query)
-from db_postgres.postgres_utils.model_object_attrs_update import (
+from db_postgres.postgres_queries_utils.model_object_attrs_update import (
     update_model_obj_no_commit)
 
 
 async def find_create_dataset_qry(
         ongoing_session: AsyncSession,
         dataset_name: str,
+        customer_id: int = None,
         dataset_csv_dir: str = None,
         creation_reason: str = None
 ) -> int | None:
@@ -30,12 +31,13 @@ async def find_create_dataset_qry(
         if found_dataset_id:
             return found_dataset_id
         new_dataset_obj = DatasetModel()
-        customer_new_data = {"dataset_name": dataset_name,
+        dataset_new_data = {"dataset_name": dataset_name,
+                            "customer_id": customer_id,
                              "dataset_csv_dir": dataset_csv_dir,
                              "creation_reason": creation_reason
                              }
         update_model_obj_no_commit(orm_model_object=new_dataset_obj,
-                                   new_update_data=customer_new_data)
+                                   new_update_data=dataset_new_data)
         ongoing_session.add(new_dataset_obj)
         await ongoing_session.flush()
         new_dataset_id = new_dataset_obj.id
