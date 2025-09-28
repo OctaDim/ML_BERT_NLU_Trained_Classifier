@@ -6,9 +6,9 @@ from sqlalchemy.orm import InstrumentedAttribute
 
 from configs.settings import ALCHEMY_OPTIONS
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
-from db_postgres.postgres_utils.create_order_by_partial_query import (
+from db_postgres.postgres_queries_utils.create_order_by_partial_query import (
     create_order_for_partial_query)
-from db_postgres.postgres_utils.create_where_partial_query import (
+from db_postgres.postgres_queries_utils.create_where_partial_query import (
     create_where_for_partial_query)
 from utils_common.exec_time_decorator import execution_time_decorator
 

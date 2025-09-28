@@ -1,8 +1,6 @@
-from typing import Sequence, Any, List, Tuple
+from typing import Sequence, Any
 
 from sqlalchemy import Row, RowMapping
-
-from db_postgres.postgres_async_conn.pgs_async_connection import Base
 
 
 async def convert_orm_rows_to_dicts(
@@ -18,7 +16,7 @@ async def convert_orm_rows_to_dicts(
 
 
 async def convert_model_recs_to_dicts(
-        model_records_list: Sequence[Row|RowMapping]
+        model_records_list: Sequence[Row | RowMapping]
 ) -> list[dict[str, Any]]:
     model_data_dicts_list = []
     for cur_record in model_records_list:

@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
-from db_postgres.postgres_utils.model_object_attrs_update import (
+from db_postgres.postgres_queries_utils.model_object_attrs_update import (
     update_model_obj_no_commit)
 
 
