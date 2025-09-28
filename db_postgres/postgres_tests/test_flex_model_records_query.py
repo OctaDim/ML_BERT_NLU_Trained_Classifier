@@ -10,7 +10,7 @@ async def test_get_model_records_via_flex_query():
     from db_postgres.postgres_models.label_category_model import (
         LabelCategoryModel)
     # from db_postgres.postgres_models.customer_model import CustomerModel
-    from db_postgres.postgres_utils.get_model_records_flex_query import (
+    from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
         get_model_rows_flex_query)
 
     pgs_conn = PostgresConnection()

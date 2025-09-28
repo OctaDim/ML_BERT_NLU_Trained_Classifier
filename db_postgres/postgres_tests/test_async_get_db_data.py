@@ -9,9 +9,9 @@ async def get_records():
         PostgresSession)
     from db_postgres.postgres_models.label_category_model import (
         LabelCategoryModel)
-    from db_postgres.postgres_utils.convert_orm_rows_to_dict import (
+    from db_postgres.postgres_queries_utils.convert_orm_rows_to_dict import (
         convert_model_recs_to_dicts)
-    from db_postgres.postgres_utils.get_model_records_flex_query import (
+    from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
         get_model_rows_flex_query)
 
     pgs_conn = PostgresConnection()

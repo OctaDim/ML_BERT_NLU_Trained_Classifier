@@ -4,7 +4,7 @@
 
 async def update_model_object_test():
     from db_postgres.postgres_async_conn.postgres_async_session import PostgresSession
-    from db_postgres.postgres_utils.merge_obj_ongoing_session import merge_obj_to_ongoing_session
+    from db_postgres.postgres_queries_utils.merge_obj_ongoing_session import merge_obj_to_ongoing_session
     from db_postgres.postgres_async_conn.pgs_async_connection import PostgresConnection
     from db_postgres.postgres_models.customer_model import CustomerModel
     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
