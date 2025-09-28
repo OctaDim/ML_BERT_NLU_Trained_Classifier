@@ -26,10 +26,10 @@ from fast_api.app_last_dataset_name.router_last_dataset_name import router_bert_
 from fast_api.app_predict_text.router_predict_single_text import router_bert_predict_single_text
 from fast_api.app_root_url.router_main import router_root_url
 from fast_api.app_test_endpoint.router_test_endpoint import router_develop_test_endpoint
-from fast_api.app_tests.router_test_categorise import router_test_categorise
-from fast_api.app_tests.router_test_load_model import router_test_load_model
-from fast_api.app_tests.router_test_save_model import router_test_save_model
-from fast_api.app_tests.router_test_train_categorise import router_test_train_categorise
+from fast_api.app_tests.test_router_categorise import router_test_categorise
+from fast_api.app_tests.test_router_load_model import router_test_load_model
+from fast_api.app_tests.test_router_save_model import router_test_save_model
+from fast_api.app_tests.test_router_train_categorise import router_test_train_categorise
 
 routers_list = [
     router_root_url,
