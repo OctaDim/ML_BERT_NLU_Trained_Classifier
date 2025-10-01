@@ -135,7 +135,7 @@ class FASTAPI_OPTIONS:
 
 @dataclass(frozen=True)
 class ALCHEMY_OPTIONS:
-    USE_POSTGRES_DATA_BASE: bool = True
+    USE_POSTGRES_DATABASE: bool = True
     ALCHEMY_ORM_RAW_SQL_CONSOLE_LOGS: bool = False
     ALCHEMY_QUERY_EXEC_TIME_LOGS: bool = False
     ALCHEMY_SESSION_OK_ACTIONS_LOGS: bool = False
