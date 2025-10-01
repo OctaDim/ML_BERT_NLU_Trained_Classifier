@@ -3,10 +3,10 @@
 
 
 async def test_get_model_records_via_flex_query():
-    from db_postgres.postgres_async_conn.postgres_async_session import (
-        PostgresSession)
     from db_postgres.postgres_async_conn.pgs_async_connection import (
         PostgresConnection)
+    from db_postgres.postgres_async_conn.postgres_async_session import (
+        PostgresSession)
     from db_postgres.postgres_models.label_category_model import (
         LabelCategoryModel)
     # from db_postgres.postgres_models.customer_model import CustomerModel
@@ -25,10 +25,10 @@ async def test_get_model_records_via_flex_query():
         # order_by_fields = ("username", "account_id")
         order_by_fields = None
 
-        selected_fields = ["label_index", "category_name"]
+        # selected_fields = ["label_index", "category_name"]
         # selected_fields = "label_index123"
         # selected_fields = "label_index"
-        # selected_fields = None
+        selected_fields = None
 
         records = await get_model_rows_flex_query(
             orm_model_class=LabelCategoryModel,
@@ -37,7 +37,7 @@ async def test_get_model_records_via_flex_query():
             selected_fields=selected_fields,
             fields_values_filter=fields_values_filter,
             order_by_fields=order_by_fields,
-            return_scalars=True
+            return_scalars=False
         )
 
     print(f"records: {records}")
@@ -46,7 +46,8 @@ async def test_get_model_records_via_flex_query():
 
     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     for record in records:
-        for field_name, field_value in record.__dict__.items():
+        print(f"type(record): {type(record)}")
+        for field_name, field_value in record_.items():
             if not field_name.startswith("_"):
                 print(f"{field_name} = {field_value}")
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
