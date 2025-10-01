@@ -4,7 +4,7 @@ from configs.settings import BASE_DIR, BERT_OPTIONS
 from utils_common.normalized_path import get_full_file_normal_path
 
 
-def get_last_saved_model_dir_path() -> str|None:
+def get_last_saved_model_dir_path() -> str | None:
     last_saved_model_ini_fpath = ""
     last_saved_model_dir_path = ""
     try:
@@ -29,6 +29,7 @@ def get_last_saved_model_dir_path() -> str|None:
             last_saved_model_dir_path = ""
         return last_saved_model_dir_path
     except Exception as error:
-        print(f"Read last saved model ini file or dir path [ERROR]: error: {error}\n"
+        print(f"Read last saved model ini file or dir path [ERROR]: "
+              f"error: {error}\n"
               f"last_saved_model_ini_fpath: {last_saved_model_ini_fpath}\n"
               f"last_saved_model_dir_path: {last_saved_model_dir_path}\n")

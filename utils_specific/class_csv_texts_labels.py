@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
 from io import TextIOWrapper
-from typing import TextIO
+from typing import TextIO, List, Dict
 
 
 class CsvTextLabel:
@@ -10,20 +10,41 @@ class CsvTextLabel:
         self.csv_file_obj = csv_file_obj
 
     def get_text_label_dict(self) -> dict[str: int]:
-        train_data_set = {}
+        train_dataset = {}
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
-            text = cur_row.get("text", "").strip().lower()
-            label = cur_row.get("label", "").strip().lower()
-            if text and label is not None:
-                train_data_set[text] = int(label)
+            text = cur_row.get("text", None)
+            label = cur_row.get("label", None)
+            if text and label:
+                text = text.strip().lower()
+                label = label.strip().lower()
+                train_dataset[text] = int(label)
             else:
                 date_time = cur_row.get("date_time", "")
                 print(f"Current row skipped, empty field value [ERROR]: "
-                      f"text: {text}, label: {label}, "
-                      f"date_time: {date_time}\n")
-        return train_data_set
+                      f"text: {text}, label: {label}, time: {date_time}\n")
+        return train_dataset
+
+    def get_label_text_list(self) -> List[Dict[str, int | str]]:
+        """Returns list of dicts with label_index (int) and text (str)"""
+        self.csv_file_obj.seek(0)
+        csv_dict_reader = csv.DictReader(self.csv_file_obj)
+        csv_lab_text_list = []
+        for cur_row in csv_dict_reader:
+            text = cur_row.get("text", None)
+            label = cur_row.get("label", None)
+            if text and label:
+                text = text.strip().lower()
+                label = label.strip().lower()
+                cur_lab_text_dict = {"text": text,
+                                     "label_index": int(label)}
+                csv_lab_text_list.append(cur_lab_text_dict)
+            else:
+                date_time = cur_row.get("date_time", "")
+                print(f"Current row skipped, empty field value [ERROR]: "
+                      f"text: {text}, label: {label}, date_time: {date_time}\n")
+        return csv_lab_text_list
 
     def get_texts_list_unique(self) -> list[str]:
         text_lab_unique_dict: dict = self.get_text_label_dict()
