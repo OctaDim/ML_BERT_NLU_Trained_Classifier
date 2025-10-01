@@ -38,7 +38,7 @@ async def add_save_single_category(
 ) -> dict:
     log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
-    if ALCHEMY_OPTIONS.USE_POSTGRES_DATA_BASE:
+    if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
         pgs_bert_model_data = await get_postgres_bert_model_data_hpr()
         pgs_all_data_flag = pgs_bert_model_data["all_data_flag"]
     else:
@@ -59,9 +59,9 @@ async def add_save_single_category(
                 else:
                     prev_dataset_dir_path = ""
 
+        print("Getting previous label-category csv path:")
         prev_lab_cat_csv_path = None
         try:
-            print("Getting previous label-category csv path:")
             prev_lab_cat_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[prev_dataset_dir_path],
                 file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
@@ -71,19 +71,19 @@ async def add_save_single_category(
                       mode="r", encoding="utf-8") as prev_lab_cat_csv_f:
                 csf_lab_cat = CsvLabelCategory(prev_lab_cat_csv_f)
                 prev_lab_cat_csv_dict = csf_lab_cat.get_label_category_dict()
+            print(f"prev_lab_cat_csv_dict: {prev_lab_cat_csv_dict}")  # Too long
             print(f"type(prev_lab_cat_csv_dict): {type(prev_lab_cat_csv_dict)}")
-            print(f"prev_lab_cat_csv_dict: {prev_lab_cat_csv_dict}")
+            print(f"len(prev_lab_cat_csv_dict): {len(prev_lab_cat_csv_dict)}")
 
-            if prev_lab_cat_csv_dict:
-                prev_lab_cat_dict = prev_lab_cat_csv_dict
-            else:
-                log_text = (f"Empty or wrong label-category csv data [ERROR]:\n"
+            if not prev_lab_cat_csv_dict:
+                error_log = (f"Empty or wrong label-category csv data [ERROR]:\n"
                             f"prev_lab_cat_csv_path: {prev_lab_cat_csv_path}\n"
                             f"prev_lab_cat_dict: {prev_lab_cat_csv_dict}\n")
-                print(log_text)
+                print(error_log)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=log_text)
+                    detail=error_log)
+            prev_lab_cat_dict = prev_lab_cat_csv_dict
         except Exception as lab_cat_csv_file_error:
             error_log = (f"Getting label-category csv file data [ERROR]:\n"
                          f"error: {lab_cat_csv_file_error}\n"
@@ -94,19 +94,19 @@ async def add_save_single_category(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=error_log)
 
+        print("Getting previous text-label csv path:")
         prev_text_lab_csv_path = None
         try:
-            print("Getting previous text-label csv path:")
             prev_text_lab_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[prev_dataset_dir_path],
                 file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
             if not prev_text_lab_csv_path:
-                log_text = (f"Empty text-label csv file path [ERROR]:\n"
+                error_log = (f"Empty text-label csv file path [ERROR]:\n"
                             f"prev_text_lab_csv_path: {prev_text_lab_csv_path}\n")
-                print(log_text)
+                print(error_log)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=log_text)
+                    detail=error_log)
         except Exception as text_lab_csv_file_error:
             error_log = (f"Getting text-label csv file path [ERROR]:\n"
                          f"error: {text_lab_csv_file_error}\n"
@@ -142,7 +142,7 @@ async def add_save_single_category(
             new_lab_cat_dict[next_label_new_index] = update_category
 
             if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
-                print("Copying and updating new csv file with new single lab-cat pair:")
+                print("Copying and updating new csv file with new single lab-cat:")
                 os.makedirs(name=new_dataset_dir_path, exist_ok=True)
                 new_lab_cat_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
@@ -157,7 +157,7 @@ async def add_save_single_category(
                         new_category=update_category)
                 lab_cat_csv_path = new_lab_cat_csv_path  # Return info
             else:  # Overwrite existing csv file
-                print("Overwriting existing csv file with new single lab-cat pair:")
+                print("Overwriting existing csv file with new single lab-cat:")
                 with open(file=prev_lab_cat_csv_path, mode="a",
                           encoding="utf-8", newline="") as prev_lab_cat_csv_f:
                     csv_lab_cat = CsvLabelCategory(prev_lab_cat_csv_f)
@@ -174,7 +174,7 @@ async def add_save_single_category(
             new_category = "category already exists"  # Just for return info
 
             if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
-                print("Copying and creating new csv file without adding existing lab-cat pair:")
+                print("Copying and creating new csv file without adding existing lab-cat:")
                 os.makedirs(new_dataset_dir_path, exist_ok=True)
                 new_lab_cat_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
@@ -183,12 +183,12 @@ async def add_save_single_category(
                              dst=new_lab_cat_csv_path)
                 lab_cat_csv_path = new_lab_cat_csv_path  # Return info
             else:  # Overwrite existing csv file
-                print("Keeping old csv file without adding existing lab-cat pair:")
+                print("Keeping old csv file without adding existing lab-cat:")
                 lab_cat_csv_path = prev_lab_cat_csv_path  # Return info
 
         print("Single saving text-label data in csv file:")
         if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
-            print("Copying and creating new csv file without adding existing text-lab pair:")
+            print("Copying and creating new csv file without adding existing text-lab:")
             os.makedirs(name=new_dataset_dir_path, exist_ok=True)
             new_text_lab_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[new_dataset_dir_path],
@@ -197,7 +197,7 @@ async def add_save_single_category(
                          dst=new_text_lab_csv_path)
             text_lab_csv_path = new_text_lab_csv_path
         else:  # Overwrite existing csv file
-            print("Keeping old csv file without adding existing text-lab pair:")
+            print("Keeping old csv file without adding existing text-lab:")
             text_lab_csv_path = prev_text_lab_csv_path
 
         print("Saving updated dataset ini file path:")
@@ -213,12 +213,15 @@ async def add_save_single_category(
 
         bert_model_inst.last_saved_dataset_dir = new_dataset_dir_path
 
-        if ALCHEMY_OPTIONS.USE_POSTGRES_DATA_BASE:
+        if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
             print("Postgres DB Single saving label-category data in data base:")
             pgs_conn = PostgresConnection()
             async with PostgresSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
+                creation_reason = (f"single category added: "
+                                   f"{update_category}")
+
                 customer_id = await find_create_customer_qry(
                     ongoing_session=pgs_session,
                     account_username=account_data.account_username,
@@ -229,12 +232,14 @@ async def add_save_single_category(
                     dataset_name=new_dataset_name,
                     customer_id=customer_id,
                     dataset_csv_dir=new_dataset_dir_path,
-                    creation_reason=f"single category added")
+                    creation_reason=creation_reason)
 
                 await cache_unique_lab_cat_dict_qry(
                     ongoing_session=pgs_session,
                     dataset_id=dataset_id,
-                    label_category_dict=new_lab_cat_dict)
+                    label_category_dict=new_lab_cat_dict,
+                    creation_reason=creation_reason,
+                    save_only_unique=True)
                 print(f"Postgres DB label-category data saved [OK]:\n"
                       f"label_category_dict: {new_lab_cat_dict}\n")
 
@@ -245,12 +250,12 @@ async def add_save_single_category(
             "new_category": new_category}
         return new_csv_files_data
     except Exception as error:
-        log_text = (f"BERT add and save single category [ERROR]: "
+        error_log = (f"BERT add and save single category [ERROR]: "
                     f"error: {error}")
-        print(log_text)
+        print(error_log)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=log_text)
+            detail=error_log)
 
 
 if __name__ == "__main__":
