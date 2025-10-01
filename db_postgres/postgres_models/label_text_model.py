@@ -17,8 +17,9 @@ class LabelTextModel(Base, ActiveMixin, CreateUpdateMixin):
 
     label_index_hint: Mapped[Optional[int]] = mapped_column()
     text: Mapped[str] = mapped_column()
+    creation_reason: Mapped[Optional[str]] = mapped_column()
 
-    rel_label_category: Mapped["LabelCategoryModel"] = relationship(
-        argument="LabelCategoryModel",
-        order_by='LabelCategoryModel.category_name',
-        back_populates="rel_labels_texts")
+    # rel_label_category: Mapped["LabelCategoryModel"] = relationship(
+    #     argument="LabelCategoryModel",
+    #     # order_by='LabelCategoryModel.category_name',
+    #     back_populates="rel_labels_texts")
