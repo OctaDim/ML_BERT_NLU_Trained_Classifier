@@ -27,9 +27,9 @@ async def find_create_customer_qry(
         fields_values_filter=filter_fields,
         order_by_fields=None)
     try:
-        found_customer_id = customer_objs[0].id if customer_objs else None
-        if found_customer_id:
-            return found_customer_id
+        if customer_objs:
+            customer_id_found = customer_objs[0].id
+            return customer_id_found
 
         new_customer_obj = CustomerModel()
         customer_new_data = {"account_username": account_username,

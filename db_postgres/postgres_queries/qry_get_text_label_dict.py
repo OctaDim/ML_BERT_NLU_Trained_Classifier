@@ -38,16 +38,3 @@ async def get_text_label_dict_qry(
     print(f"####### type(pgs_text_lab_dict): {type(pgs_text_lab_dict)}")
     print(f"####### len(pgs_text_lab_dict): {len(pgs_text_lab_dict)}")
     return pgs_text_lab_dict
-
-
-if __name__ == "__main__":
-    import asyncio
-
-
-    async def test_get_label_text_dict_qry():
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
-            await get_text_label_dict_qry(ongoing_session=pgs_session)
-
-
-    asyncio.run(main=test_get_label_text_dict_qry(), debug=True)

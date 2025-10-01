@@ -1,5 +1,3 @@
-import os
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db_postgres.postgres_models.trained_bert_model import (
@@ -22,17 +20,10 @@ async def get_last_saved_model_dir_qry(
     print(f"####### type(pgs_trained_model_objs): {type(pgs_trained_model_objs)}")
     print(f"####### len(pgs_trained_model_objs): {len(pgs_trained_model_objs)}")
 
-    if pgs_trained_model_objs:  # DB last saved model path exists
-        pgs_model_dir_path = pgs_trained_model_objs[0].model_directory  # Newest model path
-        print(f"model_directory: {pgs_model_dir_path}")
-        print(f"created_at: {pgs_trained_model_objs[0].created_at}")
+    if not pgs_trained_model_objs:
+        return None
 
-        if pgs_model_dir_path and os.path.isdir(pgs_model_dir_path):
-            return pgs_model_dir_path
-        else:  # Last saved model path from DB not found
-            print(f"DB last saved model directory not found [ERROR]:\n"
-                  f"pgs_model_dir_path: {pgs_model_dir_path}\n")
-            pgs_model_dir_path = None
-    else:  # No last saved model path in DB
-        pgs_model_dir_path = None
+    pgs_model_dir_path = pgs_trained_model_objs[0].model_directory  # Newest model path
+    print(f"model_directory: {pgs_model_dir_path}")
+    print(f"created_at: {pgs_trained_model_objs[0].created_at}")
     return pgs_model_dir_path

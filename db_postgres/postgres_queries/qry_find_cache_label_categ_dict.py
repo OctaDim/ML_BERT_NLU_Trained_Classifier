@@ -16,25 +16,32 @@ async def cache_unique_lab_cat_dict_qry(
         ongoing_session: AsyncSession,
         dataset_id: int,
         label_category_dict: Dict[int, str],
+        creation_reason: str = None,
+        save_only_unique: bool = True
 ) -> Dict[int, int]:
-    cur_label_idx, cur_cat_name = None, None
+    cur_label_idx, cur_category_name, lab_cat_dict_update = None, None, None
     try:
-
-        old_lab_cat_dict = await get_label_category_dict_qry(
-            ongoing_session=ongoing_session)
-        unique_lab_cat_dict = {}
-        for cur_lab_index, cur_cat_name in label_category_dict.items():
-            if cur_cat_name not in old_lab_cat_dict.values():
-                unique_lab_cat_dict[cur_lab_index] = cur_cat_name
-        print(f"unique_lab_cat_dict: {unique_lab_cat_dict}")
+        if save_only_unique:
+            old_lab_cat_dict = await get_label_category_dict_qry(
+                ongoing_session=ongoing_session)
+            unique_lab_cat_dict = {}
+            for cur_lab_index, cur_category_name in label_category_dict.items():
+                if cur_category_name not in old_lab_cat_dict.values():
+                    unique_lab_cat_dict[cur_lab_index] = cur_category_name
+            lab_cat_dict_update = unique_lab_cat_dict
+            print(f"lab_cat_dict_update: {lab_cat_dict_update}")  # Too long
+            print(f"len(lab_cat_dict_update): {len(lab_cat_dict_update)}")
+        else:
+            lab_cat_dict_update = label_category_dict
 
         cached_lab_index_id_dict = {}
-        for cur_label_idx, cur_cat_name in unique_lab_cat_dict.items():
+        for cur_label_idx, cur_category_name in lab_cat_dict_update.items():
             cur_new_lab_cat_obj = LabelCategoryModel()
             lab_cat_new_data = {
                 "label_index": cur_label_idx,
                 "dataset_id": dataset_id,
-                "category_name": cur_cat_name}
+                "category_name": cur_category_name,
+                "creation_reason": creation_reason}
 
             update_model_obj_no_commit(
                 orm_model_object=cur_new_lab_cat_obj,
@@ -51,21 +58,30 @@ async def cache_unique_lab_cat_dict_qry(
                      f"error: {error}\n"
                      f"dataset_id: {dataset_id}\n"
                      f"cur_label_idx: {cur_label_idx}\n"
-                     f"cur_cat_name: {cur_cat_name}\n"
-                     f"label_category_dict: {label_category_dict}\n")
+                     f"cur_category_name: {cur_category_name}\n"
+                     f"label_category_dict: {label_category_dict}\n"
+                     f"lab_cat_dict_update: {lab_cat_dict_update}\n")
         print(error_log)
         raise
 
 
-async def save_label_category_dict_qry(
+async def save_unique_lab_cat_dict_qry(
         ongoing_session: AsyncSession,
         dataset_id: int,
         label_category_dict: Dict[int, str]
 ) -> None:
     cur_label, cur_category = None, None
     try:
+        old_lab_cat_dict = await get_label_category_dict_qry(
+            ongoing_session=ongoing_session)
+        unique_lab_cat_dict = {}
+        for cur_lab_index, cur_cat_name in label_category_dict.items():
+            if cur_cat_name not in old_lab_cat_dict.values():
+                unique_lab_cat_dict[cur_lab_index] = cur_cat_name
+        print(f"unique_lab_cat_dict: {unique_lab_cat_dict}")
+
         new_lab_cat_model_obj = LabelCategoryModel()
-        for cur_label, cur_category in label_category_dict.items():
+        for cur_label, cur_category in unique_lab_cat_dict.items():
             lab_cat_new_data = {
                 "label_index": cur_label,
                 "dataset_id": dataset_id,
