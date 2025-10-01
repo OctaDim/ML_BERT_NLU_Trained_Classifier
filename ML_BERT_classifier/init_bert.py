@@ -15,8 +15,8 @@ from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
     cache_unique_lab_cat_dict_qry)
 from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
-from db_postgres.postgres_queries.qry_save_label_text_dict import (
-    save_text_label_dict_qry)
+from db_postgres.postgres_queries.qry_save_label_text_list import (
+    save_label_text_list_qry)
 from db_postgres.postgres_queries.qry_save_new_model_data import (
     save_new_model_data_qry)
 from db_postgres.postgres_queries_helpers.hpr_get_bert_model_data import (
@@ -33,6 +33,7 @@ from utils_specific.get_last_saved_dataset_path import (
     get_last_saved_dataset_dir_path)
 from utils_specific.get_last_saved_model_dir import (
     get_last_saved_model_dir_path)
+from utils_specific.validate_bert_model_directory import validate_bert_model_directory
 
 print("🚀 LET'S START !!! 🚀")
 bert_model_inst: Optional[ClassifierBERT]  # Global. Lazy init in func. Get via func. Just annotation
@@ -122,7 +123,7 @@ async def init_and_start_bert_model():
     blue_color = CONSOLE_COLORS.BRIGHT_BLUE
     reset_color = CONSOLE_COLORS.RESET
 
-    if ALCHEMY_OPTIONS.USE_POSTGRES_DATA_BASE:
+    if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
         pgs_bert_model_data = await get_postgres_bert_model_data_hpr()
         pgs_all_data_flag = pgs_bert_model_data["all_data_flag"]
     else:
@@ -131,7 +132,7 @@ async def init_and_start_bert_model():
 
     last_saved_dataset_dir_path = None
     if not pgs_all_data_flag:  # Not all data in Postgres DB
-        print("\nGetting last dataset directory path:")
+        print("Getting last dataset directory path:")
         last_saved_dataset_dir_path = get_last_saved_dataset_dir_path()
         initial_dataset_dir_path = None
         if last_saved_dataset_dir_path:
@@ -147,14 +148,14 @@ async def init_and_start_bert_model():
         print(f"start_init_dataset_dir: {start_init_dataset_dir}")
         print(f"start_init_dataset_name: {start_init_dataset_name}")
 
-        print("\nGetting csv label-category train file path:")
+        print("Getting csv label-category train file path:")
         if start_init_dataset_dir:
             last_saved_lab_cat_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[start_init_dataset_dir],
                 file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
             print(f"last_saved_lab_cat_csv_path: {last_saved_lab_cat_csv_path}")
 
-            print("\nGetting csv label-category file data:")
+            print("Getting csv label-category file data:")
             with open(file=last_saved_lab_cat_csv_path,
                       mode="r", encoding="utf-8") as lab_cat_csv_file:
                 csf_text_lab = CsvLabelCategory(lab_cat_csv_file)
@@ -177,19 +178,23 @@ async def init_and_start_bert_model():
                   f"initial_dataset_dir_path: {initial_dataset_dir_path}\n"
                   f"start_init_dataset_dir: {start_init_dataset_dir}\n")
 
-        print("\nGetting csv label-text train file path:")
+        print("Getting csv label-text train file path:")
         lab_txt_file_name = BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME
         csv_lab_txt_file_path = get_full_file_normal_path(
             all_dir_str_parts=[start_init_dataset_dir],
             file_name_with_ext=lab_txt_file_name)
 
-        print("\nGetting csv label-text file data:")
+        print("Getting csv text-label dict and label-text list file data:")
         with open(file=csv_lab_txt_file_path,
                   mode="r", encoding="utf-8") as csv_lab_txt_file:
             csf_lab_txt = CsvTextLabel(csv_file_obj=csv_lab_txt_file)
             text_label_dict = csf_lab_txt.get_text_label_dict()
-        print(f"text_label_dict: {text_label_dict}")  # Too long
-        print(f"len(text_label_dict): {len(text_label_dict)}")
+            # print(f"text_label_dict: {text_label_dict}")  # Too long
+            print(f"len(text_label_dict): {len(text_label_dict)}")
+
+            csv_lab_text_list = csf_lab_txt.get_label_text_list()
+            # print(f"csv_lab_text_list: {csv_lab_text_list}")  # Too long
+            print(f"len(csv_lab_text_list): {len(csv_lab_text_list)}")
 
         print("Getting last model directory path from file:")
         file_saved_model_dir_path = get_last_saved_model_dir_path()
@@ -198,57 +203,70 @@ async def init_and_start_bert_model():
         else:
             last_saved_model_dir_path = None
 
-        if ALCHEMY_OPTIONS.USE_POSTGRES_DATA_BASE:
-            print("\nPostgres DB saving lab-cat, lab-text file data:")
+        if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
+            print("Postgres DB saving lab-cat, lab-text file data:")
             pgs_conn = PostgresConnection()
             async with PostgresSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
+                creation_reason = (f"service restarted, csv file: "
+                                   f"{start_init_dataset_name}")
+
                 dataset_id = await find_create_dataset_qry(
                     ongoing_session=pgs_session,
                     dataset_name=start_init_dataset_name,
                     dataset_csv_dir=start_init_dataset_dir,
-                    creation_reason="service restarted")
+                    creation_reason=creation_reason)
 
                 await cache_unique_lab_cat_dict_qry(
                     ongoing_session=pgs_session,
                     dataset_id=dataset_id,
-                    label_category_dict=label_category_dict)
+                    label_category_dict=label_category_dict,
+                    creation_reason=creation_reason,
+                    save_only_unique=True)
                 print(f"Postgres DB labels categories saved [OK]:\n"
                       f"label_category_dict: {label_category_dict}\n")
 
-                await save_text_label_dict_qry(
+                await save_label_text_list_qry(
                     ongoing_session=pgs_session,
-                    text_label_dict=text_label_dict,
+                    label_text_dicts_list=csv_lab_text_list,
+                    creation_reason=creation_reason,
                     save_only_unique=True)
     else:  # All Postgres DB data exists
         label_category_dict = pgs_bert_model_data["lab_cat_dict"]
         text_label_dict = pgs_bert_model_data["text_lab_dict"]
+        csv_lab_text_list = pgs_bert_model_data["lab_text_dicts_list"]
         start_init_dataset_name = pgs_bert_model_data["dataset_name"]
         start_init_dataset_dir = pgs_bert_model_data["dataset_dir"]
-        last_saved_model_dir_path = pgs_bert_model_data["model_dir_path"]  # Just return info
+        last_saved_model_dir_path = pgs_bert_model_data["model_dir_path"]
 
-        if ALCHEMY_OPTIONS.USE_POSTGRES_DATA_BASE:
+        if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
             pgs_conn = PostgresConnection()
             async with PostgresSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
+                creation_reason = (f"service restarted, pgs data: "
+                                   f"{start_init_dataset_name}")
+
                 dataset_id = await find_create_dataset_qry(
                     ongoing_session=pgs_session,
                     dataset_name=start_init_dataset_name,
                     dataset_csv_dir=start_init_dataset_dir,
-                    creation_reason="service restarted")
+                    creation_reason=creation_reason)
 
                 await cache_unique_lab_cat_dict_qry(
                     ongoing_session=pgs_session,
                     dataset_id=dataset_id,
-                    label_category_dict=label_category_dict)
+                    label_category_dict=label_category_dict,
+                    creation_reason=creation_reason,
+                    save_only_unique=True)
                 print(f"Postgres DB labels-categories saved [OK]:\n"
                       f"label_category_dict: {label_category_dict}\n")
 
-                await save_text_label_dict_qry(
+                await save_label_text_list_qry(
                     ongoing_session=pgs_session,
-                    text_label_dict=text_label_dict,
+                    label_text_dicts_list=csv_lab_text_list,
+                    creation_reason=creation_reason,
                     save_only_unique=True)
     print("Getting initial model directory path:")
     initial_model_dir_path = get_initial_model_dir_path()
@@ -273,27 +291,32 @@ async def init_and_start_bert_model():
               f"{blue_color}{initial_model_dir_path}{reset_color}\n"
               f"last_saved_model_dir_path: {last_saved_model_dir_path}\n")
 
-        if ALCHEMY_OPTIONS.USE_POSTGRES_DATA_BASE:
+        if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
             pgs_conn = PostgresConnection()
             async with PostgresSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
+                creation_reason = f"initialized after restart"
+
                 dataset_id = await find_create_dataset_qry(
                     ongoing_session=pgs_session,
                     dataset_name=start_init_dataset_name,
                     dataset_csv_dir=start_init_dataset_dir,
-                    creation_reason="service restarted")
+                    creation_reason=creation_reason)
 
                 new_trained_model_data = {
                     "dataset_id": dataset_id,
                     "model_directory": initial_model_dir_path,
-                    "creation_reason": "service restarted"}
+                    "creation_reason": creation_reason}
                 await save_new_model_data_qry(
                     ModelClassORM=TrainedBertModel,
                     ongoing_session=pgs_session,
                     new_data=new_trained_model_data)
 
-    if last_saved_model_dir_path:
+    model_dir_exists_flag = validate_bert_model_directory(
+        model_directory_path=last_saved_model_dir_path)
+
+    if last_saved_model_dir_path and model_dir_exists_flag:
         model_load_error_log = bert_model_inst.load_model(
             dir_full_path=last_saved_model_dir_path)
         bert_model_inst.last_saved_dataset_dir = last_saved_dataset_dir_path
@@ -304,19 +327,26 @@ async def init_and_start_bert_model():
               f"initial_model_dir_path: {initial_model_dir_path}\n")
 
         if not model_load_error_log:
-            if ALCHEMY_OPTIONS.USE_POSTGRES_DATA_BASE:
+            if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
                 pgs_conn = PostgresConnection()
                 async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+                    if not pgs_all_data_flag:
+                        creation_reason = (f"loaded after restart, csv file: "
+                                           f"{start_init_dataset_name}")
+                    else:
+                        creation_reason = (f"loaded after restart, pgs data: "
+                                           f"{start_init_dataset_name}")
+
                     dataset_id = await find_create_dataset_qry(
                         ongoing_session=pgs_session,
                         dataset_name=start_init_dataset_name,
                         dataset_csv_dir=start_init_dataset_dir,
-                        creation_reason="restart initialized")
+                        creation_reason=creation_reason)
 
                     new_trained_model_data = {
                         "dataset_id": dataset_id,
                         "model_directory": last_saved_model_dir_path,
-                        "creation_reason": "model weights loaded"}
+                        "creation_reason": creation_reason}
                     await save_new_model_data_qry(
                         ModelClassORM=TrainedBertModel,
                         ongoing_session=pgs_session,
