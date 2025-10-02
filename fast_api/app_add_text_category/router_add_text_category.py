@@ -62,6 +62,7 @@ async def bert_add_text_category(
         new_text_lab_csv_path = new_csv_files_data.get("text_lab_csv_path")
         dataset_ini_file_path = new_csv_files_data.get("last_saved_dataset_ini_fpath")
         new_category = new_csv_files_data.get("new_category")
+        new_text = new_csv_files_data.get("new_text")
         json_response = JSONResponse(
             content={
                 "message": "BERT text-category csv added [OK]",
@@ -73,7 +74,8 @@ async def bert_add_text_category(
                 "adding time": adding_time,
                 "added text": update_text,
                 "added category": update_category,
-                "new_category": new_category},
+                "new_category": new_category,
+                "new_text": new_text},
             status_code=status.HTTP_200_OK)
 
         green_color = CONSOLE_COLORS.BRIGHT_GREEN
@@ -88,7 +90,8 @@ async def bert_add_text_category(
             f"dataset ini file path: {dataset_ini_file_path}\n"
             f"added text: {blue_color}{update_text}{reset_color}\n"
             f"added category: {green_color}{update_category}{reset_color}\n"
-            f"new category: {blue_color}{new_category}{reset_color}")
+            f"new category: {blue_color}{new_category}{reset_color}\n"
+            f"new text: {blue_color}{new_text}{reset_color}\n")
         return json_response
     except Exception as error:
         log_text = f"BERT router [ERROR]: error: {error}"
