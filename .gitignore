@@ -245,7 +245,7 @@ data_outgoing/*
 .configs_sqlalchemy.ini
 .configs_postgres.ini
 
-main_extra_train_backup.py
+zBackUp/main_extra_train_backup.py
 
 WORKING_DATA/*
 *Обучающий файл*
