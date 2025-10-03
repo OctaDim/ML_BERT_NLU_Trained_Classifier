@@ -11,7 +11,7 @@ from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
     get_model_rows_flex_query)
 
 
-async def get_last_dataset_name_dir_qry(
+async def get_last_dataset_name_and_dir_qry(
         ongoing_session: AsyncSession
 ) -> Tuple[str, str] | None:
     pgs_dataset_model_objs = await get_model_rows_flex_query(
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     async def test_get_last_dataset_name_dir_qry():
         pgs_conn = PostgresConnection()
         async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
-            await get_last_dataset_name_dir_qry(ongoing_session=pgs_session)
+            await get_last_dataset_name_and_dir_qry(ongoing_session=pgs_session)
 
 
     asyncio.run(main=test_get_last_dataset_name_dir_qry(),
