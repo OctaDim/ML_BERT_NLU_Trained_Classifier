@@ -251,3 +251,9 @@ WORKING_DATA/*
 *Обучающий файл*
 
 *.git
+
+ML_BERT_models/MODELS_BACKUP/
+ML_BERT_models/MODELS_BACKUP/*
+
+ML_BERT_train_datasets/DATASETS_BACKUP/
+ML_BERT_train_datasets/DATASETS_BACKUP/*

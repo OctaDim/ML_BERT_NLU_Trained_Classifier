@@ -12,9 +12,10 @@ class DirectPredictModel(Base, ActiveMixin, CreateUpdateMixin):
     __tablename__ = "direct_predict"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    customer_id: Mapped[Optional[int]] = mapped_column(ForeignKey("customer.id"))
-    dataset_id: Mapped[Optional[int]] = mapped_column(ForeignKey("dataset.id"))
+
+    account_id: Mapped[str] = mapped_column()
+    account_username: Mapped[str] = mapped_column()
 
     direct_category: Mapped[str] = mapped_column()
     direct_text: Mapped[str] = mapped_column()
-    creation_reason: Mapped[str] = mapped_column()
+    creation_reason: Mapped[Optional[str]] = mapped_column()

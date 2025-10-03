@@ -178,7 +178,7 @@ class BERT_OPTIONS:
     BERT_NEW_DATASETS_CSV_BASE_PATH: str = "WORKING_DATA/updated_product_train_datasets"
     BERT_LABEL_CATEGORY_CSV_FILE_NAME: str = "prod_labels_categories.csv"
     BERT_TEXT_LABEL_CSV_FILE_NAME: str = "prod_texts_labels.csv"
-    BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME: str = "direct_categories_texts.csv"
+    BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME: str = "direct_categories_texts.csv"
     BERT_OVERWRITE_PREV_CSV_DATASET: bool = False
     BERT_NEW_DATASET_CSV_DIR_PREFIX: str = "updated_dataset"
     # MODEL AND CSV SAVE PATHS INI FILES OPTIONS
