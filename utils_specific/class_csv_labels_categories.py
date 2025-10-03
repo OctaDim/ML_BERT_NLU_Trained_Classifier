@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
 from io import TextIOWrapper
-from typing import TextIO
+from typing import TextIO, Dict
 
 
 class CsvLabelCategory:
@@ -10,21 +10,26 @@ class CsvLabelCategory:
         self.csv_file_obj = csv_file_obj
         self.csv_dict_reader = csv.DictReader(csv_file_obj)
 
-    def get_label_category_dict(self) -> dict[int: str]:
-        labels_categories = {}
+    def get_label_category_dict(
+            self, reversed_category_label: bool = False
+    ) -> dict[int: str] | dict[str: int]:
+        result_dict = {}
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
             label = int(cur_row.get("label", "").strip().lower())
-            category = cur_row.get("category", "").strip().lower()
+            category = str(cur_row.get("category", "").strip().lower())
             if category and label is not None:
-                labels_categories[label] = category
+                if reversed_category_label:
+                    result_dict[category] = label
+                else:
+                    result_dict[label] = category
             else:
                 date_time = cur_row.get("date_time", "")
                 print(f"Current row skipped, empty field value [ERROR]: "
                       f"label: {label}, category: {category}, "
                       f"date_time: {date_time}\n")
-        return labels_categories
+        return result_dict
 
     def get_categories_list_sorted(self) -> list[str]:
         categories_list = []
