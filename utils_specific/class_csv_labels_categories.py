@@ -31,13 +31,15 @@ class CsvLabelCategory:
                       f"date_time: {date_time}\n")
         return result_dict
 
-    def get_categories_list_sorted(self) -> list[str]:
+    def get_categories_list_sorted(
+            self, titled: bool = False
+    ) -> list[str]:
         categories_list = []
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
             category = cur_row.get("category", "").strip()
-            # category = category.title()  # Titled if necessary
+            category = category.title() if titled else category
             categories_list.append(category)
         unique_categories = list(set(categories_list))
         sorted_categories = sorted(unique_categories)

@@ -14,11 +14,9 @@ class CsvTextLabel:
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
-            text = cur_row.get("text", None)
-            label = cur_row.get("label", None)
+            text = cur_row.get("text", "").lower().strip()
+            label = cur_row.get("label", "").lower().strip()
             if text and label:
-                text = text.strip().lower()
-                label = label.strip().lower()
                 train_dataset[text] = int(label)
             else:
                 date_time = cur_row.get("date_time", "")
@@ -26,17 +24,15 @@ class CsvTextLabel:
                       f"text: {text}, label: {label}, time: {date_time}\n")
         return train_dataset
 
-    def get_label_text_list(self) -> List[Dict[str, int | str]]:
+    def get_label_text_dicts_list(self) -> List[Dict[str, int | str]]:
         """Returns list of dicts with label_index (int) and text (str)"""
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         csv_lab_text_list = []
         for cur_row in csv_dict_reader:
-            text = cur_row.get("text", None)
-            label = cur_row.get("label", None)
+            text = cur_row.get("text", "").lower()
+            label = cur_row.get("label", "").lower()
             if text and label:
-                text = text.strip().lower()
-                label = label.strip().lower()
                 cur_lab_text_dict = {"text": text,
                                      "label_index": int(label)}
                 csv_lab_text_list.append(cur_lab_text_dict)
