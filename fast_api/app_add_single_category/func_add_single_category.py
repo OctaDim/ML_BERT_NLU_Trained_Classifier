@@ -121,7 +121,7 @@ async def add_save_single_category(
         try:
             prev_direct_cat_text_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[prev_dataset_dir_path],
-                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
 
             if not prev_direct_cat_text_csv_path:
                 error_log = (
@@ -154,7 +154,7 @@ async def add_save_single_category(
 
         prev_direct_cat_text_csv_path = get_full_file_normal_path(
             all_dir_str_parts=[prev_dataset_dir],
-            file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+            file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
 
     try:
         print("Creating new dataset directory path:")
@@ -235,7 +235,7 @@ async def add_save_single_category(
             os.makedirs(new_dataset_dir_path, exist_ok=True)
             new_direct_cat_text_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[new_dataset_dir_path],
-                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
             shutil.copy2(src=prev_direct_cat_text_csv_path,
                          dst=new_direct_cat_text_csv_path)
             direct_cat_text_csv_path = new_direct_cat_text_csv_path  # Return info
@@ -289,6 +289,7 @@ async def add_save_single_category(
         new_csv_files_data = {
             "lab_cat_csv_path": lab_cat_csv_path,
             "text_lab_csv_path": text_lab_csv_path,
+            "direct_cat_text_csv_path": direct_cat_text_csv_path,
             "last_saved_dataset_ini_fpath": last_saved_dataset_ini_fpath,
             "new_category": new_category}
         return new_csv_files_data

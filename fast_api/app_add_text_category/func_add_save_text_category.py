@@ -27,7 +27,7 @@ from db_postgres.postgres_queries_helpers.hpr_get_bert_model_data import (
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
 from utils_common.normalized_path import (
     get_full_file_normal_path)
-from utils_specific.class_csv_direct_categs_texts import CsvDirectCategoryText
+from utils_specific.class_csv_direct_categories_texts import CsvDirectCategoryText
 from utils_specific.class_csv_labels_categories import CsvLabelCategory
 from utils_specific.class_csv_texts_labels import CsvTextLabel
 from utils_specific.get_initial_dataset_dir_path import (
@@ -141,21 +141,32 @@ async def add_save_single_text_category(
         try:
             prev_direct_cat_text_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[prev_dataset_dir_path],
-                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
 
-            if not prev_direct_cat_text_csv_path:
-                error_log = (
-                    f"Empty direct category-text csv path [ERROR]:\n"
-                    f"prev_direct_cat_text_csv_path: {prev_direct_cat_text_csv_path}\n")
+            print("Getting previous category-text dicts list:")
+            with open(file=prev_direct_cat_text_csv_path,
+                      mode="r", encoding="utf-8") as prev_direct_cat_text_csv_f:
+                csf_direct_cat_text = CsvDirectCategoryText(prev_text_lab_csv_f)
+                prev_direct_cat_text_csv_list = csf_direct_cat_text.get_direct_categories_texts_list()
+            # print(f"prev_direct_cat_text_csv_list: {prev_direct_cat_text_csv_list}")  # Too long
+            print(f"type(prev_direct_cat_text_csv_list): {type(prev_direct_cat_text_csv_list)}")
+            print(f"len(prev_direct_cat_text_csv_list): {len(prev_direct_cat_text_csv_list)}")
+
+            if not prev_direct_cat_text_csv_list:
+                error_log = (f"Empty or wrong direct category-text csv data [ERROR]:\n"
+                             f"prev_direct_cat_text_csv_path: {prev_direct_cat_text_csv_path}\n"
+                             f"prev_direct_cat_text_csv_list: {prev_direct_cat_text_csv_list}\n")
                 print(error_log)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=error_log)
+            prev_direct_cat_text_list = prev_direct_cat_text_csv_list
         except Exception as text_lab_csv_file_error:
             error_log = (
-                f"Getting direct category-text csv path [ERROR]:\n"
+                f"Getting direct category-text csv file data [ERROR]:\n"
                 f"error: {text_lab_csv_file_error}\n"
-                f"prev_direct_cat_text_csv_path: {prev_direct_cat_text_csv_path}\n")
+                f"prev_direct_cat_text_csv_path: {prev_direct_cat_text_csv_path}\n"
+                f"prev_direct_cat_text_csv_list: {prev_direct_cat_text_csv_list}\n")
             print(error_log)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -176,7 +187,7 @@ async def add_save_single_text_category(
 
         prev_direct_cat_text_csv_path = get_full_file_normal_path(
             all_dir_str_parts=[prev_dataset_dir],
-            file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+            file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
 
     new_category = None
     new_text = None
@@ -232,7 +243,7 @@ async def add_save_single_text_category(
                 os.makedirs(new_dataset_dir_path, exist_ok=True)
                 new_direct_cat_text_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
-                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
                 shutil.copy2(src=prev_direct_cat_text_csv_path,
                              dst=new_direct_cat_text_csv_path)
                 direct_cat_text_csv_path = new_direct_cat_text_csv_path  # Return info
@@ -311,7 +322,7 @@ async def add_save_single_text_category(
                 os.makedirs(new_dataset_dir_path, exist_ok=True)
                 new_direct_cat_text_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
-                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
                 shutil.copy2(src=prev_direct_cat_text_csv_path,
                              dst=new_direct_cat_text_csv_path)
                 direct_cat_text_csv_path = new_direct_cat_text_csv_path  # Return info
@@ -419,7 +430,7 @@ async def add_save_single_text_category(
                 os.makedirs(new_dataset_dir_path, exist_ok=True)
                 new_direct_cat_text_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
-                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
                 shutil.copy2(src=prev_direct_cat_text_csv_path,
                              dst=new_direct_cat_text_csv_path)
                 direct_cat_text_csv_path = new_direct_cat_text_csv_path  # Return info
@@ -498,31 +509,32 @@ async def add_save_single_text_category(
                 print("Keeping old csv file without adding existing text-label:")
                 text_lab_csv_path = prev_text_lab_csv_path  # Return info
 
-
-
-
             print("Saving new direct category-text into new csv file:")
             if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new direct cat-text csv file
                 print("Copying and creating new csv file with adding new direct cat-text:")
                 os.makedirs(name=new_dataset_dir_path, exist_ok=True)
                 new_direct_cat_text_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
-                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
                 shutil.copy2(src=prev_direct_cat_text_csv_path,
                              dst=new_direct_cat_text_csv_path)
                 with open(file=new_direct_cat_text_csv_path, mode="a",
                           encoding="utf-8", newline="") as new_direct_cat_txt_csvf:
                     csv_text_lab = CsvDirectCategoryText(new_direct_cat_txt_csvf)
                     csv_text_lab.add_single_direct_category_text_row(
+                        account_id=account_data.account_id,
+                        account_username=account_data.account_username,
                         new_direct_category=update_category,
                         new_direct_text=update_text)
-                direct_cat_text_csv_path = new_direct_cat_text_csv_path
+                    direct_cat_text_csv_path = new_direct_cat_text_csv_path
             else:  # Append existing category-text csv file
                 print("Appending old csv file with adding new direct cat-text:")
                 with open(file=prev_direct_cat_text_csv_path, mode="a",
                           encoding="utf-8", newline="") as prev_direct_cat_txt_csvf:
                     direct_cat_text = CsvDirectCategoryText(prev_direct_cat_txt_csvf)
                     direct_cat_text.add_single_direct_category_text_row(
+                        account_id=account_data.account_id,
+                        account_username=account_data.account_username,
                         new_direct_category=update_category,
                         new_direct_text=update_text)
                 direct_cat_text_csv_path = prev_text_lab_csv_path
@@ -550,8 +562,8 @@ async def add_save_single_text_category(
                         creation_reason=creation_reason)
 
                     direct_predict_new_data = {
-                        "customer_id": customer_id,
-                        "dataset_id": dataset_id,
+                        "account_id": account_data.account_id,
+                        "account_username": account_data.account_username,
                         "direct_category": update_category,
                         "direct_text": update_text,
                         "creation_reason": creation_reason}
