@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
 from io import TextIOWrapper
-from typing import TextIO, Dict
+from typing import TextIO
 
 
 class CsvDirectCategoryText:
@@ -12,15 +12,14 @@ class CsvDirectCategoryText:
 
     def get_direct_text_category_dict(
             self, reversed_direct_cat_text: bool = False
-    ) -> dict[int: str] | dict[str: int]:
+    ) -> dict[str: str]:
         result_dict = {}
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
             direct_category = cur_row.get("direct_category", "")
-            direct_category = int(direct_category.strip().lower())
-
             direct_text = cur_row.get("direct_text", "")
+            direct_category = str(direct_category.strip().lower())
             direct_text = str(direct_text.strip().lower())
 
             if direct_category and direct_text is not None:
@@ -36,26 +35,52 @@ class CsvDirectCategoryText:
                       f"date_time: {date_time}\n")
         return result_dict
 
-    def get_direct_categories_list_sorted(self) -> list[str]:
+    def get_direct_categories_texts_list(self) -> list[dict[str: str]]:
+        direct_categories_texts_list = []
+        self.csv_file_obj.seek(0)
+        csv_dict_reader = csv.DictReader(self.csv_file_obj)
+        for cur_row in csv_dict_reader:
+            account_id = str(cur_row.get("account_id", "").strip())
+            account_username = str(cur_row.get("account_username", "").strip())
+            direct_category = str(cur_row.get("direct_category", "").strip())
+            direct_text = str(cur_row.get("direct_text", "").strip())
+            cur_direct_cat_text = {
+                "account_id": account_id,
+                "account_username": account_username,
+                "direct_category": direct_category,
+                "direct_text": direct_text}
+            direct_categories_texts_list.append(cur_direct_cat_text)
+        return direct_categories_texts_list
+
+    def get_direct_categories_list_sorted(
+            self, titled: bool = False
+    ) -> list[str]:
         direct_categories_list = []
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
-            category = cur_row.get("direct_category", "").strip()
-            # category = category.title()  # Titled if necessary
-            direct_categories_list.append(category)
+            direct_category = cur_row.get("direct_category", "").strip()
+            direct_category = direct_category.title() if titled else direct_category
+            direct_categories_list.append(direct_category)
         unique_direct_categories = list(set(direct_categories_list))
         sorted_direct_categories = sorted(unique_direct_categories)
         return sorted_direct_categories
 
     def add_single_direct_category_text_row(
-            self, new_direct_category: str, new_direct_text: str
+            self,
+            account_id: str,
+            account_username: str,
+            new_direct_category: str,
+            new_direct_text: str
     ) -> bool:
         csv_writer = csv.writer(self.csv_file_obj,
                                 quoting=csv.QUOTE_NONNUMERIC)
         date_time_str = str(datetime.now())
-        csv_writer.writerow([
-            date_time_str, new_direct_category, new_direct_text])
+        csv_writer.writerow([date_time_str,
+                             account_id,
+                             account_username,
+                             new_direct_category,
+                             new_direct_text])
         return True
 
     def add_multi_direct_category_text_rows(
@@ -69,8 +94,11 @@ class CsvDirectCategoryText:
             self, direct_category_text_dict: dict) -> bool:
         csv_writer = csv.writer(self.csv_file_obj,
                                 quoting=csv.QUOTE_NONNUMERIC)
-        csv_writer.writerow([
-            "date_time", "direct_category", "direct_text"])
+        csv_writer.writerow(["date_time",
+                             "account_id",
+                             "account_username",
+                             "direct_category",
+                             "direct_text"])
         date_time_str = str(datetime.now())
         for key, value in direct_category_text_dict.items():
             csv_writer.writerow([date_time_str, key, value])
