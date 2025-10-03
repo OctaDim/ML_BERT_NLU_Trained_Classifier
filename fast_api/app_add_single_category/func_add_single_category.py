@@ -115,6 +115,31 @@ async def add_save_single_category(
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=error_log)
+
+        print("Getting previous direct category-text csv path:")
+        prev_direct_cat_text_csv_path = None
+        try:
+            prev_direct_cat_text_csv_path = get_full_file_normal_path(
+                all_dir_str_parts=[prev_dataset_dir_path],
+                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+
+            if not prev_direct_cat_text_csv_path:
+                error_log = (
+                    f"Empty direct category-text csv path [ERROR]:\n"
+                    f"prev_direct_cat_text_csv_path: {prev_direct_cat_text_csv_path}\n")
+                print(error_log)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=error_log)
+        except Exception as text_lab_csv_file_error:
+            error_log = (
+                f"Getting direct category-text csv path [ERROR]:\n"
+                f"error: {text_lab_csv_file_error}\n"
+                f"prev_direct_cat_text_csv_path: {prev_direct_cat_text_csv_path}\n")
+            print(error_log)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=error_log)
     else:  # All Postgres DB data exists (if pgs_all_data_flag:)
         prev_lab_cat_dict = pgs_bert_model_data["lab_cat_dict"]
         prev_dataset_dir = pgs_bert_model_data["dataset_dir"]
@@ -126,6 +151,10 @@ async def add_save_single_category(
         prev_text_lab_csv_path = get_full_file_normal_path(
             all_dir_str_parts=[prev_dataset_dir],
             file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
+
+        prev_direct_cat_text_csv_path = get_full_file_normal_path(
+            all_dir_str_parts=[prev_dataset_dir],
+            file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
 
     try:
         print("Creating new dataset directory path:")
@@ -200,6 +229,20 @@ async def add_save_single_category(
             print("Keeping old csv file without adding existing text-lab:")
             text_lab_csv_path = prev_text_lab_csv_path
 
+        print("Saving existing direct category-text data into new csv file:")
+        if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
+            print("Copying and creating new csv file without adding existing direct cat-text:")
+            os.makedirs(new_dataset_dir_path, exist_ok=True)
+            new_direct_cat_text_csv_path = get_full_file_normal_path(
+                all_dir_str_parts=[new_dataset_dir_path],
+                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+            shutil.copy2(src=prev_direct_cat_text_csv_path,
+                         dst=new_direct_cat_text_csv_path)
+            direct_cat_text_csv_path = new_direct_cat_text_csv_path  # Return info
+        else:  # Keep old csv file
+            print("Keeping old csv file without adding existing direct cat-text:")
+            direct_cat_text_csv_path = prev_direct_cat_text_csv_path  # Return info
+
         print("Saving updated dataset ini file path:")
         last_saved_dataset_ini_fpath = get_full_file_normal_path(
             all_dir_str_parts=[BASE_DIR],
@@ -241,7 +284,7 @@ async def add_save_single_category(
                     creation_reason=creation_reason,
                     save_only_unique=True)
                 print(f"Postgres DB label-category data saved [OK]:\n"
-                      f"label_category_dict: {new_lab_cat_dict}\n")
+                      f"new_lab_cat_dict: {new_lab_cat_dict}\n")
 
         new_csv_files_data = {
             "lab_cat_csv_path": lab_cat_csv_path,

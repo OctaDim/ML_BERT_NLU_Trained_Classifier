@@ -12,6 +12,7 @@ from db_postgres.postgres_async_conn.pgs_async_connection import (
     PostgresConnection)
 from db_postgres.postgres_async_conn.postgres_async_session import (
     PostgresSession)
+from db_postgres.postgres_models.direct_predict_model import DirectPredictModel
 from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
     cache_unique_lab_cat_dict_qry)
 from db_postgres.postgres_queries.qry_find_create_customer import (
@@ -20,11 +21,13 @@ from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
 from db_postgres.postgres_queries.qry_save_label_text_dict import (
     save_unique_text_lab_dict_qry)
+from db_postgres.postgres_queries.qry_save_new_model_data import save_new_model_data_qry
 from db_postgres.postgres_queries_helpers.hpr_get_bert_model_data import (
     get_postgres_bert_model_data_hpr)
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
 from utils_common.normalized_path import (
     get_full_file_normal_path)
+from utils_specific.class_csv_direct_categs_texts import CsvDirectCategoryText
 from utils_specific.class_csv_labels_categories import CsvLabelCategory
 from utils_specific.class_csv_texts_labels import CsvTextLabel
 from utils_specific.get_initial_dataset_dir_path import (
@@ -132,10 +135,35 @@ async def add_save_single_text_category(
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=error_log)
+
+        print("Getting previous direct category-text csv path:")
+        prev_direct_cat_text_csv_path = None
+        try:
+            prev_direct_cat_text_csv_path = get_full_file_normal_path(
+                all_dir_str_parts=[prev_dataset_dir_path],
+                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+
+            if not prev_direct_cat_text_csv_path:
+                error_log = (
+                    f"Empty direct category-text csv path [ERROR]:\n"
+                    f"prev_direct_cat_text_csv_path: {prev_direct_cat_text_csv_path}\n")
+                print(error_log)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=error_log)
+        except Exception as text_lab_csv_file_error:
+            error_log = (
+                f"Getting direct category-text csv path [ERROR]:\n"
+                f"error: {text_lab_csv_file_error}\n"
+                f"prev_direct_cat_text_csv_path: {prev_direct_cat_text_csv_path}\n")
+            print(error_log)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=error_log)
     else:  # All Postgres DB data exists (if pgs_all_data_flag:)
         prev_lab_cat_dict = pgs_bert_model_data["lab_cat_dict"]
         prev_text_lab_dict = pgs_bert_model_data["text_lab_dict"]
-        pgs_lab_text_dicts_list = pgs_bert_model_data["lab_text_dicts_list"]
+        # pgs_lab_text_dicts_list = pgs_bert_model_data["lab_text_dicts_list"]
         prev_dataset_dir = pgs_bert_model_data["dataset_dir"]
 
         prev_lab_cat_csv_path = get_full_file_normal_path(
@@ -146,10 +174,15 @@ async def add_save_single_text_category(
             all_dir_str_parts=[prev_dataset_dir],
             file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
 
+        prev_direct_cat_text_csv_path = get_full_file_normal_path(
+            all_dir_str_parts=[prev_dataset_dir],
+            file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+
     new_category = None
     new_text = None
     lab_cat_csv_path = None
     text_lab_csv_path = None
+    direct_cat_text_csv_path = None
     try:
         print("Creating new dataset directory path:")
         new_dataset_dir_path = get_new_dataset_dir_path()
@@ -161,7 +194,52 @@ async def add_save_single_text_category(
         print(f"category_exists_flag: {category_exists_flag}")
         print(f"text_exists_flag: {text_exists_flag}")
 
-        if not category_exists_flag and not text_exists_flag:  # new cat and new text
+        if category_exists_flag and text_exists_flag:
+            new_category = "category already exists"  # Just return info
+            new_text = "text already exists"  # Just return info
+
+            print("Saving existing label-category data into new csv file:")
+            if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
+                print("Copying and creating new csv file without adding existing lab-cat:")
+                os.makedirs(new_dataset_dir_path, exist_ok=True)
+                new_lab_cat_csv_path = get_full_file_normal_path(
+                    all_dir_str_parts=[new_dataset_dir_path],
+                    file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
+                shutil.copy2(src=prev_lab_cat_csv_path,
+                             dst=new_lab_cat_csv_path)
+                lab_cat_csv_path = new_lab_cat_csv_path  # Return info
+            else:  # Keep old csv file
+                print("Keeping old csv file without adding existing label-category:")
+                lab_cat_csv_path = prev_lab_cat_csv_path  # Return info
+
+            print("Saving existing text-label data into new csv file:")
+            if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
+                print("Copying and creating new csv file without adding existing text-label:")
+                os.makedirs(new_dataset_dir_path, exist_ok=True)
+                new_text_lab_csv_path = get_full_file_normal_path(
+                    all_dir_str_parts=[new_dataset_dir_path],
+                    file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
+                shutil.copy2(src=prev_text_lab_csv_path,
+                             dst=new_text_lab_csv_path)
+                text_lab_csv_path = new_text_lab_csv_path  # Return info
+            else:  # Keep old csv file
+                print("Keeping old csv file without adding existing text-label:")
+                text_lab_csv_path = prev_text_lab_csv_path  # Return info
+
+            print("Saving existing direct category-text data into new csv file:")
+            if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
+                print("Copying and creating new csv file without adding existing direct cat-text:")
+                os.makedirs(new_dataset_dir_path, exist_ok=True)
+                new_direct_cat_text_csv_path = get_full_file_normal_path(
+                    all_dir_str_parts=[new_dataset_dir_path],
+                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+                shutil.copy2(src=prev_direct_cat_text_csv_path,
+                             dst=new_direct_cat_text_csv_path)
+                direct_cat_text_csv_path = new_direct_cat_text_csv_path  # Return info
+            else:  # Keep old csv file
+                print("Keeping old csv file without adding existing direct cat-text:")
+                direct_cat_text_csv_path = prev_direct_cat_text_csv_path  # Return info
+        elif not category_exists_flag and not text_exists_flag:  # new cat and new text
             print(11111111111111111111111111111111111111111111111111111)
             print("Getting next label new index for new category:")
             next_label_new_index = max(prev_lab_cat_dict.keys()) + 1
@@ -175,9 +253,9 @@ async def add_save_single_text_category(
             new_category = update_category  # Just return info
             new_text = update_text  # Just return info
 
-            print("Saving new label-category pair into new csv file:")
+            print("Saving new label-category into new csv file:")
             if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv lab-cat file
-                print("Copying and updating new csv file with new lab-cat pair:")
+                print("Copying and updating new csv file with adding new lab-cat:")
                 os.makedirs(name=new_dataset_dir_path, exist_ok=True)
                 new_lab_cat_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
@@ -191,8 +269,8 @@ async def add_save_single_text_category(
                         new_label=next_label_new_index,
                         new_category=update_category)
                 lab_cat_csv_path = new_lab_cat_csv_path  # Return info
-            else:  # Overwrite existing lab-cat csv file
-                print("Overwriting existing csv file with new lab-cat pair:")
+            else:  # Append existing lab-cat csv file
+                print("Appending existing csv file with adding new label-category:")
                 with open(file=prev_lab_cat_csv_path, mode="a",
                           encoding="utf-8", newline="") as prev_lab_cat_csv_f:
                     csv_lab_cat = CsvLabelCategory(prev_lab_cat_csv_f)
@@ -201,9 +279,9 @@ async def add_save_single_text_category(
                         new_category=update_category)
                 lab_cat_csv_path = prev_lab_cat_csv_path  # Return info
 
-            print("Saving new text-label pair into new csv file:")
+            print("Saving new text-label into new csv file:")
             if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new txt-lab csv file
-                print("Copying and creating new csv file with adding text-lab pair:")
+                print("Copying and creating new csv file with adding new text-label:")
                 os.makedirs(name=new_dataset_dir_path, exist_ok=True)
                 new_text_lab_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
@@ -217,8 +295,8 @@ async def add_save_single_text_category(
                         new_text=update_text,
                         new_label=next_label_new_index)
                 text_lab_csv_path = new_text_lab_csv_path
-            else:  # Overwrite existing txt-lab csv file
-                print("Keeping old csv file with adding text-lab pair:")
+            else:  # Append existing txt-lab csv file
+                print("Appending old csv file with adding new text-label:")
                 with open(file=prev_text_lab_csv_path, mode="a",
                           encoding="utf-8", newline="") as prev_text_lab_csv_f:
                     csv_text_lab = CsvTextLabel(prev_text_lab_csv_f)
@@ -227,16 +305,29 @@ async def add_save_single_text_category(
                         new_label=next_label_new_index)
                 text_lab_csv_path = prev_text_lab_csv_path
 
+            print("Saving existing direct category-text data into new csv file:")
+            if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
+                print("Copying and creating new csv file without adding existing direct cat-text:")
+                os.makedirs(new_dataset_dir_path, exist_ok=True)
+                new_direct_cat_text_csv_path = get_full_file_normal_path(
+                    all_dir_str_parts=[new_dataset_dir_path],
+                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+                shutil.copy2(src=prev_direct_cat_text_csv_path,
+                             dst=new_direct_cat_text_csv_path)
+                direct_cat_text_csv_path = new_direct_cat_text_csv_path  # Return info
+            else:  # Keep existing csv file
+                print("Keeping old csv file without adding existing direct cat-text:")
+                direct_cat_text_csv_path = prev_direct_cat_text_csv_path  # Return info
+
             if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
+                creation_reason = (f"category-text pair added: "
+                                   f"{update_category} - "
+                                   f"{update_text[:15]}")
                 print("Postgres DB Single saving label-category data in data base:")
                 pgs_conn = PostgresConnection()
                 async with PostgresSession(async_engine=pgs_conn.engine,
                                            log_good_ops=log_pgs_good_ops
                                            ) as pgs_session:
-                    creation_reason = (
-                        f"category and text pair added: "
-                        f"{update_category} - {update_text[:15]}")
-
                     customer_id = await find_create_customer_qry(
                         ongoing_session=pgs_session,
                         account_username=account_data.account_username,
@@ -256,8 +347,7 @@ async def add_save_single_text_category(
                         creation_reason=creation_reason,
                         save_only_unique=True)
                     print(f"Postgres DB label-category data saved [OK]:\n"
-                          f"new_lab_cat_dict: {new_lab_cat_dict}\n"
-                          f"len(new_lab_cat_dict): {len(new_lab_cat_dict)}\n")
+                          f"new_lab_cat_dict: {new_lab_cat_dict}\n")
 
                     await save_unique_text_lab_dict_qry(
                         ongoing_session=pgs_session,
@@ -265,14 +355,7 @@ async def add_save_single_text_category(
                         creation_reason=creation_reason,
                         save_only_unique=True)
                     print(f"Postgres DB text-category data saved [OK]:\n"
-                          # f"new_text_lab_dict: {new_text_lab_dict}\n"  # Too long
-                          f"len(new_text_lab_dict): {len(new_text_lab_dict)}\n")
-        elif category_exists_flag and text_exists_flag:
-            print(22222222222222222222222222222222222222222222222222222)
-            new_category = "category already exists"  # Just return info
-            new_text = "text already exists"  # Just return info
-
-
+                          f"new_text_lab_dict: {new_text_lab_dict}\n")
         elif category_exists_flag and not text_exists_flag:
             print(33333333333333333333333333333333333333333333333333333)
             print("Getting existing label index of existing category:")
@@ -290,9 +373,9 @@ async def add_save_single_text_category(
             new_category = "category already exists"  # Just return info
             new_text = update_text  # Just return info
 
-            print("Saving new label-category pair into new csv file:")
+            print("Saving existing label-category data into new csv file:")
             if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
-                print("Copying and creating new csv file without adding existing lab-cat pair:")
+                print("Copying and creating new csv file without adding existing lab-cat:")
                 os.makedirs(new_dataset_dir_path, exist_ok=True)
                 new_lab_cat_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
@@ -300,13 +383,13 @@ async def add_save_single_text_category(
                 shutil.copy2(src=prev_lab_cat_csv_path,
                              dst=new_lab_cat_csv_path)
                 lab_cat_csv_path = new_lab_cat_csv_path  # Return info
-            else:  # Overwrite existing csv file
-                print("Keeping old csv file without adding existing lab-cat pair:")
+            else:  # Keep old csv file
+                print("Keeping old csv file without adding existing lab-cat:")
                 lab_cat_csv_path = prev_lab_cat_csv_path  # Return info
 
-            print("Saving new text-label pair into new csv file:")
+            print("Saving new text-label data into new csv file:")
             if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new txt-lab csv file
-                print("Copying and creating new csv file with adding text-lab pair:")
+                print("Copying and creating new csv file with adding new text-lab:")
                 os.makedirs(name=new_dataset_dir_path, exist_ok=True)
                 new_text_lab_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
@@ -320,8 +403,8 @@ async def add_save_single_text_category(
                         new_text=update_text,
                         new_label=existing_lab_cat_index)
                 text_lab_csv_path = new_text_lab_csv_path
-            else:  # Overwrite existing txt-lab csv file
-                print("Keeping old csv file with adding text-lab pair:")
+            else:  # Append existing txt-lab csv file
+                print("Appending old csv file with adding new text-lab:")
                 with open(file=prev_text_lab_csv_path, mode="a",
                           encoding="utf-8", newline="") as prev_text_lab_csv_f:
                     csv_text_lab = CsvTextLabel(prev_text_lab_csv_f)
@@ -330,15 +413,29 @@ async def add_save_single_text_category(
                         new_label=existing_lab_cat_index)
                 text_lab_csv_path = prev_text_lab_csv_path
 
+            print("Saving existing direct category-text into new csv file:")
+            if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
+                print("Copying and creating new csv file without adding existing direct cat-text:")
+                os.makedirs(new_dataset_dir_path, exist_ok=True)
+                new_direct_cat_text_csv_path = get_full_file_normal_path(
+                    all_dir_str_parts=[new_dataset_dir_path],
+                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+                shutil.copy2(src=prev_direct_cat_text_csv_path,
+                             dst=new_direct_cat_text_csv_path)
+                direct_cat_text_csv_path = new_direct_cat_text_csv_path  # Return info
+            else:  # Keep existing csv file
+                print("Keeping old csv file without adding existing lab-cat pair:")
+                direct_cat_text_csv_path = prev_direct_cat_text_csv_path  # Return info
+
             if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
                 print("Postgres DB Single saving label-category data in data base:")
                 pgs_conn = PostgresConnection()
                 async with PostgresSession(async_engine=pgs_conn.engine,
                                            log_good_ops=log_pgs_good_ops
                                            ) as pgs_session:
-                    creation_reason = (
-                        f"category and text pair added: "
-                        f"{update_category} - {update_text[:15]}")
+                    creation_reason = (f"category and text pair added: "
+                                       f"{update_category} - "
+                                       f"{update_text[:15]}")
 
                     customer_id = await find_create_customer_qry(
                         ongoing_session=pgs_session,
@@ -359,8 +456,7 @@ async def add_save_single_text_category(
                         creation_reason=creation_reason,
                         save_only_unique=True)
                     print(f"Postgres DB label-category data saved [OK]:\n"
-                          f"new_lab_cat_dict: {new_lab_cat_dict}\n"
-                          f"len(new_lab_cat_dict): {len(new_lab_cat_dict)}\n")
+                          f"new_lab_cat_dict: {new_lab_cat_dict}\n")
 
                     await save_unique_text_lab_dict_qry(
                         ongoing_session=pgs_session,
@@ -368,14 +464,104 @@ async def add_save_single_text_category(
                         creation_reason=creation_reason,
                         save_only_unique=True)
                     print(f"Postgres DB text-category data saved [OK]:\n"
-                          # f"new_text_lab_dict: {new_text_lab_dict}\n"  # Too long
-                          f"len(new_text_lab_dict): {len(new_text_lab_dict)}\n")
+                          f"new_text_lab_dict: {new_text_lab_dict}\n")
         elif text_exists_flag and not category_exists_flag:
             print(44444444444444444444444444444444444444444444444444444)
-            # TODO: Make saving data in DirectPrediction
-            #  account_username, account_id, direct_category, direct_text
             new_category = update_category  # Just return info
             new_text = f"direct predict text: {update_text}"  # Just return info
+
+            print("Saving existing label-category data into new csv file:")
+            if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
+                print("Copying and creating new csv file without adding existing lab-cat:")
+                os.makedirs(new_dataset_dir_path, exist_ok=True)
+                new_lab_cat_csv_path = get_full_file_normal_path(
+                    all_dir_str_parts=[new_dataset_dir_path],
+                    file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
+                shutil.copy2(src=prev_lab_cat_csv_path,
+                             dst=new_lab_cat_csv_path)
+                lab_cat_csv_path = new_lab_cat_csv_path  # Return info
+            else:  # Keep old csv file
+                print("Keeping old csv file without adding existing label-category:")
+                lab_cat_csv_path = prev_lab_cat_csv_path  # Return info
+
+            print("Saving existing text-label data into new csv file:")
+            if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new csv file
+                print("Copying and creating new csv file without adding existing text-label:")
+                os.makedirs(new_dataset_dir_path, exist_ok=True)
+                new_text_lab_csv_path = get_full_file_normal_path(
+                    all_dir_str_parts=[new_dataset_dir_path],
+                    file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
+                shutil.copy2(src=prev_text_lab_csv_path,
+                             dst=new_text_lab_csv_path)
+                text_lab_csv_path = new_text_lab_csv_path  # Return info
+            else:  # Keep old csv file
+                print("Keeping old csv file without adding existing text-label:")
+                text_lab_csv_path = prev_text_lab_csv_path  # Return info
+
+
+
+
+            print("Saving new direct category-text into new csv file:")
+            if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:  # Create new direct cat-text csv file
+                print("Copying and creating new csv file with adding new direct cat-text:")
+                os.makedirs(name=new_dataset_dir_path, exist_ok=True)
+                new_direct_cat_text_csv_path = get_full_file_normal_path(
+                    all_dir_str_parts=[new_dataset_dir_path],
+                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEG_LABEL_CSV_FILE_NAME)
+                shutil.copy2(src=prev_direct_cat_text_csv_path,
+                             dst=new_direct_cat_text_csv_path)
+                with open(file=new_direct_cat_text_csv_path, mode="a",
+                          encoding="utf-8", newline="") as new_direct_cat_txt_csvf:
+                    csv_text_lab = CsvDirectCategoryText(new_direct_cat_txt_csvf)
+                    csv_text_lab.add_single_direct_category_text_row(
+                        new_direct_category=update_category,
+                        new_direct_text=update_text)
+                direct_cat_text_csv_path = new_direct_cat_text_csv_path
+            else:  # Append existing category-text csv file
+                print("Appending old csv file with adding new direct cat-text:")
+                with open(file=prev_direct_cat_text_csv_path, mode="a",
+                          encoding="utf-8", newline="") as prev_direct_cat_txt_csvf:
+                    direct_cat_text = CsvDirectCategoryText(prev_direct_cat_txt_csvf)
+                    direct_cat_text.add_single_direct_category_text_row(
+                        new_direct_category=update_category,
+                        new_direct_text=update_text)
+                direct_cat_text_csv_path = prev_text_lab_csv_path
+
+            if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
+                print("Postgres DB Single saving label-category data in data base:")
+                pgs_conn = PostgresConnection()
+                async with PostgresSession(async_engine=pgs_conn.engine,
+                                           log_good_ops=log_pgs_good_ops
+                                           ) as pgs_session:
+                    creation_reason = (f"category-text pair added: "
+                                       f"{update_category} - "
+                                       f"{update_text[:15]}")
+
+                    customer_id = await find_create_customer_qry(
+                        ongoing_session=pgs_session,
+                        account_username=account_data.account_username,
+                        account_id=account_data.account_id)
+
+                    dataset_id = await find_create_dataset_qry(
+                        ongoing_session=pgs_session,
+                        dataset_name=new_dataset_name,
+                        customer_id=customer_id,
+                        dataset_csv_dir=new_dataset_dir_path,
+                        creation_reason=creation_reason)
+
+                    direct_predict_new_data = {
+                        "customer_id": customer_id,
+                        "dataset_id": dataset_id,
+                        "direct_category": update_category,
+                        "direct_text": update_text,
+                        "creation_reason": creation_reason}
+                    await save_new_model_data_qry(
+                        ModelClassORM=DirectPredictModel,
+                        ongoing_session=pgs_session,
+                        new_data=direct_predict_new_data)
+                    print(f"Postgres DB text-category data saved [OK]:\n"
+                          f"direct_category: {update_category}\n"
+                          f"creation_reason: {update_text}\n")
 
         print("Saving updated dataset ini file path:")
         last_saved_dataset_ini_fpath = get_full_file_normal_path(
@@ -393,6 +579,7 @@ async def add_save_single_text_category(
         new_csv_files_data = {
             "lab_cat_csv_path": lab_cat_csv_path,
             "text_lab_csv_path": text_lab_csv_path,
+            "direct_cat_text_csv_path": direct_cat_text_csv_path,
             "last_saved_dataset_ini_fpath": last_saved_dataset_ini_fpath,
             "new_category": new_category,
             "new_text": new_text}

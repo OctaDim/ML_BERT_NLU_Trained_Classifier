@@ -60,6 +60,7 @@ async def bert_add_text_category(
 
         new_lab_cat_csv_path = new_csv_files_data.get("lab_cat_csv_path")
         new_text_lab_csv_path = new_csv_files_data.get("text_lab_csv_path")
+        direct_cat_text_csv_path = new_csv_files_data.get("direct_cat_text_csv_path")
         dataset_ini_file_path = new_csv_files_data.get("last_saved_dataset_ini_fpath")
         new_category = new_csv_files_data.get("new_category")
         new_text = new_csv_files_data.get("new_text")
@@ -70,6 +71,7 @@ async def bert_add_text_category(
                 "dataset init": BERT_OPTIONS.BERT_INITIAL_DATASET_CSV_PATH,
                 "csv label-category path": new_lab_cat_csv_path,
                 "csv text-label path:": new_text_lab_csv_path,
+                "direct category-text path:": direct_cat_text_csv_path,
                 "dataset ini file path": dataset_ini_file_path,
                 "adding time": adding_time,
                 "added text": update_text,
@@ -87,6 +89,7 @@ async def bert_add_text_category(
             f"username: {auth_data.username}\n"
             f"csv label-category path: {new_lab_cat_csv_path}\n"
             f"csv text-label path: {new_text_lab_csv_path}\n"
+            f"direct category-text path: {direct_cat_text_csv_path}\n"
             f"dataset ini file path: {dataset_ini_file_path}\n"
             f"added text: {blue_color}{update_text}{reset_color}\n"
             f"added category: {green_color}{update_category}{reset_color}\n"
