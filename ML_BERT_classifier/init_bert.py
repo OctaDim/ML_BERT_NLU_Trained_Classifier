@@ -15,6 +15,8 @@ from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
     cache_unique_lab_cat_dict_qry)
 from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
+from db_postgres.postgres_queries.qry_save_direct_category_text_list import (
+    save_direct_cat_text_list_qry)
 from db_postgres.postgres_queries.qry_save_label_text_list import (
     save_label_text_list_qry)
 from db_postgres.postgres_queries.qry_save_new_model_data import (
@@ -23,6 +25,8 @@ from db_postgres.postgres_queries_helpers.hpr_get_bert_model_data import (
     get_postgres_bert_model_data_hpr)
 from utils_common.exec_time_decorator import execution_time_decorator
 from utils_common.normalized_path import get_full_file_normal_path
+from utils_specific.class_csv_direct_categories_texts import (
+    CsvDirectCategoryText)
 from utils_specific.class_csv_labels_categories import CsvLabelCategory
 from utils_specific.class_csv_texts_labels import CsvTextLabel
 from utils_specific.get_initial_dataset_dir_path import (
@@ -148,8 +152,8 @@ async def init_and_start_bert_model():
         print(f"start_init_dataset_dir: {start_init_dataset_dir}")
         print(f"start_init_dataset_name: {start_init_dataset_name}")
 
-        print("Getting csv label-category train file path:")
         if start_init_dataset_dir:
+            print("Getting csv label-category train file path:")
             last_saved_lab_cat_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[start_init_dataset_dir],
                 file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
@@ -188,13 +192,28 @@ async def init_and_start_bert_model():
         with open(file=csv_lab_txt_file_path,
                   mode="r", encoding="utf-8") as csv_lab_txt_file:
             csf_lab_txt = CsvTextLabel(csv_file_obj=csv_lab_txt_file)
-            text_label_dict = csf_lab_txt.get_text_label_dict()
-            # print(f"text_label_dict: {text_label_dict}")  # Too long
-            print(f"len(text_label_dict): {len(text_label_dict)}")
+            # text_label_dict = csf_lab_txt.get_text_label_dict()
+            # # print(f"text_label_dict: {text_label_dict}")  # Too long
+            # print(f"len(text_label_dict): {len(text_label_dict)}")
 
-            csv_lab_text_list = csf_lab_txt.get_label_text_list()
-            # print(f"csv_lab_text_list: {csv_lab_text_list}")  # Too long
-            print(f"len(csv_lab_text_list): {len(csv_lab_text_list)}")
+            lab_text_dicts_list = csf_lab_txt.get_label_text_dicts_list()
+            # print(f"lab_text_dicts_list: {lab_text_dicts_list}")  # Too long
+            print(f"len(lab_text_dicts_list): {len(lab_text_dicts_list)}")
+
+        print("Getting csv category-test train file path:")
+        last_saved_direct_cat_text_csv_path = get_full_file_normal_path(
+            all_dir_str_parts=[start_init_dataset_dir],
+            file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
+        print(f"last_saved_cat_text_csv_path: "
+              f"{last_saved_direct_cat_text_csv_path}")
+
+        print("Getting csv category-text dicts list file data:")
+        with open(file=last_saved_direct_cat_text_csv_path,
+                  mode="r", encoding="utf-8") as csv_direct_cat_txt_f:
+            csf_direct_cat_txt = CsvDirectCategoryText(csv_file_obj=csv_direct_cat_txt_f)
+            direct_cat_text_dicts_list = csf_direct_cat_txt.get_direct_categories_texts_list()
+            # print(f"direct_cat_text_dicts_list: {direct_cat_text_dicts_list}")  # Too long
+            print(f"len(direct_cat_text_dicts_list): {len(direct_cat_text_dicts_list)}")
 
         print("Getting last model directory path from file:")
         file_saved_model_dir_path = get_last_saved_model_dir_path()
@@ -229,13 +248,20 @@ async def init_and_start_bert_model():
 
                 await save_label_text_list_qry(
                     ongoing_session=pgs_session,
-                    label_text_dicts_list=csv_lab_text_list,
+                    label_text_dicts_list=lab_text_dicts_list,
+                    creation_reason=creation_reason,
+                    save_only_unique=True)
+
+                await save_direct_cat_text_list_qry(
+                    ongoing_session=pgs_session,
+                    direct_cat_text_dicts_list=direct_cat_text_dicts_list,
                     creation_reason=creation_reason,
                     save_only_unique=True)
     else:  # All Postgres DB data exists
         label_category_dict = pgs_bert_model_data["lab_cat_dict"]
-        text_label_dict = pgs_bert_model_data["text_lab_dict"]
-        csv_lab_text_list = pgs_bert_model_data["lab_text_dicts_list"]
+        # text_label_dict = pgs_bert_model_data["text_lab_dict"]
+        lab_text_dicts_list = pgs_bert_model_data["lab_text_dicts_list"]
+        direct_cat_text_dicts_list = pgs_bert_model_data["direct_cat_text_dicts_list"]
         start_init_dataset_name = pgs_bert_model_data["dataset_name"]
         start_init_dataset_dir = pgs_bert_model_data["dataset_dir"]
         last_saved_model_dir_path = pgs_bert_model_data["model_dir_path"]
@@ -265,7 +291,13 @@ async def init_and_start_bert_model():
 
                 await save_label_text_list_qry(
                     ongoing_session=pgs_session,
-                    label_text_dicts_list=csv_lab_text_list,
+                    label_text_dicts_list=lab_text_dicts_list,
+                    creation_reason=creation_reason,
+                    save_only_unique=True)
+
+                await save_direct_cat_text_list_qry(
+                    ongoing_session=pgs_session,
+                    direct_cat_text_dicts_list=direct_cat_text_dicts_list,
                     creation_reason=creation_reason,
                     save_only_unique=True)
     print("Getting initial model directory path:")
@@ -329,7 +361,9 @@ async def init_and_start_bert_model():
         if not model_load_error_log:
             if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
                 pgs_conn = PostgresConnection()
-                async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+                async with PostgresSession(async_engine=pgs_conn.engine,
+                                           log_good_ops=log_pgs_good_ops
+                                           ) as pgs_session:
                     if not pgs_all_data_flag:
                         creation_reason = (f"loaded after restart, csv file: "
                                            f"{start_init_dataset_name}")
