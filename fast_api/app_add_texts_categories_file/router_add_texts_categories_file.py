@@ -4,13 +4,17 @@ import os
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import (
+    APIRouter, File, Form, HTTPException, UploadFile, status, Depends)
 from fastapi.responses import JSONResponse
 
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS)
-from fast_api.app_add_texts_categories_file.func_add_save_test_category_file import (
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import get_bert_model_instance_dep
+from fast_api.app_account_data.scheme_account_data import AccountDataBert
+from fast_api.app_add_texts_categories_file.func_add_save_text_category_file import (
     add_save_multi_text_category_file)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from utils_common.class_file_validate_read import FileValidateRead
@@ -27,7 +31,10 @@ async def bert_add_text_category_file(
         upload_file: Annotated[UploadFile, File(description="file .xls, .xlsx, or .txt")],
         username: Annotated[str, Form()],
         password: Annotated[str, Form()],
-):
+        account_data: AccountDataBert,
+        bert_model_inst: Annotated[
+            ClassifierBERT, Depends(get_bert_model_instance_dep)],
+) -> JSONResponse:
     verify_prod_username_password(username=username,
                                   password=password)
 
@@ -108,7 +115,9 @@ async def bert_add_text_category_file(
     try:
         datetime_start = datetime.now()
         new_csv_files_data = add_save_multi_text_category_file(
-            update_text_category_data=update_data_list)
+            account_data=account_data,
+            update_text_category_data=update_data_list,
+            bert_model_inst=bert_model_inst)
         adding_time = (datetime.now() - datetime_start).total_seconds()
         adding_time = round(adding_time, 1)
 
