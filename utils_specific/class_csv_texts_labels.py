@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
 from io import TextIOWrapper
-from typing import TextIO, List, Dict
+from typing import TextIO, List, Dict, Union, Tuple
 
 
 class CsvTextLabel:
@@ -61,7 +61,8 @@ class CsvTextLabel:
         return True
 
     def add_multi_text_label_rows(
-            self, upd_text_label_data: list[list]) -> bool:
+            self, upd_text_label_data: List[Union[List, Tuple]]
+    ) -> bool:
         csv_writer = csv.writer(self.csv_file_obj,
                                 quoting=csv.QUOTE_NONNUMERIC)
         csv_writer.writerows(upd_text_label_data)

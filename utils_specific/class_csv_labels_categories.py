@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
 from io import TextIOWrapper
-from typing import TextIO, Dict
+from typing import TextIO, List, Union, Tuple
 
 
 class CsvLabelCategory:
@@ -54,7 +54,8 @@ class CsvLabelCategory:
         return True
 
     def add_multi_label_category_rows(
-            self, upd_label_category_data: list[list]) -> bool:
+            self, upd_label_category_data: List[Union[List, Tuple]]
+    ) -> bool:
         csv_writer = csv.writer(self.csv_file_obj,
                                 quoting=csv.QUOTE_NONNUMERIC)
         csv_writer.writerows(upd_label_category_data)

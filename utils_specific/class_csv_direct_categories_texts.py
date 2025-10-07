@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
 from io import TextIOWrapper
-from typing import TextIO
+from typing import TextIO, List, Union, Tuple
 
 
 class CsvDirectCategoryText:
@@ -83,8 +83,9 @@ class CsvDirectCategoryText:
                              new_direct_text])
         return True
 
-    def add_multi_direct_category_text_rows(
-            self, upd_direct_category_text_data: list[list]) -> bool:
+    def add_multi_direct_cat_text_rows(
+            self, upd_direct_category_text_data: List[Union[List, Tuple]]
+    ) -> bool:
         csv_writer = csv.writer(self.csv_file_obj,
                                 quoting=csv.QUOTE_NONNUMERIC)
         csv_writer.writerows(upd_direct_category_text_data)
