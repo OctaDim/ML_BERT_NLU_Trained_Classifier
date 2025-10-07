@@ -122,7 +122,8 @@ async def bert_add_text_category_file(
         new_csv_files_data = await add_save_multi_text_category_file(
             account_data=account_data,
             update_text_category_data=update_data_list,
-            bert_model_inst=bert_model_inst)
+            bert_model_inst=bert_model_inst,
+            file_name=file_name)
         adding_time = (datetime.now() - datetime_start).total_seconds()
         adding_time = round(adding_time, 1)
 
