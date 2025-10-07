@@ -12,7 +12,8 @@ from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS)
-from db_postgres.postgres_dependencies.dep_get_bert_model_instance import get_bert_model_instance_dep
+from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
 from fast_api.app_add_texts_categories_file.func_add_save_text_category_file import (
     add_save_multi_text_category_file)
@@ -31,12 +32,16 @@ async def bert_add_text_category_file(
         upload_file: Annotated[UploadFile, File(description="file .xls, .xlsx, or .txt")],
         username: Annotated[str, Form()],
         password: Annotated[str, Form()],
-        account_data: AccountDataBert,
+        account_id: Annotated[str, Form()],
+        account_username: Annotated[str, Form()],
         bert_model_inst: Annotated[
             ClassifierBERT, Depends(get_bert_model_instance_dep)],
 ) -> JSONResponse:
     verify_prod_username_password(username=username,
                                   password=password)
+
+    account_data = AccountDataBert(account_id=account_id,
+                                   account_username=account_username)
 
     ALLOWED_FILE_MIME_TYPES = (
         "application/vnd.ms-excel",  # xls, old excel
@@ -114,7 +119,7 @@ async def bert_add_text_category_file(
 
     try:
         datetime_start = datetime.now()
-        new_csv_files_data = add_save_multi_text_category_file(
+        new_csv_files_data = await add_save_multi_text_category_file(
             account_data=account_data,
             update_text_category_data=update_data_list,
             bert_model_inst=bert_model_inst)
