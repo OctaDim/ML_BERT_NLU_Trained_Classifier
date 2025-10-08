@@ -27,12 +27,11 @@ async def save_direct_cat_text_list_qry(
                 if not cur_cat_text_dict in old_direct_cat_text_list:
                     unique_direct_cat_text_list.append(cur_cat_text_dict)
             direct_cat_text_update_list = unique_direct_cat_text_list
-            # print(f"direct_cat_text_update_list: {direct_cat_text_update_list}")  # Too long
-            print(f"len(direct_cat_text_update_list): {len(direct_cat_text_update_list)}")
         else:
             direct_cat_text_update_list = direct_cat_text_dicts_list
+        # print(f"direct_cat_text_update_list: {direct_cat_text_update_list}")  # Too long
+        print(f"len(direct_cat_text_update_list): {len(direct_cat_text_update_list)}")
 
-        print(f"direct_cat_text_update_list: {direct_cat_text_update_list}")
         new_direct_cat_text_model_obj = DirectPredictModel()
         for cur_cat_text_dict in direct_cat_text_update_list:
             account_id = cur_cat_text_dict.get("account_id")
