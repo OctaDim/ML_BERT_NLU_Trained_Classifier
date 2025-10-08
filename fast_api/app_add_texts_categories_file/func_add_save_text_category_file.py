@@ -162,7 +162,6 @@ async def add_save_multi_text_category_file(
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=error_log)
-            prev_direct_cat_text_list = prev_direct_cat_text_csv_list
         except Exception as text_lab_csv_file_error:
             error_log = (
                 f"Getting direct category-text csv file data [ERROR]:\n"
@@ -241,14 +240,18 @@ async def add_save_multi_text_category_file(
                 next_label_new_index = max(extended_lab_cat_dict.keys()) + 1
 
                 print("Updating label-category update list and dict with new category:")
-                new_lab_cat_data = (common_datetime_str,
+                # cur_datetime_str = str(datetime.now())
+                new_lab_cat_data = (common_datetime_str,  # Common time
+                                    # cur_datetime_str,  # Current time
                                     next_label_new_index,
                                     cur_upd_category)
                 update_lab_cat_list.append(new_lab_cat_data)
                 extended_lab_cat_dict[next_label_new_index] = cur_upd_category
 
                 print("Updating label-text update list and dict with new text:")
-                new_lab_text_data = (common_datetime_str,
+                # cur_datetime_str = str(datetime.now())
+                new_lab_text_data = (common_datetime_str,  # Common time
+                                     # cur_datetime_str,  # Current time
                                      next_label_new_index,
                                      cur_upd_text)
                 update_text_lab_list.append(new_lab_text_data)
@@ -279,7 +282,9 @@ async def add_save_multi_text_category_file(
                 print("Updating category-text update list with new category-text:")
                 cur_direct_category = cur_upd_category
                 cur_direct_text = cur_upd_text
-                new_direct_cat_text_data = (common_datetime_str,
+                cur_datetime_str = str(datetime.now())
+                new_direct_cat_text_data = (cur_datetime_str,  # Current time
+                                            # common_datetime_str,  # Common time
                                             account_data.account_id,
                                             account_data.account_username,
                                             cur_direct_category,
@@ -452,7 +457,7 @@ async def add_save_multi_text_category_file(
                     ongoing_session=pgs_session,
                     direct_cat_text_dicts_list=upd_direct_text_cat_dicts_list,
                     creation_reason=creation_reason,
-                    save_only_unique=False)
+                    save_only_unique=True)
                 print(f"Postgres DB direct categories-texts saved [OK]")
                 print(f"upd_direct_text_cat_dicts_list: {upd_direct_text_cat_dicts_list}")  # Too long
 

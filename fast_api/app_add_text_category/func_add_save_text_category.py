@@ -12,18 +12,16 @@ from db_postgres.postgres_async_conn.pgs_async_connection import (
     PostgresConnection)
 from db_postgres.postgres_async_conn.postgres_async_session import (
     PostgresSession)
-from db_postgres.postgres_models.direct_predict_model import (
-    DirectPredictModel)
 from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
     cache_unique_lab_cat_dict_qry)
 from db_postgres.postgres_queries.qry_find_create_customer import (
     find_create_customer_qry)
 from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
+from db_postgres.postgres_queries.qry_save_direct_category_text_list import (
+    save_direct_cat_text_list_qry)
 from db_postgres.postgres_queries.qry_save_label_text_dict import (
     save_unique_text_lab_dict_qry)
-from db_postgres.postgres_queries.qry_save_new_model_data import (
-    save_new_model_data_qry)
 from db_postgres.postgres_queries_helpers.hpr_get_bert_model_data import (
     get_postgres_bert_model_data_hpr)
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
@@ -566,10 +564,16 @@ async def add_save_single_text_category(
                         "direct_category": update_category,
                         "direct_text": update_text,
                         "creation_reason": creation_reason}
-                    await save_new_model_data_qry(
-                        ModelClassORM=DirectPredictModel,
+                    # await save_new_model_data_qry(
+                    #     ModelClassORM=DirectPredictModel,
+                    #     ongoing_session=pgs_session,
+                    #     new_data=direct_predict_new_data)
+                    direct_predict_dicts_list = [direct_predict_new_data, ]
+                    await save_direct_cat_text_list_qry(
                         ongoing_session=pgs_session,
-                        new_data=direct_predict_new_data)
+                        direct_cat_text_dicts_list=direct_predict_dicts_list,
+                        creation_reason=creation_reason,
+                        save_only_unique=True)
                     print(f"Postgres DB text-category data saved [OK]:\n"
                           f"direct_category: {update_category}\n"
                           f"creation_reason: {update_text}\n")
