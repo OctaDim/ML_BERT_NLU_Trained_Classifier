@@ -182,7 +182,7 @@ async def bert_save_model(
             if save_after_train_flag:
                 creation_reason = f"trained and saved: {dataset_name}"
             else:
-                creation_reason = "saved without training"
+                creation_reason = f"saved without training: {dataset_name}"
 
             customer_id = await find_create_customer_qry(
                 ongoing_session=pgs_session,
