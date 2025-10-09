@@ -75,7 +75,7 @@ async def add_save_multi_text_category_file(
                 all_dir_str_parts=[prev_dataset_dir_path],
                 file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
 
-            print("Getting previous label-category dictionary:")
+            print("Getting previous csv label-category dictionary:")
             with open(file=prev_lab_cat_csv_path,
                       mode="r", encoding="utf-8") as prev_lab_cat_csv_f:
                 csf_lab_cat = CsvLabelCategory(prev_lab_cat_csv_f)
@@ -110,7 +110,7 @@ async def add_save_multi_text_category_file(
                 all_dir_str_parts=[prev_dataset_dir_path],
                 file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
 
-            print("Getting previous text-label dictionary:")
+            print("Getting previous csv text-label dictionary:")
             with open(file=prev_text_lab_csv_path,
                       mode="r", encoding="utf-8") as prev_text_lab_csv_f:
                 csf_text_lab = CsvTextLabel(prev_text_lab_csv_f)
@@ -145,7 +145,7 @@ async def add_save_multi_text_category_file(
                 all_dir_str_parts=[prev_dataset_dir_path],
                 file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
 
-            print("Getting previous category-text dicts list:")
+            print("Getting previous csv category-text dicts list:")
             with open(file=prev_direct_cat_text_csv_path,
                       mode="r", encoding="utf-8") as prev_direct_cat_text_csv_f:
                 csf_direct_cat_text = CsvDirectCategoryText(prev_text_lab_csv_f)
