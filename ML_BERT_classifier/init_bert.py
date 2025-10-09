@@ -328,7 +328,8 @@ async def init_and_start_bert_model():
             async with PostgresSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
-                creation_reason = f"initialized after restart"
+                creation_reason = (f"service restart init: "
+                                   f"{start_init_dataset_name}")
 
                 dataset_id = await find_create_dataset_qry(
                     ongoing_session=pgs_session,
@@ -338,6 +339,7 @@ async def init_and_start_bert_model():
 
                 new_trained_model_data = {
                     "dataset_id": dataset_id,
+                    "dataset_name": start_init_dataset_name,
                     "model_directory": initial_model_dir_path,
                     "creation_reason": creation_reason}
                 await save_new_model_data_qry(
@@ -379,6 +381,7 @@ async def init_and_start_bert_model():
 
                     new_trained_model_data = {
                         "dataset_id": dataset_id,
+                        "dataset_name": start_init_dataset_name,
                         "model_directory": last_saved_model_dir_path,
                         "creation_reason": creation_reason}
                     await save_new_model_data_qry(
