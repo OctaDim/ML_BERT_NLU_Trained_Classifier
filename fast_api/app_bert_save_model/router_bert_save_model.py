@@ -9,7 +9,8 @@ from fastapi.responses import JSONResponse
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
-    BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, REDIS_OPTIONS, STATUSES)
+    BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, REDIS_OPTIONS, STATUSES,
+    ALCHEMY_OPTIONS)
 from db_postgres.postgres_async_conn.pgs_async_connection import (
     PostgresConnection)
 from db_postgres.postgres_async_conn.postgres_async_session import (
@@ -20,8 +21,12 @@ from db_postgres.postgres_models.trained_bert_model import (
     TrainedBertModel)
 from db_postgres.postgres_queries.qry_find_create_customer import (
     find_create_customer_qry)
-from db_postgres.postgres_utils.merge_obj_ongoing_session import (
-    merge_obj_to_ongoing_session)
+from db_postgres.postgres_queries.qry_find_create_dataset import (
+    find_create_dataset_qry)
+from db_postgres.postgres_queries.qry_get_last_dataset_name_and_dir import (
+    get_last_dataset_name_and_dir_qry)
+from db_postgres.postgres_queries.qry_save_new_model_data import (
+    save_new_model_data_qry)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
     redis_save_key_mapping_dict)
 from fast_api.app_account_data.scheme_account_data import (
@@ -32,6 +37,10 @@ from fast_api.app_bert_save_model.scheme_bert_save_model import (
     SaveModelAfterTrainBert, SaveModelDataBert)
 from utils_common.normalized_path import (
     get_full_dir_normal_path, get_full_file_normal_path)
+from utils_specific.get_initial_dataset_dir_path import (
+    get_initial_dataset_dir_path)
+from utils_specific.get_last_saved_dataset_path import (
+    get_last_saved_dataset_dir_path)
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_save_model = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -48,25 +57,56 @@ async def bert_save_model(
         save_model_after_train_data: SaveModelAfterTrainBert,
         bert_model_inst: Annotated[
             ClassifierBERT, Depends(get_bert_model_instance_dep)],
-        dataset_name: str = None,
+        # dataset_name: str = None,
 ) -> JSONResponse:
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
+    log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
-    print("\nGetting or creating customer record and customer id:")
-    account_username = account_data.account_username
-    account_id = account_data.account_id
-
+    print("Postgres DB Getting last saved dataset directory and dataset name:")
     pgs_conn = PostgresConnection()
-    async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
-        customer_id = await find_create_customer_qry(
-            ongoing_session=pgs_session,
-            account_username=account_username,
-            account_id=account_id)
+    async with PostgresSession(async_engine=pgs_conn.engine,
+                               log_good_ops=log_pgs_good_ops
+                               ) as pgs_session:
+        pgs_last_dataset_data = await get_last_dataset_name_and_dir_qry(
+            ongoing_session=pgs_session)
 
-    print("\nBERT saving model without train or after train process:")
+    if pgs_last_dataset_data:
+        train_dataset_dir = pgs_last_dataset_data[1]
+        dataset_name = pgs_last_dataset_data[0]
+    else:
+        print("Getting csv last saved dataset directory and dataset name:")
+        inst_last_saved_dataset_path = bert_model_inst.last_saved_dataset_dir
+        last_saved_dataset_dir_path, initial_dataset_dir_path = None, None
+        if inst_last_saved_dataset_path:
+            train_dataset_dir = inst_last_saved_dataset_path
+        else:
+            last_saved_dataset_dir_path = get_last_saved_dataset_dir_path()
+            if last_saved_dataset_dir_path:
+                train_dataset_dir = last_saved_dataset_dir_path
+            else:
+                initial_dataset_dir_path = get_initial_dataset_dir_path()
+                if initial_dataset_dir_path:
+                    train_dataset_dir = initial_dataset_dir_path
+                else:
+                    train_dataset_dir = ""
+        if not train_dataset_dir:
+            log_text = (
+                f"BERT Train dataset directory or files not found [ERROR]:\n"
+                f"inst_last_saved_dataset_path: {inst_last_saved_dataset_path}\n"
+                f"last_saved_dataset_dir_path: {last_saved_dataset_dir_path}\n"
+                f"initial_dataset_dir_path: {initial_dataset_dir_path}\n"
+                f"train_dataset_dir: {train_dataset_dir}\n")
+            print(log_text)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail=log_text)
+
+        dataset_path_dirs = train_dataset_dir.split(os.sep)
+        dataset_name = dataset_path_dirs[-1]  # As dataset files directory name
+
+    print("BERT saving model without train or after train process:")
     save_after_train_flag = save_model_after_train_data.trained_model_redirected_save_flag
     try:
         if save_after_train_flag:
@@ -110,6 +150,7 @@ async def bert_save_model(
         print(log_text)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=log_text)
+
     try:
         datetime_start = datetime.now()
         error_log = bert_model_inst.save_model(
@@ -126,33 +167,44 @@ async def bert_save_model(
         last_saved_model_ini_fpath = get_full_file_normal_path(
             all_dir_str_parts=[BASE_DIR],
             file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_MODEL_INI_FILE_PATH)
-
         last_saved_model_ini_fdir = os.path.dirname(
             last_saved_model_ini_fpath)
         os.makedirs(name=last_saved_model_ini_fdir, exist_ok=True)
-
         with open(file=last_saved_model_ini_fpath,
                   mode="w", encoding="utf-8") as model_ini_file:
             model_ini_file.write(model_save_path)
 
-        print("\nDB Postgres saving trained_model table data:")
-        if save_after_train_flag:
-            pgs_status = "trained+saved"
-        else:
-            pgs_status = "saved"
-
+        print("Postgres DB Saving trained model data:")
         pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
-            new_trained_model_obj = TrainedBertModel()
-            trained_model_upd_data = {
-                "customer_id": customer_id,
-                "model_directory": model_save_path,
-                "dataset_name": dataset_name,
-                "status": pgs_status}
-            await merge_obj_to_ongoing_session(
+        async with PostgresSession(async_engine=pgs_conn.engine,
+                                   log_good_ops=log_pgs_good_ops
+                                   ) as pgs_session:
+            if save_after_train_flag:
+                creation_reason = f"trained and saved: {dataset_name}"
+            else:
+                creation_reason = "saved without training"
+
+            customer_id = await find_create_customer_qry(
                 ongoing_session=pgs_session,
-                object_to_merge=new_trained_model_obj,
-                new_update_data=trained_model_upd_data)
+                account_username=account_data.account_username,
+                account_id=account_data.account_id)
+
+            dataset_id = await find_create_dataset_qry(
+                ongoing_session=pgs_session,
+                dataset_name=dataset_name,
+                customer_id=customer_id,
+                dataset_csv_dir=train_dataset_dir,
+                creation_reason=creation_reason)
+
+            trained_model_upd_data = {
+                "dataset_id": dataset_id,
+                "dataset_name": dataset_name,
+                "model_directory": model_save_path,
+                "creation_reason": creation_reason}
+            await save_new_model_data_qry(
+                ModelClassORM=TrainedBertModel,
+                ongoing_session=pgs_session,
+                new_data=trained_model_upd_data)
 
         model_saving_time = (datetime.now() - datetime_start).total_seconds()
         model_saving_time = round(model_saving_time, 1)

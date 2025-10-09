@@ -2,9 +2,11 @@ from datetime import datetime, timedelta
 
 from torch.utils.data import TensorDataset
 
+from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
-    REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, STATUSES)
+    REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, STATUSES,
+    BERT_TRAIN_OPTIONS)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
     redis_save_key_mapping_dict)
 from fast_api.app_account_data.scheme_account_data import (
@@ -25,10 +27,11 @@ async def background_train_save_model(
         new_train_dataset: TensorDataset,
         dataset_name: str,
         train_text_lab_csv_path: str,
-        creating_dataset_time: float
+        creating_dataset_time: float,
+        bert_model_inst: ClassifierBERT
 ) -> None:
     print("#" * 65)
-    print("\nBERT model background training start:")
+    print("BERT model background training start:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
 
     redis_update = {
@@ -42,22 +45,21 @@ async def background_train_save_model(
         print(redis_error)
 
     datetime_start = datetime.now()
-    # print("\n\n***********************************************************")
-    # print("****** MODEL TRAINING TEMPORARY SWITCHED OFF (start) ******")
-    # await asyncio.sleep(60)
-    # time.sleep(60)
-    # print("\n\n******* MODEL TRAINING TEMPORARY SWITCHED OFF (end) *******")
+    if BERT_TRAIN_OPTIONS.BERT_TEMPORARY_SKIP_TRAINING:
+        print("**** MODEL TRAINING TEMPORARY SWITCHED OFF (start) ****")
+        # await asyncio.sleep(60)
+        # time.sleep(60)
+        print("***** MODEL TRAINING TEMPORARY SWITCHED OFF (end) *****")
+    else:
+        print("********* MODEL TRAINING SWITCHED ON (start) **********")
+        await bert_model_inst.train(
+            train_dataset=new_train_dataset,
+            max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
+            max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
+            batch_size=BERT_TRAIN_OPTIONS.BERT_TRAIN_BATCH_SUZE,
+            learning_rate=BERT_TRAIN_OPTIONS.BERT_TRAIN_LEARNING_RATE)
+        print("********** MODEL TRAINING SWITCHED ON (end) ***********")
 
-    print("***********************************************************")
-    print("********* MODEL TRAINING SWITCHED ON (start) **************")
-    # await bert_model_inst.train(
-    #     train_dataset=new_train_dataset,
-    #     max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
-    #     max_cont_100perc_epochs=BERT_TRAIN_OPTIONS.CONTINUOUS_100PERC_EPOCHS,
-    #     batch_size=BERT_TRAIN_OPTIONS.BERT_TRAIN_BATCH_SUZE,
-    #     learning_rate=BERT_TRAIN_OPTIONS.BERT_TRAIN_LEARNING_RATE)
-    print("********** MODEL TRAINING SWITCHED ON (end) ***************")
-    print("***********************************************************")
     training_time = (datetime.now() - datetime_start).total_seconds()
     hours, remainder = [int(el) for el in divmod(training_time, 3600)]
     minutes, seconds = [int(el) for el in divmod(remainder, 60)]
@@ -91,7 +93,7 @@ async def background_train_save_model(
           f"training_time_str: {blue_color}{training_time_str}{reset_color}\n")
 
     if train_model_data.save_model_after_train:
-        print("\nBERT background saving model after train start:")
+        print("BERT background saving model after train start:")
         redis_update = {
             "train_status": STATUSES.STATUS_TRAINED_MODEL_SAVE_START_EN,
             "train_step_9_saving_model_after_training_started": "[OK]", }
@@ -104,26 +106,27 @@ async def background_train_save_model(
 
         trained_model_save_dir_path = train_model_data.trained_model_save_dir_path
 
-        # Preparing main Pydantic data for bert_save_model router view
+        print("Preparing main Pydantic data for bert_save_model router view")
         save_model_data_bert = SaveModelDataBert(
             model_save_dir_path=trained_model_save_dir_path)
 
-        # Preparing extra Pydantic data for bert_save_model router view
+        print("Preparing extra Pydantic data for bert_save_model router view")
         save_model_after_train_bert = SaveModelAfterTrainBert(
             trained_model_redirected_save_flag=True,
             redirected_train_text_lab_csv_path=train_text_lab_csv_path,
             redirected_creating_dataset_time=creating_dataset_time,
             redirected_training_time=training_time_str)
 
-        # Redirecting to bert_save_model router view with necessary params
+        print("Redirecting to bert_save_model router view with necessary params")
         await bert_save_model(
             auth_data=auth_data,
             account_data=account_data,
             save_model_data=save_model_data_bert,
             save_model_after_train_data=save_model_after_train_bert,
-            dataset_name=dataset_name, )
+            # dataset_name=dataset_name,
+            bert_model_inst=bert_model_inst)
 
-        print("\nBERT background saving model after train finished")
+        print("BERT background saving model after train finished")
         redis_update = {
             "train_status": STATUSES.STATUS_TRAIN_AND_SAVE_COMPLETE_EN,
             "train_step_12_saving_model_after_training_complete": "[OK]", }
@@ -134,7 +137,7 @@ async def background_train_save_model(
         if redis_error:
             print(redis_error)
     else:
-        print("\nBERT background training model without saving completed:")
+        print("BERT background training model without saving completed:")
         redis_update = {
             "train_status": STATUSES.STATUS_TRAIN_WITHOUT_SAVE_COMPLETE_EN,
             "train_complete_status": "complete",
