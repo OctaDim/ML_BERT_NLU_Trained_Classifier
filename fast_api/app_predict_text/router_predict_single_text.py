@@ -9,8 +9,15 @@ from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_MODEL_NAMES, BERT_OPTIONS)
+from db_postgres.postgres_async_conn.pgs_async_connection import (
+    PostgresConnection)
+from db_postgres.postgres_async_conn.postgres_async_session import (
+    PostgresSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
+from db_postgres.postgres_queries.qry_get_direct_category import (
+    get_direct_category_by_text)
+from fast_api.app_account_data.scheme_account_data import AccountDataBert
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_predict_text.schemes_predict import PredictDataBert
@@ -28,6 +35,7 @@ router_bert_predict_single_text = APIRouter(prefix=f"/{bert_base_url_name}",
                                       response_model=None)
 async def bert_predict_single_text(
         auth_data: AuthDataBert,
+        account_data: AccountDataBert,
         predict_data: PredictDataBert,
         bert_model_inst: Annotated[
             ClassifierBERT, Depends(get_bert_model_instance_dep)]
@@ -44,12 +52,24 @@ async def bert_predict_single_text(
                             detail=log_text)
 
     try:
-        print("\nPrediction single text:")
+        print("Prediction single text:")
         datetime_start = datetime.now()
-        predicted_category = bert_model_inst.predict(text_phrase)
-        # prepared_sync_func = partial(bert_model_inst.predict,
-        #                              text=text_phrase)
-        # predicted_category = await asyncio.to_thread(prepared_sync_func)  # Exec prepared func
+
+        print("Postgres DB Check direct category prediction availability:")
+        pgs_conn = PostgresConnection()
+        async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+            pgs_direct_category = await get_direct_category_by_text(
+                ongoing_session=pgs_session,
+                account_id=account_data.account_id,
+                account_username=account_data.account_username,
+                direct_text=text_phrase)
+
+        if pgs_direct_category:
+            predicted_category = pgs_direct_category
+        else:
+            predicted_category = bert_model_inst.predict(text_phrase)
+            # prepared_sync_func = partial(bert_model_inst.predict, text=text_phrase)
+            # predicted_category = await asyncio.to_thread(prepared_sync_func)  # Exec prepared func
         prediction_time = (datetime.now() - datetime_start).total_seconds()
         prediction_time = round(prediction_time, 1)
 
