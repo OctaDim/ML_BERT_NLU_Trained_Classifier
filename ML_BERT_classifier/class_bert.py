@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timedelta
+from os import PathLike
 from typing import Dict, List, Literal, Union
 
 import torch
@@ -112,8 +113,8 @@ class ClassifierBERT:
         "tf" returns TensorFlow tensors, "np" returns NumPy arrays,
         None returns lists"""
 
-        print(f"####### texts_list: {texts_list[:25]},..........\n"
-              f"####### labels_list: {labels_list[:25]},..........\n"
+        print(f"####### texts_list: {texts_list[:5]}.......\n"
+              f"####### labels_list: {labels_list}\n"
               f"####### truncation: {truncation}\n"
               f"####### padding: {padding}\n"
               f"####### return_tensors: {return_tensors}\n")
@@ -280,7 +281,9 @@ class ClassifierBERT:
                 return
         return
 
-    def save_model(self, dir_full_path: str) -> None | str:
+    def save_model(self,
+                   dir_full_path: str | Literal[""] | PathLike | bytes
+                   ) -> None | str:
         """Save model and tokeniser"""
 
         if not dir_full_path:
