@@ -4,11 +4,11 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
-from db_postgres.postgres_models.active_create_upd_mixins import (
-    ActiveMixin, CreateUpdateMixin)
+from db_postgres.postgres_models.orm_models_fields_mixins import (
+    ActiveMix, CreateUpdateMix)
 
 
-class CustomerModel(Base, ActiveMixin, CreateUpdateMixin):
+class CustomerModel(Base, ActiveMix, CreateUpdateMix):
     __tablename__ = "customer"
     __table_args__ = (
         UniqueConstraint("account_username", "account_id",

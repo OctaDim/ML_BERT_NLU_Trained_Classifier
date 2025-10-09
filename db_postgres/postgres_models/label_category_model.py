@@ -4,11 +4,11 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
-from db_postgres.postgres_models.active_create_upd_mixins import (
-    ActiveMixin, CreateUpdateMixin)
+from db_postgres.postgres_models.orm_models_fields_mixins import (
+    ActiveMix, CreateUpdateMix, CreateReasonMix)
 
 
-class LabelCategoryModel(Base, ActiveMixin, CreateUpdateMixin):
+class LabelCategoryModel(Base, CreateReasonMix, ActiveMix, CreateUpdateMix):
     __tablename__ = "label_category"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -16,7 +16,6 @@ class LabelCategoryModel(Base, ActiveMixin, CreateUpdateMixin):
 
     label_index: Mapped[int] = mapped_column(unique=True)
     category_name: Mapped[str] = mapped_column(unique=True)
-    creation_reason: Mapped[Optional[str]] = mapped_column()
 
     # rel_labels_texts: Mapped[List["LabelTextModel"]] = relationship(
     #     argument="LabelTextModel",

@@ -4,19 +4,17 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
-from db_postgres.postgres_models.active_create_upd_mixins import (
-    ActiveMixin, CreateUpdateMixin, StatusMixin)
+from db_postgres.postgres_models.orm_models_fields_mixins import (
+    ActiveMix, CreateUpdateMix, StatusMix, CreateReasonMix)
 
 
-class TrainedBertModel(Base, ActiveMixin, CreateUpdateMixin, StatusMixin):
+class TrainedBertModel(Base, CreateReasonMix, ActiveMix, CreateUpdateMix):
     __tablename__ = "trained_model"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     dataset_id: Mapped[Optional[int]] = mapped_column(ForeignKey("dataset.id"))
-
+    dataset_name: Mapped[Optional[str]] = mapped_column()
     model_directory: Mapped[str] = mapped_column()
-    creation_reason: Mapped[Optional[str]] = mapped_column()
-    # dataset_name: Mapped[Optional[str]] = mapped_column()
 
     # category_services: Mapped['Service'] = relationship(
     #     argument='Service',

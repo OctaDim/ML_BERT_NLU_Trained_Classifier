@@ -4,11 +4,11 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
-from db_postgres.postgres_models.active_create_upd_mixins import (
-    ActiveMixin, CreateUpdateMixin)
+from db_postgres.postgres_models.orm_models_fields_mixins import (
+    ActiveMix, CreateUpdateMix, CreateReasonMix)
 
 
-class DatasetModel(Base, ActiveMixin, CreateUpdateMixin):
+class DatasetModel(Base, CreateReasonMix, ActiveMix, CreateUpdateMix):
     __tablename__ = "dataset"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -16,7 +16,6 @@ class DatasetModel(Base, ActiveMixin, CreateUpdateMixin):
     customer_id: Mapped[Optional[int]] = mapped_column(ForeignKey("customer.id"))
     dataset_name: Mapped[str] = mapped_column(unique=True)
     dataset_csv_dir: Mapped[Optional[str]] = mapped_column(unique=True)
-    creation_reason: Mapped[Optional[str]] = mapped_column()
 
     # category_services: Mapped['Service'] = relationship(
     #     argument='Service',
