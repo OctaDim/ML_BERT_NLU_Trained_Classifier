@@ -1,8 +1,10 @@
 from typing import Union, Optional, Tuple, Type, Any, Sequence, List
 
+from fastapi import HTTPException
 from sqlalchemy import select, UnaryExpression, Row, RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
+from starlette import status
 
 from configs.settings import ALCHEMY_OPTIONS
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
@@ -89,13 +91,12 @@ async def get_model_rows_flex_query(
             orm_model_rows = result.all()
         return orm_model_rows
     except Exception as error:
-        log_text = (f"Getting orm model rows with flex query [ERROR]: \n"
+        error_log = (f"Getting orm model rows with flex query [ERROR]: \n"
                     f"error: {error} \n"
                     f"orm_model_class: {orm_model_class} \n"
                     f"fields_values_filter: {fields_values_filter} \n"
                     f"order_by_fields: {order_by_fields} \n")
-        print(log_text)
-        raise
-        # raise HTTPException(
-        #     status_code=status.HTTP_401_UNAUTHORIZED,
-        #     detail=log_text)
+        print(error_log)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=error_log)
