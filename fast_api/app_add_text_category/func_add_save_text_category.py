@@ -563,12 +563,7 @@ async def add_save_single_text_category(
                         "account_id": account_data.account_id,
                         "account_username": account_data.account_username,
                         "direct_category": update_category,
-                        "direct_text": update_text,
-                        "creation_reason": creation_reason}
-                    # await save_new_model_data_qry(
-                    #     ModelClassORM=DirectPredictModel,
-                    #     ongoing_session=pgs_session,
-                    #     new_data=direct_predict_new_data)
+                        "direct_text": update_text}
                     direct_predict_dicts_list = [direct_predict_new_data, ]
                     await save_direct_cat_text_list_qry(
                         ongoing_session=pgs_session,

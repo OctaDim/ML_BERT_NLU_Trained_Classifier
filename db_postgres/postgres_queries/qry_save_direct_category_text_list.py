@@ -1,3 +1,4 @@
+import copy
 from typing import Dict, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,14 +19,18 @@ async def save_direct_cat_text_list_qry(
 ) -> None:
     account_id, account_username = None, None
     direct_cat_text_update_list = None
+
     try:
         if save_only_unique:
             old_direct_cat_text_list = await get_direct_cat_text_dicts_list_qry(
                 ongoing_session=ongoing_session)
+            ext_direct_cat_text_list = copy.copy(old_direct_cat_text_list)
             unique_direct_cat_text_list = []
             for cur_cat_text_dict in direct_cat_text_dicts_list:
-                if not cur_cat_text_dict in old_direct_cat_text_list:
+                cur_cat_text_dict["creation_reason"] = creation_reason
+                if not cur_cat_text_dict in ext_direct_cat_text_list:
                     unique_direct_cat_text_list.append(cur_cat_text_dict)
+                    ext_direct_cat_text_list.append(cur_cat_text_dict)
             direct_cat_text_update_list = unique_direct_cat_text_list
         else:
             direct_cat_text_update_list = direct_cat_text_dicts_list

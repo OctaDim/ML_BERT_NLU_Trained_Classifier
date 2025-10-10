@@ -25,14 +25,12 @@ async def get_direct_cat_text_dicts_list_qry(
 
     pgs_direct_cat_text_dicts_list = []
     for cur_record in pgs_direct_cat_text_objs:
-        account_id = cur_record.account_id
-        account_username = cur_record.account_username
-        direct_category = cur_record.direct_category
-        direct_text = cur_record.direct_text
-        cur_direct_cat_text_dict = {"account_id": account_id,
-                                    "account_username": account_username,
-                                    "direct_category": direct_category,
-                                    "direct_text": direct_text}
+        cur_direct_cat_text_dict = {
+            "account_id": cur_record.account_id,
+            "account_username": cur_record.account_username,
+            "direct_category": cur_record.direct_category,
+            "direct_text": cur_record.direct_text,
+            "creation_reason": cur_record.creation_reason}
         pgs_direct_cat_text_dicts_list.append(cur_direct_cat_text_dict)
     return pgs_direct_cat_text_dicts_list
 
