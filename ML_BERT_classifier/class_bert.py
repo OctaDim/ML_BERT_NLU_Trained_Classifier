@@ -304,10 +304,8 @@ class ClassifierBERT:
 
     def load_model(self, dir_full_path: str = None) -> str | None:
         """Load model and tokeniser saved earlier"""
-        if dir_full_path:
-            model_path = dir_full_path
-        else:
-            model_path = self.last_saved_model_dir
+
+        model_path = dir_full_path
 
         if not model_path:
             error_log = (f"Model load dir path not defined [ERROR]: "

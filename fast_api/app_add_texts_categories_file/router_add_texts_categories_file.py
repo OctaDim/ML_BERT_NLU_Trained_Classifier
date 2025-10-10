@@ -132,6 +132,8 @@ async def bert_add_text_category_file(
         dataset_ini_file_path = new_csv_files_data.get("last_saved_dataset_ini_fpath")
         empty_error_skipped_rows = new_csv_files_data.get("empty_error_skipped_rows")
         new_categories_list = new_csv_files_data.get("new_categories_list")
+        new_texts_list = new_csv_files_data.get("new_texts_list")
+        result_list = new_csv_files_data.get("result_list")
 
         json_content = {
             "message": "BERT text-category csv added [OK]",
@@ -143,7 +145,9 @@ async def bert_add_text_category_file(
             "adding time": adding_time,
             "update data list": update_data_list,
             "empty error skipped rows": empty_error_skipped_rows,
-            "new categories": new_categories_list}
+            "new categories": new_categories_list,
+            "new_texts_list": new_texts_list,
+            "result_list": result_list}
 
         json_response = JSONResponse(
             content=json_content,
@@ -160,9 +164,11 @@ async def bert_add_text_category_file(
               f"new_lab_cat_csv_path: {new_lab_cat_csv_path}\n"
               f"new_text_lab_csv_path: {new_text_lab_csv_path}\n"
               f"dataset_ini_file_path: {dataset_ini_file_path}\n"
-              f"update_data_list: {blue_color}{update_data_list}{reset_color}\n"
+              f"update_data_list: {blue_color}{update_data_list[:2]}.....{reset_color}\n"
               f"empty_error_skipped_rows: {yellow_color}{empty_error_skipped_rows}{reset_color}\n"
-              f"new_categories_list: {blue_color}{new_categories_list}{reset_color}\n")
+              f"new_categories_list: {blue_color}{new_categories_list}{reset_color}\n"
+              f"new_texts_list: {blue_color}{new_texts_list[:2]}.....{reset_color}\n"
+              f"result_list: {blue_color}{result_list[:2]}.....{reset_color}\n")
         return json_response
     except Exception as error:
         log_text = f"BERT router [ERROR]: error: {error}"

@@ -331,14 +331,16 @@ async def add_save_single_text_category(
                 direct_cat_text_csv_path = prev_direct_cat_text_csv_path  # Return info
 
             if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
-                creation_reason = (f"category-text pair added: "
-                                   f"{update_category} - "
-                                   f"{update_text[:15]}")
                 print("Postgres DB Single saving label-category data in data base:")
                 pgs_conn = PostgresConnection()
                 async with PostgresSession(async_engine=pgs_conn.engine,
                                            log_good_ops=log_pgs_good_ops
                                            ) as pgs_session:
+                    creation_reason = (
+                        f"category-text added: "
+                        f"{update_category} - {update_text[:15]}, "
+                        f"new dataset: {new_dataset_name}")
+
                     customer_id = await find_create_customer_qry(
                         ongoing_session=pgs_session,
                         account_username=account_data.account_username,
@@ -443,9 +445,10 @@ async def add_save_single_text_category(
                 async with PostgresSession(async_engine=pgs_conn.engine,
                                            log_good_ops=log_pgs_good_ops
                                            ) as pgs_session:
-                    creation_reason = (f"category and text pair added: "
-                                       f"{update_category} - "
-                                       f"{update_text[:15]}")
+                    creation_reason = (
+                        f"category-text added: "
+                        f"{update_category} - {update_text[:15]}, "
+                        f"new dataset: {new_dataset_name}")
 
                     customer_id = await find_create_customer_qry(
                         ongoing_session=pgs_session,
@@ -543,9 +546,10 @@ async def add_save_single_text_category(
                 async with PostgresSession(async_engine=pgs_conn.engine,
                                            log_good_ops=log_pgs_good_ops
                                            ) as pgs_session:
-                    creation_reason = (f"category-text pair added: "
-                                       f"{update_category} - "
-                                       f"{update_text[:15]}")
+                    creation_reason = (
+                        f"category-text added: "
+                        f"{update_category} - {update_text[:15]}, "
+                        f"new dataset: {new_dataset_name}")
 
                     customer_id = await find_create_customer_qry(
                         ongoing_session=pgs_session,

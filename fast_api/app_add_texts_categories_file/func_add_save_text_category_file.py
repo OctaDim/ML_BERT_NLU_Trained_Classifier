@@ -422,13 +422,14 @@ async def add_save_multi_text_category_file(
                     "direct_category": direct_category,
                     "direct_text": direct_text}
                 upd_direct_text_cat_dicts_list.append(cur_direct_cat_text_dict)
-            print(f"upd_direct_text_cat_dicts_list: {upd_direct_text_cat_dicts_list}")  # Too long
+            print(f"upd_direct_text_cat_dicts_list: {upd_direct_text_cat_dicts_list[:2]}")  # Too long
 
             pgs_conn = PostgresConnection()
             async with PostgresSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
-                creation_reason = f"uploaded dataset file: {file_name}"
+                creation_reason = (f"uploaded file: {file_name}, "
+                                   f"new dataset: {new_dataset_name}")
 
                 dataset_id = await find_create_dataset_qry(
                     ongoing_session=pgs_session,
@@ -459,17 +460,17 @@ async def add_save_multi_text_category_file(
                     creation_reason=creation_reason,
                     save_only_unique=True)
                 print(f"Postgres DB direct categories-texts saved [OK]")
-                print(f"upd_direct_text_cat_dicts_list: {upd_direct_text_cat_dicts_list}")  # Too long
+                print(f"upd_direct_text_cat_dicts_list: {upd_direct_text_cat_dicts_list[:2]}")  # Too long
 
             print(f"new_categories_list: {new_categories_list}")
-            print(f"new_texts_list: {new_texts_list}\n")
-            print(f"result_list: {result_list}\n")
+            print(f"new_texts_list: {new_texts_list[:2]}.....\n")
+            print(f"result_list: {result_list[:2]}.....\n")
             print(f"update_lab_cat_list: {update_lab_cat_list}")
-            print(f"update_text_lab_list: {update_text_lab_list}")
+            print(f"update_text_lab_list: {update_text_lab_list[:2]}.....")
             print(f"update_direct_text_cat_list: {update_direct_text_cat_list}\n")
             print(f"upd_lab_cat_dict: {upd_lab_cat_dict}")
-            print(f"upd_lab_text_dicts_list: {upd_lab_text_dicts_list}")
-            print(f"upd_direct_text_cat_dicts_list: {upd_direct_text_cat_dicts_list}\n")
+            print(f"upd_lab_text_dicts_list: {upd_lab_text_dicts_list[:2]}.....")
+            print(f"upd_direct_text_cat_dicts_list: {upd_direct_text_cat_dicts_list[:2]}.....\n")
 
         new_csv_files_data = {
             "lab_cat_csv_path": lab_cat_csv_path,
