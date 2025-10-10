@@ -100,8 +100,9 @@ async def bert_save_model(
                 f"initial_dataset_dir_path: {initial_dataset_dir_path}\n"
                 f"train_dataset_dir: {train_dataset_dir}\n")
             print(log_text)
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                detail=log_text)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=log_text)
 
         dataset_path_dirs = train_dataset_dir.split(os.sep)
         dataset_name = dataset_path_dirs[-1]  # As dataset files directory name
@@ -123,6 +124,7 @@ async def bert_save_model(
         if save_model_data.model_save_dir_path:
             model_save_path = save_model_data.model_save_dir_path
         else:
+            print("Creating new dir path to save trained or saved model:")
             datetime_str = datetime.now().strftime("%d_%m_%Y_%H_%M_%S_%f")
             random_str = str(random.randint(10000, 99999))
             prefix = BERT_OPTIONS.BERT_TRAINED_MODELS_SAVE_DIR_PREFIX
@@ -130,7 +132,7 @@ async def bert_save_model(
             model_save_path = get_full_dir_normal_path(
                 [BASE_DIR, BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH, new_dir_name])
     except Exception as error:
-        log_text = (f"Creating new trained models save dir path [ERROR]: "
+        log_text = (f"Creating new trained model save dir path [ERROR]: "
                     f"error: {error}\n"
                     f"save_model_data.model_save_dir_path: "
                     f"{save_model_data.model_save_dir_path},"
@@ -158,7 +160,6 @@ async def bert_save_model(
         # TODO: Make saving learning dataset into the saved model dir also
         #  to have opportunity to load model and to load corresponding
         #  dataset for the model
-
         if error_log:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -173,6 +174,9 @@ async def bert_save_model(
         with open(file=last_saved_model_ini_fpath,
                   mode="w", encoding="utf-8") as model_ini_file:
             model_ini_file.write(model_save_path)
+
+        # Double attribute assigning in bert_model_inst.save_model()
+        bert_model_inst.last_saved_model_dir = model_save_path
 
         print("Postgres DB Saving trained model data:")
         pgs_conn = PostgresConnection()
