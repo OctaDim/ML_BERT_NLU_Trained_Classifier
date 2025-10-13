@@ -12,7 +12,8 @@ from db_postgres.postgres_queries_utils.model_object_attrs_update import (
 async def find_create_customer_qry(
         ongoing_session: AsyncSession,
         account_username: str,
-        account_id: str
+        account_id: str,
+        creation_reason: str = None
 ) -> int | None:
     if not account_username or not account_id:
         return None
@@ -33,7 +34,8 @@ async def find_create_customer_qry(
 
         new_customer_obj = CustomerModel()
         customer_new_data = {"account_username": account_username,
-                             "account_id": account_id}
+                             "account_id": account_id,
+                             "creation_reason": creation_reason}
         update_model_obj_no_commit(orm_model_object=new_customer_obj,
                                    new_update_data=customer_new_data)
         ongoing_session.add(new_customer_obj)
