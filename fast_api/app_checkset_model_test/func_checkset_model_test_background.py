@@ -6,14 +6,24 @@ from typing import List, Tuple
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
-    REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, STATUSES)
+    REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, STATUSES,
+    ALCHEMY_OPTIONS)
+from db_postgres.postgres_async_conn.pgs_async_connection import (
+    PostgresConnection)
+from db_postgres.postgres_async_conn.postgres_async_session import (
+    PostgresSession)
+from db_postgres.postgres_queries.qry_get_direct_category import (
+    get_direct_category_by_text)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
     redis_save_key_mapping_dict)
+from fast_api.app_account_data.scheme_account_data import (
+    AccountDataBert)
 from fast_api.app_auth.scheme_auth import AuthDataBert
 
 
 async def background_checkset_test_model(
         auth_data: AuthDataBert,
+        account_data: AccountDataBert,
         checkset_data_list: List[Tuple[str, str]],
         checkset_file_name: str,
         bert_model_inst: ClassifierBERT,
@@ -24,6 +34,7 @@ async def background_checkset_test_model(
     print("@" * 65)
     print("\nBERT background checkset model test start:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.CHECKSET_TESTS_EXPIRY_DAYS)
+    log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
     redis_update = {
         "checkset_status": STATUSES.STATUS_CHECKSET_TEST_PROCESS_EN,
@@ -48,10 +59,25 @@ async def background_checkset_test_model(
     right_categories_counter = 0
     step_counter = 1
     for cur_test_text, cur_test_category in checkset_data_list:
-        predicted_category = bert_model_inst.predict(cur_test_text)
+        pgs_conn = PostgresConnection()
+        async with PostgresSession(async_engine=pgs_conn.engine,
+                                   log_good_ops=log_pgs_good_ops
+                                   ) as pgs_session:
+            direct_predicted_category = await get_direct_category_by_text(
+                ongoing_session= pgs_session,
+                account_id=account_data.account_id,
+                account_username=account_data.account_username,
+                direct_text=cur_test_text)
+
+        if direct_predicted_category:
+            predicted_category = direct_predicted_category
+        else:
+            predicted_category = bert_model_inst.predict(cur_test_text)
+
         cur_result_dict = {"checkset_text": cur_test_text,
                            "checkset_category": cur_test_category,
                            "predicted_category": predicted_category}
+
         if predicted_category == cur_test_category:
             cur_result_dict["checkset_result"] = "OK"
             result_str = f"{green_color}[OK]{reset_color}"
