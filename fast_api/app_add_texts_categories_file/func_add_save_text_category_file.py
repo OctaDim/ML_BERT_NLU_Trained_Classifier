@@ -16,6 +16,7 @@ from db_postgres.postgres_async_conn.postgres_async_session import (
     PostgresSession)
 from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
     cache_unique_lab_cat_dict_qry)
+from db_postgres.postgres_queries.qry_find_create_customer import find_create_customer_qry
 from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
 from db_postgres.postgres_queries.qry_save_direct_category_text_list import (
@@ -431,9 +432,16 @@ async def add_save_multi_text_category_file(
                 creation_reason = (f"uploaded file: {file_name}, "
                                    f"new dataset: {new_dataset_name}")
 
+                customer_id = await find_create_customer_qry(
+                    ongoing_session=pgs_session,
+                    account_username=account_data.account_username,
+                    account_id=account_data.account_id,
+                    creation_reason=creation_reason)
+
                 dataset_id = await find_create_dataset_qry(
                     ongoing_session=pgs_session,
                     dataset_name=new_dataset_name,
+                    customer_id=customer_id,
                     dataset_csv_dir=new_dataset_dir_path,
                     creation_reason=creation_reason)
 
