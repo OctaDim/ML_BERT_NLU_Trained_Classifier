@@ -17,6 +17,7 @@ from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
     redis_save_key_mapping_dict)
+from fast_api.app_account_data.scheme_account_data import AccountDataBert
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_checkset_model_test.func_checkset_model_test_background import (
@@ -39,9 +40,11 @@ async def bert_start_checkset_model_test(
         upload_file: Annotated[UploadFile, File(description="file .xls, .xlsx, or .txt")],
         username: Annotated[str, Form()],
         password: Annotated[str, Form()],
-        background_tasks: BackgroundTasks,  # FastAPI Class for background tasks
+        account_id: Annotated[str, Form()],
+        account_username: Annotated[str, Form()],
         bert_model_inst: Annotated[
-            ClassifierBERT, Depends(get_bert_model_instance_dep)]
+            ClassifierBERT, Depends(get_bert_model_instance_dep)],
+        background_tasks: BackgroundTasks  # FastAPI Class for background tasks
 ) -> JSONResponse:
     verify_prod_username_password(username=username,
                                   password=password)
@@ -190,9 +193,13 @@ async def bert_start_checkset_model_test(
 
     try:
         print("####### BEFORE BACKGROUND CHECK-SET MODEL TEST")
-        auth_data = AuthDataBert(username=username, password=password)
+        auth_data = AuthDataBert(username=username,
+                                 password=password)
+        account_data = AccountDataBert(account_id=account_id,
+                                       account_username=account_username)
         background_tasks.add_task(background_checkset_test_model,
                                   auth_data,
+                                  account_data,
                                   checkset_data_list,
                                   checkset_file_name,
                                   bert_model_inst,
