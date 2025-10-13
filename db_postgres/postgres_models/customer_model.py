@@ -5,10 +5,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
 from db_postgres.postgres_models.orm_models_fields_mixins import (
-    ActiveMix, CreateUpdateMix)
+    ActiveMix, CreateUpdateMix, CreateReasonMix)
 
 
-class CustomerModel(Base, ActiveMix, CreateUpdateMix):
+class CustomerModel(Base, ActiveMix, CreateUpdateMix, CreateReasonMix):
     __tablename__ = "customer"
     __table_args__ = (
         UniqueConstraint("account_username", "account_id",
