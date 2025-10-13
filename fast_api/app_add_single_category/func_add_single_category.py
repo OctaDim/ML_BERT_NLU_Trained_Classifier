@@ -268,7 +268,8 @@ async def add_save_single_category(
                 customer_id = await find_create_customer_qry(
                     ongoing_session=pgs_session,
                     account_username=account_data.account_username,
-                    account_id=account_data.account_id)
+                    account_id=account_data.account_id,
+                    creation_reason=creation_reason)
 
                 dataset_id = await find_create_dataset_qry(
                     ongoing_session=pgs_session,
