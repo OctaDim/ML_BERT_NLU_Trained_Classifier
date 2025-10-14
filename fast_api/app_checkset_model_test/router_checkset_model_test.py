@@ -12,9 +12,16 @@ from fastapi.responses import JSONResponse
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
-    BERT_OPTIONS, REDIS_OPTIONS, STATUSES, BERT_MODEL_NAMES)
+    BERT_OPTIONS, REDIS_OPTIONS, STATUSES, BERT_MODEL_NAMES,
+    ALCHEMY_OPTIONS)
+from db_postgres.postgres_async_conn.pgs_async_connection import (
+    PostgresConnection)
+from db_postgres.postgres_async_conn.postgres_async_session import (
+    PostgresSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
+from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
+    get_last_saved_model_dir_qry)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
     redis_save_key_mapping_dict)
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
@@ -51,6 +58,7 @@ async def bert_start_checkset_model_test(
 
     print("\nBERT Model check-set start test:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.CHECKSET_TESTS_EXPIRY_DAYS)
+    log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
     print("\nBERT file extension and format verifying:")
     ALLOWED_FILE_MIME_TYPES = (
@@ -144,21 +152,35 @@ async def bert_start_checkset_model_test(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=log_text)
 
-    print("\nBERT Getting last saved model dir path and dir name:")
-    inst_last_saved_model_path = bert_model_inst.last_saved_model_dir
+    print("Postgres DB Getting last saved model directory path:")
+    pgs_conn = PostgresConnection()
+    async with PostgresSession(async_engine=pgs_conn.engine,
+                               log_good_ops=log_pgs_good_ops
+                               ) as pgs_session:
+        pgs_last_saved_model_dir = get_last_saved_model_dir_qry(
+            ongoing_session=pgs_session)
+
     last_saved_model_dir_path, initial_model_dir_path = None, None
-    if inst_last_saved_model_path:
-        checkset_model_dir_path = inst_last_saved_model_path
+    inst_last_saved_model_path = None
+    if pgs_last_saved_model_dir:
+        checkset_model_dir_path = pgs_last_saved_model_dir
     else:
-        last_saved_model_dir_path = get_last_saved_model_dir_path()
-        if last_saved_model_dir_path:
-            checkset_model_dir_path = last_saved_model_dir_path
+        print("\nBERT Getting last saved model dir path from instance:")
+        inst_last_saved_model_path = bert_model_inst.last_saved_model_dir
+        if inst_last_saved_model_path:
+            checkset_model_dir_path = inst_last_saved_model_path
         else:
-            initial_model_dir_path = get_initial_model_dir_path()
-            if initial_model_dir_path:
-                checkset_model_dir_path = initial_model_dir_path
+            print("\nBERT Getting last saved model dir path from csv file:")
+            last_saved_model_dir_path = get_last_saved_model_dir_path()
+            if last_saved_model_dir_path:
+                checkset_model_dir_path = last_saved_model_dir_path
             else:
-                checkset_model_dir_path = ""
+                initial_model_dir_path = get_initial_model_dir_path()
+                if initial_model_dir_path:
+                    checkset_model_dir_path = initial_model_dir_path
+                else:
+                    checkset_model_dir_path = ""
+
     if not checkset_model_dir_path:
         log_text = (f"BERT Checkset test model dir path not defined [ERROR]:\n"
                     f"inst_last_saved_model_path: {inst_last_saved_model_path}\n"
