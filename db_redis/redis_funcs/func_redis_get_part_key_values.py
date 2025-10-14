@@ -20,7 +20,7 @@ async def get_redis_values_by_pattern(
         redis_matched_keys = redis_conn.scan_iter(match=partial_pattern)
 
     async for cur_redis_key in redis_matched_keys:
-        redis_key_dict = await redis_conn.hgetall(cur_redis_key)
+        redis_key_dict = await redis_conn.hgetall(cur_redis_key)  # Always returns dict or {}, not None
         if get_dictionary:
             redis_values[cur_redis_key] = redis_key_dict
         else:

@@ -32,7 +32,7 @@ async def background_checkset_test_model(
     cur_func_name = inspect.currentframe().f_code.co_name
 
     print("@" * 65)
-    print("\nBERT background checkset model test start:")
+    print("BERT background checkset model test start:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.CHECKSET_TESTS_EXPIRY_DAYS)
     log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
@@ -133,4 +133,4 @@ async def background_checkset_test_model(
           f"checkset_file_name: {checkset_file_name}\n"
           f"checkset_redis_name: {checkset_redis_name}\n"
           f"testing_time_str: {testing_time_str}\n"
-          f"checkset_test_results: {blue_color}{checkset_test_results}{reset_color}")
+          f"checkset_test_results: {blue_color}{checkset_test_results[:2]}.....{reset_color}")  # Too long
