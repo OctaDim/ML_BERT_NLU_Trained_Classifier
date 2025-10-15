@@ -157,16 +157,15 @@ async def bert_start_checkset_model_test(
     async with PostgresSession(async_engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
-        pgs_last_saved_model_dir = get_last_saved_model_dir_qry(
+        pgs_last_saved_model_dir = await get_last_saved_model_dir_qry(
             ongoing_session=pgs_session)
 
-    last_saved_model_dir_path, initial_model_dir_path = None, None
-    inst_last_saved_model_path = None
     if pgs_last_saved_model_dir:
         checkset_model_dir_path = pgs_last_saved_model_dir
     else:
         print("\nBERT Getting last saved model dir path from instance:")
         inst_last_saved_model_path = bert_model_inst.last_saved_model_dir
+        last_saved_model_dir_path, initial_model_dir_path = None, None
         if inst_last_saved_model_path:
             checkset_model_dir_path = inst_last_saved_model_path
         else:
@@ -181,15 +180,15 @@ async def bert_start_checkset_model_test(
                 else:
                     checkset_model_dir_path = ""
 
-    if not checkset_model_dir_path:
-        log_text = (f"BERT Checkset test model dir path not defined [ERROR]:\n"
-                    f"inst_last_saved_model_path: {inst_last_saved_model_path}\n"
-                    f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
-                    f"initial_model_dir_path: {initial_model_dir_path}\n"
-                    f"checkset_model_dir_path: {checkset_model_dir_path}\n")
-        print(log_text)
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=log_text)
+        if not checkset_model_dir_path:
+            log_text = (f"BERT Checkset test model dir path not defined [ERROR]:\n"
+                        f"inst_last_saved_model_path: {inst_last_saved_model_path}\n"
+                        f"last_saved_model_dir_path: {last_saved_model_dir_path}\n"
+                        f"initial_model_dir_path: {initial_model_dir_path}\n"
+                        f"checkset_model_dir_path: {checkset_model_dir_path}\n")
+            print(log_text)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=log_text)
 
     if not os.path.isdir(checkset_model_dir_path):
         log_text = (f"BERT Checkset test model dir path not exists [ERROR]: "
