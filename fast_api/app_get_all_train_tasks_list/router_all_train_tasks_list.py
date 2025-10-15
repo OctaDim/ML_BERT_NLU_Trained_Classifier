@@ -28,9 +28,10 @@ async def bert_get_train_tasks_list(auth_data: AuthDataBert):
         redis_match_pattern = f"{BERT_OPTIONS.BERT_NEW_DATASET_CSV_DIR_PREFIX}*"  # * - ends with any symbols
         tasks_dicts_list = await get_redis_values_by_pattern(
             partial_pattern=redis_match_pattern)
-        tasks_sorted_list = sorted(tasks_dicts_list,
-                                   key=lambda s: s["dataset_name"],
-                                   reverse=True)
+        tasks_sorted_list = sorted(
+            tasks_dicts_list,
+            key=lambda tsk_dic: tsk_dic.get("dataset_name"),
+            reverse=True)
         getting_time = (datetime.now() - datetime_start).total_seconds()
         getting_time = round(getting_time, 1)
 
@@ -57,7 +58,7 @@ async def bert_get_train_tasks_list(auth_data: AuthDataBert):
               f"username: {auth_data.username}\n"
               f"getting_time: {getting_time}\n"
               f"type(tasks_sorted_list): {type(tasks_sorted_list)}\n"
-              f"tasks_sorted_list: {tasks_sorted_list_print[:3]},..........\n")
+              f"tasks_sorted_list: {tasks_sorted_list_print[:2]}.....\n")
         return json_response
     except Exception as error:
         log_text = (f"BERT router train model tasks list [ERROR]: "
