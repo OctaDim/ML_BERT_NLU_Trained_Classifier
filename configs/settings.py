@@ -207,8 +207,8 @@ class BERT_TRAIN_OPTIONS:
     str: "tf" - returns TensorFlow tensors
     str: "np" - returns NumPy arrays
     None - returns lists"""
-    BERT_TEMPORARY_SKIP_TRAINING = True
-    BERT_TRAIN_MAX_EPOCHS_NUMBER: int = 50
+    BERT_TEMPORARY_SKIP_TRAINING = False
+    BERT_TRAIN_MAX_EPOCHS_NUMBER: int = 100
     CONTINUOUS_100PERC_EPOCHS: int = 5
     BERT_TRAIN_BATCH_SUZE: int = 8
     BERT_TRAIN_LEARNING_RATE: int = 5e-5
