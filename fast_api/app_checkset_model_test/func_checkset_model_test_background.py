@@ -12,7 +12,7 @@ from db_postgres.postgres_async_conn.pgs_async_connection import (
     PostgresConnection)
 from db_postgres.postgres_async_conn.postgres_async_session import (
     PostgresSession)
-from db_postgres.postgres_queries.qry_get_direct_category import (
+from db_postgres.postgres_queries.qry_get_direct_category_by_text import (
     get_direct_category_by_text)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
     redis_save_key_mapping_dict)

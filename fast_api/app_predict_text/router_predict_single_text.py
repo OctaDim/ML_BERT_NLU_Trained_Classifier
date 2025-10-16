@@ -15,7 +15,7 @@ from db_postgres.postgres_async_conn.postgres_async_session import (
     PostgresSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
-from db_postgres.postgres_queries.qry_get_direct_category import (
+from db_postgres.postgres_queries.qry_get_direct_category_by_text import (
     get_direct_category_by_text)
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
