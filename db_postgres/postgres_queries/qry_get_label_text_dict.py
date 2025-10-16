@@ -12,7 +12,7 @@ from db_postgres.postgres_models.label_text_model import (
 async def get_label_text_dict_qry(
         ongoing_session: AsyncSession,
         reversed_text_label_dict: bool = False
-) -> Dict[int, str] | Dict[str, int]:
+) -> dict[int, str] | dict[str, int]:
     orm_query = (
         select(LabelCategoryModel.label_index,
                LabelTextModel.text)

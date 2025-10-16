@@ -11,7 +11,7 @@ from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
 async def get_label_category_dict_qry(
         ongoing_session: AsyncSession,
         reversed_category_label_dict: bool = False,
-) -> Dict[int, str] | Dict[str, int]:
+) -> dict[int, str] | dict[str, int]:
     pgs_lab_cat_objs = await get_model_rows_flex_query(
         orm_model_class=LabelCategoryModel,
         ongoing_session=ongoing_session,
