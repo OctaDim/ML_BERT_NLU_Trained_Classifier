@@ -57,7 +57,7 @@ async def bert_get_categories_list(
     log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
     try:
-        print("Getting predict and direct categories list:")
+        print("Getting predict and direct categories list by account data:")
         datetime_start = datetime.now()
 
         print("Postgres DB Getting predict and direct categories list:")
