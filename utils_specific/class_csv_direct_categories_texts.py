@@ -66,12 +66,12 @@ class CsvDirectCategoryText:
         sorted_direct_categories = sorted(unique_direct_categories)
         return sorted_direct_categories
 
-    def get_direct_categories_list_by_account(
+    def get_direct_categs_by_acc_list(
             self, account_id: str,
             account_username: str,
             titled: bool = False
     ) -> list[str]:
-        direct_categories_list = []
+        direct_text_cat_dict = {}
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
@@ -81,7 +81,9 @@ class CsvDirectCategoryText:
                     and csv_account_username == account_username):
                 direct_category = cur_row.get("direct_category", "").strip()
                 direct_category = direct_category.title() if titled else direct_category
-                direct_categories_list.append(direct_category)
+                direct_text = cur_row.get("direct_text", "").strip()
+                direct_text_cat_dict[direct_text] = direct_category
+        direct_categories_list = list(direct_text_cat_dict.values())
         unique_direct_categories = list(set(direct_categories_list))
         sorted_direct_categories = sorted(unique_direct_categories)
         return sorted_direct_categories
