@@ -9,14 +9,14 @@ from db_postgres.postgres_queries.qry_get_direct_category_text_dicts_list import
     get_direct_cat_text_dicts_list_qry)
 from db_postgres.postgres_queries.qry_get_label_category_dict import (
     get_label_category_dict_qry)
+from db_postgres.postgres_queries.qry_get_label_text_dict import (
+    get_label_text_dict_qry)
 from db_postgres.postgres_queries.qry_get_label_text_dicts_list import (
     get_label_text_dicts_list_qry)
 from db_postgres.postgres_queries.qry_get_last_dataset_name_and_dir import (
     get_last_dataset_name_and_dir_qry)
 from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
     get_last_saved_model_dir_qry)
-from db_postgres.postgres_queries.qry_get_text_label_dict import (
-    get_text_label_dict_qry)
 
 
 async def get_postgres_bert_model_data_hpr() -> Dict[str, any]:
@@ -27,13 +27,15 @@ async def get_postgres_bert_model_data_hpr() -> Dict[str, any]:
                                ) as pgs_session:
         print("DB Postgres Getting labels categories data:")
         pgs_lab_cat_dict = await get_label_category_dict_qry(
-            ongoing_session=pgs_session)
+            ongoing_session=pgs_session,
+            reversed_category_label_dict=False)
         print(f"pgs_lab_cat_dict: {pgs_lab_cat_dict}")  # Too long
         print(f"len(pgs_lab_cat_dict): {len(pgs_lab_cat_dict)}")
 
         print("DB Postgres Getting texts labels dict data:")
-        pgs_text_lab_dict = await get_text_label_dict_qry(
-            ongoing_session=pgs_session)
+        pgs_text_lab_dict = await get_label_text_dict_qry(
+            ongoing_session=pgs_session,
+            reversed_text_label_dict=True)
         # print(f"pgs_text_lab_dict: {pgs_text_lab_dict}")  # Too long
         print(f"len(pgs_text_lab_dict): {len(pgs_text_lab_dict)}")
 

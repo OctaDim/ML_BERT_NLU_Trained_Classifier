@@ -12,8 +12,10 @@ if __name__ == "__main__":
     pgs_conn = PostgresConnection()
     async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
         label_category_records = asyncio.run(
-            main=get_label_category_dict_qry(ongoing_session=pgs_session),
-            debug=True)
+            main=get_label_category_dict_qry(
+                ongoing_session=pgs_session,
+                reversed_category_label_dict=False),
+        debug=True)
         print(label_category_records)
 
         

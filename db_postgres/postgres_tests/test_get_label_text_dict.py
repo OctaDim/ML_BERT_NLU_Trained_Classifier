@@ -16,7 +16,8 @@ if __name__ == "__main__":
         pgs_conn = PostgresConnection()
         async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
             pgs_text_lab_dict = await get_label_text_dict_qry(
-                ongoing_session=pgs_session)
+                ongoing_session=pgs_session,
+                reversed_text_label_dict=False)
             print(pgs_text_lab_dict)
 
 

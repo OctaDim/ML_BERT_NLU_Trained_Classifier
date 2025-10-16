@@ -23,7 +23,8 @@ async def cache_unique_lab_cat_dict_qry(
     try:
         if save_only_unique:
             old_lab_cat_dict = await get_label_category_dict_qry(
-                ongoing_session=ongoing_session)
+                ongoing_session=ongoing_session,
+                reversed_category_label_dict=False)
             unique_lab_cat_dict = {}
             for cur_lab_index, cur_category_name in label_category_dict.items():
                 if cur_category_name not in old_lab_cat_dict.values():
@@ -73,7 +74,8 @@ async def save_unique_lab_cat_dict_qry(
     cur_label, cur_category = None, None
     try:
         old_lab_cat_dict = await get_label_category_dict_qry(
-            ongoing_session=ongoing_session)
+            ongoing_session=ongoing_session,
+            reversed_category_label_dict=False)
         unique_lab_cat_dict = {}
         for cur_lab_index, cur_cat_name in label_category_dict.items():
             if cur_cat_name not in old_lab_cat_dict.values():
