@@ -138,7 +138,8 @@ async def bert_train_model(
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             pgs_new_lab_cat_dict = await get_label_category_dict_qry(
-                ongoing_session=pgs_session)
+                ongoing_session=pgs_session,
+                reversed_category_label_dict=False)
 
         if pgs_new_lab_cat_dict:
             new_lab_cat_dict = pgs_new_lab_cat_dict
