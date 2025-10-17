@@ -77,10 +77,11 @@ async def bert_get_categories_list(
                 reversed_direct_text_cat_dict=True)
             pgs_direct_cat_list = list(pgs_direct_text_cat_dict.values())
 
-            pgs_united_cat_list = pgs_predict_cat_list + pgs_direct_cat_list
+            print("Postgres DB Merge predict and direct categories lists from db:")
+            pgs_merged_cat_list = pgs_predict_cat_list + pgs_direct_cat_list
 
-        if pgs_united_cat_list:
-            categories_list = pgs_united_cat_list
+        if pgs_merged_cat_list:
+            categories_list = pgs_merged_cat_list
         else:
             print("Postgres DB Getting last saved dataset directory:")
             pgs_conn = PostgresConnection()
@@ -89,8 +90,9 @@ async def bert_get_categories_list(
                                        ) as pgs_session:
                 pgs_last_dataset_data = await get_last_dataset_name_and_dir_qry(
                     ongoing_session=pgs_session)
+
             if pgs_last_dataset_data:
-                # last_saved_dataset_name = pgs_last_dataset_data[0]
+                # last_dataset_name = pgs_last_dataset_data[0]
                 last_dataset_dir = pgs_last_dataset_data[1]
             else:
                 print("Getting csv last saved dataset directory name from file:")
@@ -120,27 +122,22 @@ async def bert_get_categories_list(
                                         detail=log_text)
 
             print("Getting csv predict non-titled categories list from file:")
-            lab_cat_directory = last_dataset_dir
-            labels_categories_fname = BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME
-
-            csv_lab_cat_file_path = get_full_file_normal_path(
-                all_dir_str_parts=[lab_cat_directory],
-                file_name_with_ext=labels_categories_fname)
-
-            with open(file=csv_lab_cat_file_path,
+            csv_lab_cat_f_name = BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME
+            print("Getting csv predict non-titled categories list from file:")
+            csv_lab_cat_f_path = get_full_file_normal_path(
+                all_dir_str_parts=[last_dataset_dir],
+                file_name_with_ext=csv_lab_cat_f_name)
+            with open(file=csv_lab_cat_f_path,
                       mode="r", encoding="utf-8") as csv_lab_cat_f:
                 csf_lab_cat = CsvLabelCategory(csv_file_obj=csv_lab_cat_f)
                 csv_predict_cat_list = csf_lab_cat.get_categories_list_sorted(
                     titled=False)
 
             print("Getting csv direct non-titled categories list from file:")
-            direct_cat_text_directory = last_dataset_dir
-            direct_categories_texts_fname = BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME
-
+            csv_direct_cat_text_f_name = BERT_OPTIONS.BERT_DIRECT_CATEGORY_TEXT_CSV_FILE_NAME
             csv_direct_cat_text_f_path = get_full_file_normal_path(
-                all_dir_str_parts=[direct_cat_text_directory],
-                file_name_with_ext=direct_categories_texts_fname)
-
+                all_dir_str_parts=[last_dataset_dir],
+                file_name_with_ext=csv_direct_cat_text_f_name)
             with open(file=csv_direct_cat_text_f_path,
                       mode="r", encoding="utf-8") as csv_cat_text_f:
                 csf_cat_text = CsvDirectCategoryText(csv_file_obj=csv_cat_text_f)
@@ -149,9 +146,10 @@ async def bert_get_categories_list(
                     account_username=account_data.account_username,
                     titled=False)
 
-            csv_united_cat_list = csv_predict_cat_list + csv_direct_cat_list
-            if csv_united_cat_list:
-                categories_list = csv_united_cat_list
+            print("Merge csv predict and direct categories lists from files:")
+            csv_merged_cat_list = csv_predict_cat_list + csv_direct_cat_list
+            if csv_merged_cat_list:
+                categories_list = csv_merged_cat_list
             else:
                 categories_list = []
 
