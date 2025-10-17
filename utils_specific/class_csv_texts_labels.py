@@ -9,20 +9,26 @@ class CsvTextLabel:
     def __init__(self, csv_file_obj: TextIO | TextIOWrapper):
         self.csv_file_obj = csv_file_obj
 
-    def get_text_label_dict(self) -> dict[str: int]:
-        train_dataset = {}
+    def get_text_label_dict(
+            self,
+            reversed_label_text_dict: bool = False
+    ) -> dict[str: int] | dict[int: str]:
+        text_lab_text_dict = {}
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
-            text = cur_row.get("text", "").lower().strip()
-            label = cur_row.get("label", "").lower().strip()
+            text = str(cur_row.get("text", "").lower().strip())
+            label = int(cur_row.get("label", "").lower().strip())
             if text and label:
-                train_dataset[text] = int(label)
+                if reversed_label_text_dict:
+                    text_lab_text_dict[label] = text
+                else:
+                    text_lab_text_dict[text] = label
             else:
                 date_time = cur_row.get("date_time", "")
                 print(f"Current row skipped, empty field value [ERROR]: "
                       f"text: {text}, label: {label}, time: {date_time}\n")
-        return train_dataset
+        return text_lab_text_dict
 
     def get_label_text_dicts_list(self) -> List[Dict[str, int | str]]:
         """Returns list of dicts with label_index (int) and text (str)"""
@@ -30,11 +36,11 @@ class CsvTextLabel:
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         csv_lab_text_list = []
         for cur_row in csv_dict_reader:
-            text = cur_row.get("text", "").lower()
-            label = cur_row.get("label", "").lower()
+            text = str(cur_row.get("text", "").lower().strip())
+            label = int(cur_row.get("label", "").lower().strip())
             if text and label:
                 cur_lab_text_dict = {"text": text,
-                                     "label_index": int(label)}
+                                     "label_index": label}
                 csv_lab_text_list.append(cur_lab_text_dict)
             else:
                 date_time = cur_row.get("date_time", "")
