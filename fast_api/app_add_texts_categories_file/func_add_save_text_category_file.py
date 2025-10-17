@@ -144,7 +144,7 @@ async def add_save_multi_text_category_file(
         try:
             prev_direct_cat_text_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[prev_dataset_dir_path],
-                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
+                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_TEXT_CSV_FILE_NAME)
 
             print("Getting previous csv category-text dicts list:")
             with open(file=prev_direct_cat_text_csv_path,
@@ -189,7 +189,7 @@ async def add_save_multi_text_category_file(
 
         prev_direct_cat_text_csv_path = get_full_file_normal_path(
             all_dir_str_parts=[prev_dataset_dir],
-            file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
+            file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_TEXT_CSV_FILE_NAME)
 
     update_lab_cat_list = []
     update_text_lab_list = []
@@ -360,7 +360,7 @@ async def add_save_multi_text_category_file(
             if not BERT_OPTIONS.BERT_OVERWRITE_PREV_CSV_DATASET:
                 new_direct_cat_text_csv_path = get_full_file_normal_path(
                     all_dir_str_parts=[new_dataset_dir_path],
-                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
+                    file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_TEXT_CSV_FILE_NAME)
                 shutil.copy2(src=prev_direct_cat_text_csv_path,
                              dst=new_direct_cat_text_csv_path)
                 with open(file=new_direct_cat_text_csv_path, mode="a",
@@ -379,7 +379,7 @@ async def add_save_multi_text_category_file(
         else:
             new_direct_cat_text_csv_path = get_full_file_normal_path(
                 all_dir_str_parts=[new_dataset_dir_path],
-                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
+                file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_TEXT_CSV_FILE_NAME)
             shutil.copy2(src=prev_direct_cat_text_csv_path,
                          dst=new_direct_cat_text_csv_path)
             direct_cat_text_csv_path = new_direct_cat_text_csv_path

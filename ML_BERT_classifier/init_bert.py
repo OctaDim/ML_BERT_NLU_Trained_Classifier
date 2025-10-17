@@ -37,7 +37,8 @@ from utils_specific.get_last_saved_dataset_path import (
     get_last_saved_dataset_dir_path)
 from utils_specific.get_last_saved_model_dir import (
     get_last_saved_model_dir_path)
-from utils_specific.validate_bert_model_directory import validate_bert_model_directory
+from utils_specific.validate_bert_model_directory import (
+    validate_bert_model_directory)
 
 print("🚀 LET'S START !!! 🚀")
 bert_model_inst: Optional[ClassifierBERT]  # Global. Lazy init in func. Get via func. Just annotation
@@ -203,7 +204,7 @@ async def init_and_start_bert_model():
         print("Getting csv category-test train file path:")
         last_saved_direct_cat_text_csv_path = get_full_file_normal_path(
             all_dir_str_parts=[start_init_dataset_dir],
-            file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_LABEL_CSV_FILE_NAME)
+            file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_TEXT_CSV_FILE_NAME)
         print(f"last_saved_cat_text_csv_path: "
               f"{last_saved_direct_cat_text_csv_path}")
 
