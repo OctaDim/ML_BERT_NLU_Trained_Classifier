@@ -13,23 +13,23 @@ class CsvLabelCategory:
     def get_label_category_dict(
             self, reversed_category_label: bool = False
     ) -> dict[int: str] | dict[str: int]:
-        result_dict = {}
+        lab_cat_lab_dict = {}
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
             label = int(cur_row.get("label", "").strip().lower())
             category = str(cur_row.get("category", "").strip().lower())
-            if category and label is not None:
+            if category and (label is not None and label != ""):  # Not if not: label can be zero!!!
                 if reversed_category_label:
-                    result_dict[category] = label
+                    lab_cat_lab_dict[category] = label
                 else:
-                    result_dict[label] = category
+                    lab_cat_lab_dict[label] = category
             else:
                 date_time = cur_row.get("date_time", "")
                 print(f"Current row skipped, empty field value [ERROR]: "
                       f"label: {label}, category: {category}, "
                       f"date_time: {date_time}\n")
-        return result_dict
+        return lab_cat_lab_dict
 
     def get_categories_list_sorted(
             self, titled: bool = False
@@ -38,7 +38,7 @@ class CsvLabelCategory:
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
-            category = cur_row.get("category", "").strip()
+            category = str(cur_row.get("category", "").strip().lower())
             category = category.title() if titled else category
             categories_list.append(category)
         unique_categories = list(set(categories_list))

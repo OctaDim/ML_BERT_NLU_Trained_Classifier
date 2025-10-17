@@ -17,9 +17,9 @@ class CsvTextLabel:
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         for cur_row in csv_dict_reader:
-            text = str(cur_row.get("text", "").lower().strip())
-            label = int(cur_row.get("label", "").lower().strip())
-            if text and label:
+            text = str(cur_row.get("text", "").strip().lower())
+            label = int(cur_row.get("label", "").strip().lower())
+            if text and (label is not None and label != ""):  # Not if not: label can be zero!!!
                 if reversed_label_text_dict:
                     text_lab_text_dict[label] = text
                 else:
@@ -36,9 +36,9 @@ class CsvTextLabel:
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
         csv_lab_text_list = []
         for cur_row in csv_dict_reader:
-            text = str(cur_row.get("text", "").lower().strip())
-            label = int(cur_row.get("label", "").lower().strip())
-            if text and label:
+            text = str(cur_row.get("text", "").strip().lower())
+            label = int(cur_row.get("label", "").strip().lower())
+            if text and (label is not None and label != ""):  # Not if not: label can be zero!!!
                 cur_lab_text_dict = {"text": text,
                                      "label_index": label}
                 csv_lab_text_list.append(cur_lab_text_dict)
