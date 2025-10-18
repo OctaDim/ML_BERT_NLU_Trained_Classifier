@@ -28,7 +28,8 @@ from utils_specific.get_initial_dataset_dir_path import (
     get_initial_dataset_dir_path)
 from utils_specific.get_last_saved_dataset_path import (
     get_last_saved_dataset_dir_path)
-from utils_specific.new_dataset_dir_path import get_new_dataset_dir_path
+from utils_specific.get_new_dataset_dir_path import (
+    get_new_dataset_rand_dir_path)
 
 
 async def add_save_single_category(
@@ -77,8 +78,8 @@ async def add_save_single_category(
 
             if not prev_lab_cat_csv_dict:
                 error_log = (f"Empty or wrong label-category csv data [ERROR]:\n"
-                            f"prev_lab_cat_csv_path: {prev_lab_cat_csv_path}\n"
-                            f"prev_lab_cat_dict: {prev_lab_cat_csv_dict}\n")
+                             f"prev_lab_cat_csv_path: {prev_lab_cat_csv_path}\n"
+                             f"prev_lab_cat_dict: {prev_lab_cat_csv_dict}\n")
                 print(error_log)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -102,7 +103,7 @@ async def add_save_single_category(
                 file_name_with_ext=BERT_OPTIONS.BERT_TEXT_LABEL_CSV_FILE_NAME)
             if not prev_text_lab_csv_path:
                 error_log = (f"Empty text-label csv file path [ERROR]:\n"
-                            f"prev_text_lab_csv_path: {prev_text_lab_csv_path}\n")
+                             f"prev_text_lab_csv_path: {prev_text_lab_csv_path}\n")
                 print(error_log)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -158,7 +159,7 @@ async def add_save_single_category(
 
     try:
         print("Creating new dataset directory path:")
-        new_dataset_dir_path = get_new_dataset_dir_path()
+        new_dataset_dir_path = get_new_dataset_rand_dir_path()
         new_dataset_name = new_dataset_dir_path.split(os.path.sep)[-1]
 
         print("Single saving label-category data in csv file:")
@@ -296,7 +297,7 @@ async def add_save_single_category(
         return new_csv_files_data
     except Exception as error:
         error_log = (f"BERT add and save single category [ERROR]: "
-                    f"error: {error}")
+                     f"error: {error}")
         print(error_log)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

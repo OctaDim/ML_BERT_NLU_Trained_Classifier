@@ -16,7 +16,8 @@ from db_postgres.postgres_async_conn.postgres_async_session import (
     PostgresSession)
 from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
     cache_unique_lab_cat_dict_qry)
-from db_postgres.postgres_queries.qry_find_create_customer import find_create_customer_qry
+from db_postgres.postgres_queries.qry_find_create_customer import (
+    find_create_customer_qry)
 from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
 from db_postgres.postgres_queries.qry_save_direct_category_text_list import (
@@ -37,7 +38,8 @@ from utils_specific.get_initial_dataset_dir_path import (
     get_initial_dataset_dir_path)
 from utils_specific.get_last_saved_dataset_path import (
     get_last_saved_dataset_dir_path)
-from utils_specific.new_dataset_dir_path import get_new_dataset_dir_path
+from utils_specific.get_new_dataset_dir_path import (
+    get_new_dataset_rand_dir_path)
 
 
 async def add_save_multi_text_category_file(
@@ -293,7 +295,7 @@ async def add_save_multi_text_category_file(
                 update_direct_text_cat_list.append(new_direct_cat_text_data)
 
         print("Creating new dataset directory path:")
-        new_dataset_dir_path = get_new_dataset_dir_path()
+        new_dataset_dir_path = get_new_dataset_rand_dir_path()
         os.makedirs(name=new_dataset_dir_path, exist_ok=True)
         new_dataset_name = new_dataset_dir_path.split(os.path.sep)[-1]
 

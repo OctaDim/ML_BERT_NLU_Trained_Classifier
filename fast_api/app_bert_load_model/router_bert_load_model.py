@@ -1,5 +1,4 @@
 import os
-import random
 from datetime import datetime
 from typing import Annotated
 
@@ -28,7 +27,8 @@ from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
     get_last_saved_model_dir_qry)
 from db_postgres.postgres_queries.qry_save_new_model_data import (
     save_new_model_data_qry)
-from fast_api.app_account_data.scheme_account_data import AccountDataBert
+from fast_api.app_account_data.scheme_account_data import (
+    AccountDataBert)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_load_model.scheme_bert_load_model import (
@@ -41,6 +41,8 @@ from utils_specific.get_last_saved_dataset_path import (
     get_last_saved_dataset_dir_path)
 from utils_specific.get_last_saved_model_dir import (
     get_last_saved_model_dir_path)
+from utils_specific.get_new_model_dir_path import (
+    get_new_model_random_dir_path)
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_load_model = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -140,12 +142,7 @@ async def bert_load_model(
         model_load_time = round(model_load_time, 1)
 
         print("Creating new directory path to save loaded model:")
-        datetime_str = datetime.now().strftime("%d_%m_%Y_%H_%M_%S_%f")
-        random_str = str(random.randint(10000, 99999))
-        prefix = BERT_OPTIONS.BERT_TRAINED_MODELS_SAVE_DIR_PREFIX
-        new_dir_name = f"{prefix}_{datetime_str}-{random_str}"
-        model_save_path = get_full_dir_normal_path(
-            [BASE_DIR, BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH, new_dir_name])
+        model_save_path = get_new_model_random_dir_path()
 
         print("BERT saving model after loading:")
         error_log = bert_model_inst.save_model(

@@ -35,8 +35,8 @@ from utils_specific.get_initial_dataset_dir_path import (
     get_initial_dataset_dir_path)
 from utils_specific.get_last_saved_dataset_path import (
     get_last_saved_dataset_dir_path)
-from utils_specific.new_dataset_dir_path import (
-    get_new_dataset_dir_path)
+from utils_specific.get_new_dataset_dir_path import (
+    get_new_dataset_rand_dir_path)
 
 
 async def add_save_single_text_category(
@@ -198,7 +198,7 @@ async def add_save_single_text_category(
 
     try:
         print("Creating new dataset directory path:")
-        new_dataset_dir_path = get_new_dataset_dir_path()
+        new_dataset_dir_path = get_new_dataset_rand_dir_path()
         new_dataset_name = new_dataset_dir_path.split(os.path.sep)[-1]
 
         category_exists_flag = update_category in prev_lab_cat_dict.values()

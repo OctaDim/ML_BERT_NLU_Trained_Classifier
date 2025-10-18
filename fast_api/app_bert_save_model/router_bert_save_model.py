@@ -1,5 +1,4 @@
 import os
-import random
 from datetime import datetime, timedelta
 from typing import Annotated
 
@@ -36,11 +35,13 @@ from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_save_model.scheme_bert_save_model import (
     SaveModelAfterTrainBert, SaveModelDataBert)
 from utils_common.normalized_path import (
-    get_full_dir_normal_path, get_full_file_normal_path)
+    get_full_file_normal_path)
 from utils_specific.get_initial_dataset_dir_path import (
     get_initial_dataset_dir_path)
 from utils_specific.get_last_saved_dataset_path import (
     get_last_saved_dataset_dir_path)
+from utils_specific.get_new_model_dir_path import (
+    get_new_model_random_dir_path)
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_save_model = APIRouter(prefix=f"/{bert_base_url_name}",
@@ -125,12 +126,7 @@ async def bert_save_model(
             model_save_path = save_model_data.model_save_dir_path
         else:
             print("Creating new dir path to save trained or saved model:")
-            datetime_str = datetime.now().strftime("%d_%m_%Y_%H_%M_%S_%f")
-            random_str = str(random.randint(10000, 99999))
-            prefix = BERT_OPTIONS.BERT_TRAINED_MODELS_SAVE_DIR_PREFIX
-            new_dir_name = f"{prefix}_{datetime_str}-{random_str}"
-            model_save_path = get_full_dir_normal_path(
-                [BASE_DIR, BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH, new_dir_name])
+            model_save_path = get_new_model_random_dir_path()
     except Exception as error:
         log_text = (f"Creating new trained model save dir path [ERROR]: "
                     f"error: {error}\n"
