@@ -281,9 +281,10 @@ class ClassifierBERT:
                 return
         return
 
-    def save_model(self,
-                   dir_full_path: str | Literal[""] | PathLike | bytes
-                   ) -> None | str:
+    def save_model(
+            self,
+            dir_full_path: str | Literal[""] | PathLike | bytes
+    ) -> None | str:
         """Save model and tokeniser"""
 
         if not dir_full_path:
@@ -294,7 +295,7 @@ class ClassifierBERT:
 
         try:
             os.makedirs(dir_full_path, exist_ok=True)
-            self.model.save_pretrained(dir_full_path)
+            self.model.save_pretrained(str(dir_full_path))
             self.tokenizer.save_pretrained(dir_full_path)
             self.last_saved_model_dir = dir_full_path
         except Exception as error:
