@@ -1,4 +1,5 @@
 import os
+import shutil
 from datetime import datetime, timedelta
 from typing import Annotated
 
@@ -35,7 +36,7 @@ from fast_api.app_auth.scheme_auth import AuthDataBert
 from fast_api.app_bert_save_model.scheme_bert_save_model import (
     SaveModelAfterTrainBert, SaveModelDataBert)
 from utils_common.normalized_path import (
-    get_full_file_normal_path)
+    get_full_file_normal_path, get_full_dir_normal_path)
 from utils_specific.get_initial_dataset_dir_path import (
     get_initial_dataset_dir_path)
 from utils_specific.get_last_saved_dataset_path import (
@@ -109,7 +110,8 @@ async def bert_save_model(
         dataset_name = dataset_path_dirs[-1]  # As dataset files directory name
 
     print("BERT saving model without train or after train process:")
-    save_after_train_flag = save_model_after_train_data.trained_model_redirected_save_flag
+    save_after_train_flag = (
+        save_model_after_train_data.trained_model_redirected_save_flag)
     try:
         if save_after_train_flag:
             redis_update = {
@@ -150,16 +152,27 @@ async def bert_save_model(
                             detail=log_text)
 
     try:
+        print("Saving trained model into request passed dir or random dir")
         datetime_start = datetime.now()
         error_log = bert_model_inst.save_model(
             dir_full_path=model_save_path)
-        # TODO: Make saving learning dataset into the saved model dir also
-        #  to have opportunity to load model and to load corresponding
-        #  dataset for the model
         if error_log:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=error_log)
+
+        print("Copying csv dataset files into saved model subfolder")
+        saved_model_extra_dir = BERT_OPTIONS.BERT_SAVED_MODEL_EXTRA_BASE_DIR
+        saved_model_dataset_subdir_path = get_full_dir_normal_path(
+            [model_save_path, saved_model_extra_dir, dataset_name])
+        shutil.copytree(src=train_dataset_dir,
+                        dst=saved_model_dataset_subdir_path,
+                        dirs_exist_ok=True)
+
+        # It can be ini file saving dataset name and dir here instead of instance
+        # extra_dataset_data = {
+        #     "save model dataset name": dataset_name,
+        #     "saved model dataset directory": saved_model_dataset_subdir_path}
 
         last_saved_model_ini_fpath = get_full_file_normal_path(
             all_dir_str_parts=[BASE_DIR],
