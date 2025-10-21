@@ -358,6 +358,7 @@ class ClassifierBERT:
             load_model_metadata_fpath = get_full_file_normal_path(
                 all_dir_str_parts=[dir_full_path, saved_model_extra_dir],
                 file_name_with_ext=model_metadata_f_name)
+
             loaded_model_metadata = torch.load(f=load_model_metadata_fpath)
             self.labels = loaded_model_metadata["labels"]
             self.model_name = loaded_model_metadata["model_name"]

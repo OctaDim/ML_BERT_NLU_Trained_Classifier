@@ -107,7 +107,7 @@ async def bert_save_model(
                 detail=log_text)
 
         dataset_path_dirs = train_dataset_dir.split(os.sep)
-        dataset_name = dataset_path_dirs[-1]  # As dataset files directory name
+        dataset_name = dataset_path_dirs[-1]  # Dataset dir as dataset name
 
     print("BERT saving model without train or after train process:")
     save_after_train_flag = (
@@ -187,7 +187,7 @@ async def bert_save_model(
         # Double attribute assigning in bert_model_inst.save_model()
         bert_model_inst.last_saved_model_dir = model_save_path
 
-        print("Postgres DB Saving trained model data:")
+        print("Postgres DB Saving trained or saved model and dataset data:")
         pgs_conn = PostgresConnection()
         async with PostgresSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
