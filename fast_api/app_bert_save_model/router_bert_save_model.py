@@ -152,28 +152,37 @@ async def bert_save_model(
                             detail=log_text)
 
     try:
-        print("Saving trained model into request passed dir or random dir")
+        print("Dataset: Copying csv dataset files into saved model subdir")
+        saved_model_extra_dir = BERT_OPTIONS.BERT_SAVED_MODEL_EXTRA_BASE_DIR
+        saved_model_dataset_subdir_path = get_full_dir_normal_path(
+            [model_save_path, saved_model_extra_dir, dataset_name])
+        #TODO: Saving last dataset dir into saved model dir file, not into instance
+        shutil.copytree(src=train_dataset_dir,
+                        dst=saved_model_dataset_subdir_path,
+                        dirs_exist_ok=True)
+
+        print("Dataset: Saving last saved dataset dir path into ini file")
+        last_saved_dataset_ini_fpath = get_full_file_normal_path(
+            all_dir_str_parts=[BASE_DIR],
+            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FILE_PATH)
+        last_saved_dataset_ini_fdir = os.path.dirname(
+            last_saved_dataset_ini_fpath)
+        os.makedirs(name=last_saved_dataset_ini_fdir, exist_ok=True)
+        with open(file=last_saved_dataset_ini_fpath,
+                  mode="w", encoding="utf-8") as dataset_ini_file:
+            dataset_ini_file.write(saved_model_dataset_subdir_path)
+
+        print("Model: Saving trained model into request passed dir or random dir")
         datetime_start = datetime.now()
         error_log = bert_model_inst.save_model(
-            dir_full_path=model_save_path)
+            model_save_dir_path=model_save_path,
+            dataset_save_dir_path=saved_model_dataset_subdir_path)
         if error_log:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=error_log)
 
-        print("Copying csv dataset files into saved model subfolder")
-        saved_model_extra_dir = BERT_OPTIONS.BERT_SAVED_MODEL_EXTRA_BASE_DIR
-        saved_model_dataset_subdir_path = get_full_dir_normal_path(
-            [model_save_path, saved_model_extra_dir, dataset_name])
-        shutil.copytree(src=train_dataset_dir,
-                        dst=saved_model_dataset_subdir_path,
-                        dirs_exist_ok=True)
-
-        # It can be ini file saving dataset name and dir here instead of instance
-        # extra_dataset_data = {
-        #     "save model dataset name": dataset_name,
-        #     "saved model dataset directory": saved_model_dataset_subdir_path}
-
+        print("Model: Saving last saved model dir path into ini file")
         last_saved_model_ini_fpath = get_full_file_normal_path(
             all_dir_str_parts=[BASE_DIR],
             file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_MODEL_INI_FILE_PATH)
@@ -184,8 +193,8 @@ async def bert_save_model(
                   mode="w", encoding="utf-8") as model_ini_file:
             model_ini_file.write(model_save_path)
 
-        # Double attribute assigning in bert_model_inst.save_model()
-        bert_model_inst.last_saved_model_dir = model_save_path
+        bert_model_inst.last_saved_model_dir = model_save_path  # Double assigning attr in addition to save_model()
+        bert_model_inst.last_saved_dataset_dir = saved_model_dataset_subdir_path  # Double assigning attr in addition to save_model()
 
         print("Postgres DB Saving trained or saved model and dataset data:")
         pgs_conn = PostgresConnection()

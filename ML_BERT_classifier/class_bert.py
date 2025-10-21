@@ -284,29 +284,32 @@ class ClassifierBERT:
 
     def save_model(
             self,
-            dir_full_path: str | Literal[""] | PathLike | bytes
+            model_save_dir_path: str | Literal[""] | PathLike | bytes,
+            dataset_save_dir_path: str
     ) -> None | str:
         """Save model and tokeniser"""
 
-        if not dir_full_path:
+        if not model_save_dir_path:
             error_log = (f"Model save dir path not defined [ERROR]: "
-                         f"dir_full_path: {dir_full_path}")
+                         f"dir_full_path: {model_save_dir_path}")
             print(error_log)
             return error_log
 
         try:
-            os.makedirs(dir_full_path, exist_ok=True)
-            self.model.save_pretrained(str(dir_full_path))
-            self.tokenizer.save_pretrained(dir_full_path)
+            os.makedirs(model_save_dir_path, exist_ok=True)
+            self.model.save_pretrained(str(model_save_dir_path))
+            self.tokenizer.save_pretrained(model_save_dir_path)
+            self.last_saved_model_dir = model_save_dir_path
+            self.last_saved_dataset_dir = dataset_save_dir_path
 
             saved_model_extra_dir = BERT_OPTIONS.BERT_SAVED_MODEL_EXTRA_BASE_DIR
             saved_model_extra_dir_path = get_full_dir_normal_path(
-                all_dir_str_parts=[dir_full_path, saved_model_extra_dir])
+                all_dir_str_parts=[model_save_dir_path, saved_model_extra_dir])
             os.makedirs(saved_model_extra_dir_path, exist_ok=True)
 
             model_metadata_f_name = BERT_OPTIONS.BERT_SAVED_MODEL_METADATA_FILE_NAME
             save_model_metadata_fpath = get_full_file_normal_path(
-                all_dir_str_parts=[saved_model_extra_dir_path],
+                all_dir_str_parts=[model_save_dir_path, saved_model_extra_dir],
                 file_name_with_ext=model_metadata_f_name)
             save_model_metadata = {
                 "labels": self.labels,
@@ -319,44 +322,32 @@ class ClassifierBERT:
             torch.save(obj=save_model_metadata,
                        f=save_model_metadata_fpath)
             print(">>>>>>> save_model_metadata:", save_model_metadata)
-
-            self.last_saved_model_dir = dir_full_path
         except Exception as error:
             error_log = f"BERT Model saving [ERROR]: error: {error}"
             print(error_log)
             return error_log
 
-    def load_model(self, dir_full_path: str = None) -> str | None:
+    def load_model(self, model_load_dir_path: str = None) -> str | None:
         """Load model and tokeniser saved earlier"""
-
-        model_path = dir_full_path
-
-        if not model_path:
-            error_log = (f"Model load dir path not defined [ERROR]: "
-                         f"dir_full_path: {dir_full_path}, "
-                         f"self.last_trained_model_path "
-                         f"{self.last_saved_model_dir}")
-            print(error_log)
-            return error_log
-
-        if not os.path.isdir(model_path):
-            error_log = (f"Model load dir path not exists [ERROR]: "
-                         f"dir_full_path: {dir_full_path}, "
-                         f"self.last_trained_model_path "
-                         f"{self.last_saved_model_dir}")
+        if (not model_load_dir_path or
+                not os.path.isdir(model_load_dir_path)):
+            error_log = (
+                f"Model load dir path not defined or doesn't exists [ERROR]: "
+                f"model_load_dir_path: {model_load_dir_path}, "
+                f"self.last_trained_model_path {self.last_saved_model_dir}")
             print(error_log)
             return error_log
 
         try:
             self.model = BertForSequenceClassification.from_pretrained(
-                model_path).to(self.device)
-            self.tokenizer = BertTokenizer.from_pretrained(model_path)
-            self.last_saved_model_dir = model_path
+                model_load_dir_path).to(self.device)
+            self.tokenizer = BertTokenizer.from_pretrained(model_load_dir_path)
+            self.last_saved_model_dir = model_load_dir_path
 
             saved_model_extra_dir = BERT_OPTIONS.BERT_SAVED_MODEL_EXTRA_BASE_DIR
             model_metadata_f_name = BERT_OPTIONS.BERT_SAVED_MODEL_METADATA_FILE_NAME
             load_model_metadata_fpath = get_full_file_normal_path(
-                all_dir_str_parts=[dir_full_path, saved_model_extra_dir],
+                all_dir_str_parts=[model_load_dir_path, saved_model_extra_dir],
                 file_name_with_ext=model_metadata_f_name)
 
             loaded_model_metadata = torch.load(f=load_model_metadata_fpath)
@@ -368,7 +359,6 @@ class ClassifierBERT:
             self.last_saved_model_dir = loaded_model_metadata["last_saved_model_dir"]
             self.last_saved_dataset_dir = loaded_model_metadata["last_saved_dataset_dir"]
             print(">>>>>>> loaded_model_metadata:", loaded_model_metadata)
-
         except Exception as error:
             error_log = f"BERT Model loading [ERROR]: error: {error}"
             print(error_log)

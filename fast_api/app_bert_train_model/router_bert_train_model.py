@@ -199,8 +199,9 @@ async def bert_train_model(
             if not os.path.isdir(before_reinit_model_temp_path):
                 os.makedirs(before_reinit_model_temp_path, exist_ok=True)
 
-            error_log = bert_model_inst.save_model(
-                dir_full_path=before_reinit_model_temp_path)  # Model saving before reinitialising
+            error_log = bert_model_inst.save_model(  # Model saving before reinitialising
+                model_save_dir_path=before_reinit_model_temp_path,
+                dataset_save_dir_path=train_dataset_dir)
             if error_log:
                 print(error_log)
                 raise HTTPException(
@@ -218,7 +219,7 @@ async def bert_train_model(
             labels_after = bert_model_inst.model.config.num_labels
 
             # error_log = bert_model_inst.load_model(
-            #     dir_full_path=before_reinit_model_temp_path)  # Model loading after reinitialising
+            #     model_load_dir_path=before_reinit_model_temp_path)  # Model loading after reinitialising
             # if error_log:
             #     print(error_log)
             #     raise HTTPException(

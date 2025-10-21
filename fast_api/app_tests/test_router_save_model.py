@@ -65,7 +65,7 @@ async def bert_test_save_model(
                             detail=log_text)
     try:
         datetime_start = datetime.now()
-        bert_model_inst.save_model(dir_full_path=model_save_path)
+        bert_model_inst.save_model(model_save_dir_path=model_save_path)
         model_saving_time = (datetime.now() - datetime_start).total_seconds()
         model_saving_time = round(model_saving_time, 1)
 

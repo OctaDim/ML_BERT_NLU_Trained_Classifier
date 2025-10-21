@@ -353,7 +353,7 @@ async def init_and_start_bert_model():
 
     if last_saved_model_dir_path and model_dir_exists_flag:
         model_load_error_log = bert_model_inst.load_model(
-            dir_full_path=last_saved_model_dir_path)
+            model_load_dir_path=last_saved_model_dir_path)
         bert_model_inst.last_saved_dataset_dir = last_saved_dataset_dir_path
         bert_model_inst.last_saved_dataset_dir = start_init_dataset_dir
         print(f"Last Saved BERT Model initialised preliminary and loaded [OK]:\n"

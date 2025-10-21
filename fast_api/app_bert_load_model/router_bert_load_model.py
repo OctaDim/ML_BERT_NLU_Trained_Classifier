@@ -122,40 +122,7 @@ async def bert_load_model(
             detail=log_text)
 
     try:
-        print("Model: Loading model data from directory")
         datetime_start = datetime.now()
-        model_load_path = get_full_dir_normal_path([model_load_path, ])
-        error_log = bert_model_inst.load_model(
-            dir_full_path=model_load_path)
-        if error_log:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=error_log)
-
-        model_load_time = (datetime.now() - datetime_start).total_seconds()
-        model_load_time = round(model_load_time, 1)
-
-        print("Model: Creating new random dir path to save loaded model:")
-        model_save_path = get_new_model_random_dir_path()
-
-        print("Model: BERT saving model after loading:")
-        error_log = bert_model_inst.save_model(
-            dir_full_path=model_save_path)
-        if error_log:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=error_log)
-
-        print("Model: Saving last saved model dir path into ini file")
-        last_saved_model_ini_fpath = get_full_file_normal_path(
-            all_dir_str_parts=[BASE_DIR],
-            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_MODEL_INI_FILE_PATH)
-        last_saved_model_ini_fdir = os.path.dirname(
-            last_saved_model_ini_fpath)
-        os.makedirs(name=last_saved_model_ini_fdir, exist_ok=True)
-        with open(file=last_saved_model_ini_fpath,
-                  mode="w", encoding="utf-8") as model_ini_file:
-            model_ini_file.write(model_save_path)
 
         print("Dataset: Creating new random dir path to save loaded dataset:")
         dataset_save_new_path = get_new_dataset_rand_dir_path()
@@ -163,6 +130,7 @@ async def bert_load_model(
         dataset_save_new_name = dataset_save_path_dirs[-1]  # Dataset dir as dataset name
 
         print("Dataset: Copying model loaded dataset into new random dir:")
+        # TODO: Getting last dataset dir from saved model file, not from instance
         loaded_model_dataset_dir = bert_model_inst.last_saved_dataset_dir
         shutil.copytree(src=loaded_model_dataset_dir,
                         dst=dataset_save_new_path,
@@ -179,8 +147,44 @@ async def bert_load_model(
                   mode="w", encoding="utf-8") as dataset_ini_file:
             dataset_ini_file.write(dataset_save_new_path)
 
+        print("Model: Loading model data from directory")
+        model_load_path = get_full_dir_normal_path([model_load_path, ])
+        error_log = bert_model_inst.load_model(
+            model_load_dir_path=model_load_path)
+        if error_log:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=error_log)
+
+        model_load_time = (datetime.now() - datetime_start).total_seconds()
+        model_load_time = round(model_load_time, 1)
+
+        print("Model: Creating new random dir path to save loaded model:")
+        model_save_rand_path = get_new_model_random_dir_path()
+
+        print("Model: BERT saving model after loading:")
+        error_log = bert_model_inst.save_model(
+            model_save_dir_path=model_save_rand_path,
+            dataset_save_dir_path=dataset_save_new_path)
+        if error_log:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=error_log)
+
+        print("Model: Saving last saved model dir path into ini file")
+        last_saved_model_ini_fpath = get_full_file_normal_path(
+            all_dir_str_parts=[BASE_DIR],
+            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_MODEL_INI_FILE_PATH)
+        last_saved_model_ini_fdir = os.path.dirname(
+            last_saved_model_ini_fpath)
+        os.makedirs(name=last_saved_model_ini_fdir, exist_ok=True)
+        with open(file=last_saved_model_ini_fpath,
+                  mode="w", encoding="utf-8") as model_ini_file:
+            model_ini_file.write(model_save_rand_path)
+
         print("Dataset: Saving last saved dataset dir path into instance attr")
-        bert_model_inst.last_saved_dataset_dir = model_save_path
+        bert_model_inst.last_saved_model_dir = model_save_rand_path  # Double assigning attr in addition to save_model()
+        bert_model_inst.last_saved_dataset_dir = dataset_save_new_path  # Double assigning attr in addition to save_model()
 
         print("Postgres DB Saving loaded model and dataset data:")
         pgs_conn = PostgresConnection()
@@ -188,7 +192,7 @@ async def bert_load_model(
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             creation_reason = (f"model loaded from: {model_load_path}, "
-                               f"saved to: {model_save_path}, "
+                               f"saved to: {model_save_rand_path}, "
                                f"dataset loaded from: {loaded_model_dataset_dir}, "
                                f"saved to: {dataset_save_new_path}")
 
@@ -207,7 +211,7 @@ async def bert_load_model(
             trained_model_upd_data = {
                 "dataset_id": dataset_id,
                 "dataset_name": dataset_save_new_name,
-                "model_directory": model_save_path,
+                "model_directory": model_save_rand_path,
                 "creation_reason": creation_reason}
             await save_new_model_data_qry(
                 ModelClassORM=TrainedBertModel,

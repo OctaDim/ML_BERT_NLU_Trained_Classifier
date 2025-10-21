@@ -51,7 +51,7 @@ async def bert_test_load_model(
         normal_model_load_path = get_full_dir_normal_path([model_load_path, ])
 
         datetime_start = datetime.now()
-        bert_model_inst.load_model(dir_full_path=normal_model_load_path)
+        bert_model_inst.load_model(model_load_dir_path=normal_model_load_path)
         model_load_time = (datetime.now() - datetime_start).total_seconds()
         model_load_time = round(model_load_time, 1)
 
