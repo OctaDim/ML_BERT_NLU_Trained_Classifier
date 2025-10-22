@@ -15,8 +15,8 @@ async def get_direct_categ_text_by_acc_dict_qry(
         reversed_direct_text_cat_dict: bool = False
 ) -> Dict[str, str]:
     filter_fields = {"account_id": account_id,
-                     "account_username": account_username}
-
+                     "account_username": account_username,
+                     "active": True}
     pgs_direct_cat_text_objs = await get_model_rows_flex_query(
         orm_model_class=DirectPredictModel,
         ongoing_session=ongoing_session,

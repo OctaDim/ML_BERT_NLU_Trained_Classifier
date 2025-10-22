@@ -18,7 +18,8 @@ async def get_direct_category_by_text(
 ) -> str | None:
     filter_fields = {"account_id": account_id,
                      "account_username": account_username,
-                     "direct_text": direct_text}
+                     "direct_text": direct_text,
+                     "active": True}
     direct_predict_objs = await get_model_rows_flex_query(
         orm_model_class=DirectPredictModel,
         ongoing_session=ongoing_session,
@@ -47,9 +48,9 @@ if __name__ == "__main__":
         async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
             direct_category = await get_direct_category_by_text(
                 ongoing_session=pgs_session,
-                account_id="313",
-                account_username="octadim",
-                direct_text="text-11 for cat-6")
+                account_id="30",
+                account_username="globalhome",
+                direct_text="врач по глазам")
             print(f"direct_category: {direct_category}")
 
 
