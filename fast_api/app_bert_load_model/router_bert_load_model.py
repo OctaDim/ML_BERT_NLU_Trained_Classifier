@@ -16,14 +16,19 @@ from db_postgres.postgres_async_conn.postgres_async_session import (
     PostgresSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
+from db_postgres.postgres_models.direct_predict_model import DirectPredictModel
 from db_postgres.postgres_models.trained_bert_model import (
     TrainedBertModel)
+from db_postgres.postgres_queries.qry_deactivate_all_direct_cat_text_records import (
+    deactivate_all_orm_model_records)
 from db_postgres.postgres_queries.qry_find_create_customer import (
     find_create_customer_qry)
 from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
 from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
     get_last_saved_model_dir_qry)
+from db_postgres.postgres_queries.qry_save_direct_category_text_list import (
+    save_direct_cat_text_list_qry)
 from db_postgres.postgres_queries.qry_save_new_model_data import (
     save_new_model_data_qry)
 from fast_api.app_account_data.scheme_account_data import (
@@ -34,6 +39,8 @@ from fast_api.app_bert_load_model.scheme_bert_load_model import (
     LoadModelDataBert)
 from utils_common.normalized_path import (
     get_full_dir_normal_path, get_full_file_normal_path)
+from utils_specific.class_csv_direct_categories_texts import (
+    CsvDirectCategoryText)
 from utils_specific.get_last_saved_model_dir import (
     get_last_saved_model_dir_path)
 from utils_specific.get_new_dataset_dir_path import (
@@ -122,33 +129,6 @@ async def bert_load_model(
             detail=log_text)
 
     try:
-        print("Dataset: Creating new random dir path to save loaded dataset:")
-        datetime_start = datetime.now()
-        dataset_save_new_path = get_new_dataset_rand_dir_path()
-        dataset_save_path_dirs = dataset_save_new_path.split(os.sep)
-        dataset_save_new_name = dataset_save_path_dirs[-1]  # Dataset dir as dataset name
-
-        print("Dataset: Copying model loaded dataset into new random dir:")
-        # TODO: Getting last dataset dir from saved model file, not from instance
-        loaded_model_dataset_dir = bert_model_inst.last_saved_dataset_dir
-        shutil.copytree(src=loaded_model_dataset_dir,
-                        dst=dataset_save_new_path,
-                        dirs_exist_ok=True)
-
-        print("Dataset: Saving last saved dataset dir path into ini file")
-        last_saved_dataset_ini_fpath = get_full_file_normal_path(
-            all_dir_str_parts=[BASE_DIR],
-            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FILE_PATH)
-        last_saved_dataset_ini_fdir = os.path.dirname(
-            last_saved_dataset_ini_fpath)
-        os.makedirs(name=last_saved_dataset_ini_fdir, exist_ok=True)
-        with open(file=last_saved_dataset_ini_fpath,
-                  mode="w", encoding="utf-8") as dataset_ini_file:
-            dataset_ini_file.write(dataset_save_new_path)
-
-        dataset_load_copy_time = (datetime.now() - datetime_start).total_seconds()
-        dataset_load_copy_time = round(dataset_load_copy_time, 1)
-
         print("Model: Loading model data from directory")
         datetime_start = datetime.now()
         model_load_path = get_full_dir_normal_path([model_load_path, ])
@@ -162,6 +142,33 @@ async def bert_load_model(
         model_load_time = (datetime.now() - datetime_start).total_seconds()
         model_load_time = round(model_load_time, 1)
 
+        print("Dataset: Creating new random dir path to save loaded dataset:")
+        datetime_start = datetime.now()
+        dataset_save_new_dir_path = get_new_dataset_rand_dir_path()
+        dataset_save_path_dirs = dataset_save_new_dir_path.split(os.sep)
+        dataset_save_new_name = dataset_save_path_dirs[-1]  # Dataset dir as dataset name
+
+        print("Dataset: Copying model loaded dataset into new random dir:")
+        # TODO: Getting last dataset dir from saved model file, not from instance
+        loaded_model_dataset_subdir = bert_model_inst.last_saved_dataset_dir
+        shutil.copytree(src=loaded_model_dataset_subdir,
+                        dst=dataset_save_new_dir_path,
+                        dirs_exist_ok=True)
+
+        print("Dataset: Saving last saved dataset dir path into ini file")
+        last_saved_dataset_ini_fpath = get_full_file_normal_path(
+            all_dir_str_parts=[BASE_DIR],
+            file_name_with_ext=BERT_OPTIONS.BERT_LAST_SAVED_DATASET_INI_FILE_PATH)
+        last_saved_dataset_ini_fdir = os.path.dirname(
+            last_saved_dataset_ini_fpath)
+        os.makedirs(name=last_saved_dataset_ini_fdir, exist_ok=True)
+        with open(file=last_saved_dataset_ini_fpath,
+                  mode="w", encoding="utf-8") as dataset_ini_file:
+            dataset_ini_file.write(dataset_save_new_dir_path)
+
+        dataset_load_copy_time = (datetime.now() - datetime_start).total_seconds()
+        dataset_load_copy_time = round(dataset_load_copy_time, 1)
+
         print("Model: Creating new random dir path to save loaded model:")
         datetime_start = datetime.now()
         model_save_rand_path = get_new_model_random_dir_path()
@@ -169,7 +176,7 @@ async def bert_load_model(
         print("Model: BERT saving model after loading:")
         error_log = bert_model_inst.save_model(
             model_save_dir_path=model_save_rand_path,
-            dataset_save_dir_path=dataset_save_new_path)
+            dataset_save_dir_path=dataset_save_new_dir_path)
         if error_log:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -191,7 +198,22 @@ async def bert_load_model(
 
         print("Saving last saved model and dataset dir path into instance attrs")
         bert_model_inst.last_saved_model_dir = model_save_rand_path  # Double assigning attr in addition to save_model()
-        bert_model_inst.last_saved_dataset_dir = dataset_save_new_path  # Double assigning attr in addition to save_model()
+        bert_model_inst.last_saved_dataset_dir = dataset_save_new_dir_path  # Double assigning attr in addition to save_model()
+
+        print("Getting loaded-copied csv category-text file path:")
+        direct_cat_text_csv_fname = BERT_OPTIONS.BERT_DIRECT_CATEGORY_TEXT_CSV_FILE_NAME
+        loaded_direct_cat_text_fpath = get_full_file_normal_path(
+            all_dir_str_parts=[loaded_model_dataset_subdir, ],  # equal dataset_save_new_dir_path
+            file_name_with_ext=direct_cat_text_csv_fname)
+
+        print("Getting category-text dicts list from loaded-copied csv file:")
+        with open(file=loaded_direct_cat_text_fpath,
+                  mode="r", encoding="utf-8") as direct_cat_text_csvf:
+            direct_cat_text = CsvDirectCategoryText(direct_cat_text_csvf)
+            loaded_direct_cat_text_list = direct_cat_text.get_direct_categories_texts_list()
+        # print(f"loaded_direct_cat_text_list: {loaded_direct_cat_text_list}")  # Too long
+        print(f"type(loaded_direct_cat_text_list): {type(loaded_direct_cat_text_list)}")
+        print(f"len(loaded_direct_cat_text_list): {len(loaded_direct_cat_text_list)}")
 
         print("Postgres DB Saving loaded model and dataset data:")
         pgs_conn = PostgresConnection()
@@ -200,8 +222,8 @@ async def bert_load_model(
                                    ) as pgs_session:
             creation_reason = (f"model loaded from: {model_load_path}, "
                                f"saved to: {model_save_rand_path}, "
-                               f"dataset loaded from: {loaded_model_dataset_dir}, "
-                               f"saved to: {dataset_save_new_path}")
+                               f"dataset loaded from: {loaded_model_dataset_subdir}, "
+                               f"saved to: {dataset_save_new_dir_path}")
 
             customer_id = await find_create_customer_qry(
                 ongoing_session=pgs_session,
@@ -212,8 +234,20 @@ async def bert_load_model(
                 ongoing_session=pgs_session,
                 dataset_name=dataset_save_new_name,
                 customer_id=customer_id,
-                dataset_csv_dir=dataset_save_new_path,
+                dataset_csv_dir=dataset_save_new_dir_path,
                 creation_reason=creation_reason)
+
+            await deactivate_all_orm_model_records(
+                ongoing_session=pgs_session,
+                ModelClassORM=DirectPredictModel)
+
+            await save_direct_cat_text_list_qry(
+                ongoing_session=pgs_session,
+                direct_cat_text_dicts_list=loaded_direct_cat_text_list,
+                creation_reason=creation_reason,
+                save_only_unique=True)
+            print(f"Postgres DB direct categories-texts saved [OK]")
+            print(f"loaded_direct_cat_text_list: {loaded_direct_cat_text_list[:2]}")  # Too long
 
             trained_model_upd_data = {
                 "dataset_id": dataset_id,
