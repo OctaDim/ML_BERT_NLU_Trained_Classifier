@@ -1,7 +1,5 @@
 # ####################### DEBUG CODE (start) ###########################
 # ######################################################################
-
-
 async def test_get_model_records_via_flex_query():
     from db_postgres.postgres_async_conn.pgs_async_connection import (
         PostgresConnection)
@@ -9,17 +7,20 @@ async def test_get_model_records_via_flex_query():
         PostgresSession)
     from db_postgres.postgres_models.label_category_model import (
         LabelCategoryModel)
-    # from db_postgres.postgres_models.customer_model import CustomerModel
+    from db_postgres.postgres_models.customer_model import CustomerModel
     from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
         get_model_rows_flex_query)
+    from db_postgres.postgres_models.direct_predict_model import (
+        DirectPredictModel)
 
     pgs_conn = PostgresConnection()
     async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
-        # fields_values_filter = {
-        #     "label_index": [0, 1]
-        #     # "username": ["Dima-5", "Dima-10"]
-        # }
-        fields_values_filter = None
+        fields_values_filter = {
+            "active": True,
+            # "label_index": [0, 1],
+            # "username": ["Dima-5", "Dima-10"],
+        }
+        # fields_values_filter = None
 
         # order_by_fields = ("category_name", )
         # order_by_fields = ("username", "account_id")
@@ -31,13 +32,15 @@ async def test_get_model_records_via_flex_query():
         selected_fields = None
 
         records = await get_model_rows_flex_query(
-            orm_model_class=LabelCategoryModel,
+            orm_model_class=DirectPredictModel,
+            # orm_model_class=LabelCategoryModel,
             # orm_model_class=CustomerModel,
             ongoing_session=pgs_session,
             selected_fields=selected_fields,
             fields_values_filter=fields_values_filter,
             order_by_fields=order_by_fields,
-            return_scalars=False
+            # return_scalars=False,
+            return_scalars=True
         )
 
     print(f"records: {records}")
@@ -47,7 +50,7 @@ async def test_get_model_records_via_flex_query():
     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     for record in records:
         print(f"type(record): {type(record)}")
-        for field_name, field_value in record_.items():
+        for field_name, field_value in record.__dict__.items():
             if not field_name.startswith("_"):
                 print(f"{field_name} = {field_value}")
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
