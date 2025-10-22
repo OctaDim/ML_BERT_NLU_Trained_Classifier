@@ -59,7 +59,6 @@ async def bert_save_model(
         save_model_after_train_data: SaveModelAfterTrainBert,
         bert_model_inst: Annotated[
             ClassifierBERT, Depends(get_bert_model_instance_dep)],
-        # dataset_name: str = None,
 ) -> JSONResponse:
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
@@ -153,6 +152,7 @@ async def bert_save_model(
 
     try:
         print("Dataset: Copying csv dataset files into saved model subdir")
+        datetime_start = datetime.now()
         saved_model_extra_dir = BERT_OPTIONS.BERT_SAVED_MODEL_EXTRA_BASE_DIR
         saved_model_dataset_subdir_path = get_full_dir_normal_path(
             [model_save_path, saved_model_extra_dir, dataset_name])
@@ -171,6 +171,9 @@ async def bert_save_model(
         with open(file=last_saved_dataset_ini_fpath,
                   mode="w", encoding="utf-8") as dataset_ini_file:
             dataset_ini_file.write(saved_model_dataset_subdir_path)
+
+        dataset_save_time = (datetime.now() - datetime_start).total_seconds()
+        dataset_save_time = round(dataset_save_time, 1)
 
         print("Model: Saving trained model into request passed dir or random dir")
         datetime_start = datetime.now()
@@ -192,6 +195,9 @@ async def bert_save_model(
         with open(file=last_saved_model_ini_fpath,
                   mode="w", encoding="utf-8") as model_ini_file:
             model_ini_file.write(model_save_path)
+
+        model_save_time = (datetime.now() - datetime_start).total_seconds()
+        model_save_time = round(model_save_time, 1)
 
         bert_model_inst.last_saved_model_dir = model_save_path  # Double assigning attr in addition to save_model()
         bert_model_inst.last_saved_dataset_dir = saved_model_dataset_subdir_path  # Double assigning attr in addition to save_model()
@@ -229,8 +235,8 @@ async def bert_save_model(
                 ongoing_session=pgs_session,
                 new_data=trained_model_upd_data)
 
-        model_saving_time = (datetime.now() - datetime_start).total_seconds()
-        model_saving_time = round(model_saving_time, 1)
+        model_save_time = (datetime.now() - datetime_start).total_seconds()
+        model_save_time = round(model_save_time, 1)
 
         new_model_path_dirs = model_save_path.split(os.sep)
         new_model_name = new_model_path_dirs[-1]  # Same as new model directory name
@@ -240,7 +246,7 @@ async def bert_save_model(
                 "train_status": STATUSES.STATUS_TRAINED_MODEL_SAVE_FINISH_EN,
                 "train_complete_status": "complete",
                 "new_model_name": new_model_name,
-                "model_saving_time": model_saving_time,
+                "model_save_time": model_save_time,
                 "train_step_11_saving_model_after_training_finished": "[OK]", }
             redis_error = await redis_save_key_mapping_dict(
                 key_name=dataset_name,
@@ -259,7 +265,8 @@ async def bert_save_model(
             f"Pretrained Model download dir: {BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH}\n"
             f"Trained Model common save dir: {BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH}\n"
             f"Trained Model saved dir path: {blue_color}{model_save_path}{reset_color}\n"
-            f"Trained Model saving time: {model_saving_time}\n")
+            f"Dataset saving time: {dataset_save_time}\n"
+            f"Trained Model saving time: {model_save_time}\n")
 
         if save_after_train_flag:
             log_text = (

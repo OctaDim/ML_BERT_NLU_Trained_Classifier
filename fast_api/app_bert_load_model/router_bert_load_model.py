@@ -122,9 +122,8 @@ async def bert_load_model(
             detail=log_text)
 
     try:
-        datetime_start = datetime.now()
-
         print("Dataset: Creating new random dir path to save loaded dataset:")
+        datetime_start = datetime.now()
         dataset_save_new_path = get_new_dataset_rand_dir_path()
         dataset_save_path_dirs = dataset_save_new_path.split(os.sep)
         dataset_save_new_name = dataset_save_path_dirs[-1]  # Dataset dir as dataset name
@@ -147,7 +146,11 @@ async def bert_load_model(
                   mode="w", encoding="utf-8") as dataset_ini_file:
             dataset_ini_file.write(dataset_save_new_path)
 
+        dataset_load_copy_time = (datetime.now() - datetime_start).total_seconds()
+        dataset_load_copy_time = round(dataset_load_copy_time, 1)
+
         print("Model: Loading model data from directory")
+        datetime_start = datetime.now()
         model_load_path = get_full_dir_normal_path([model_load_path, ])
         error_log = bert_model_inst.load_model(
             model_load_dir_path=model_load_path)
@@ -160,6 +163,7 @@ async def bert_load_model(
         model_load_time = round(model_load_time, 1)
 
         print("Model: Creating new random dir path to save loaded model:")
+        datetime_start = datetime.now()
         model_save_rand_path = get_new_model_random_dir_path()
 
         print("Model: BERT saving model after loading:")
@@ -182,7 +186,10 @@ async def bert_load_model(
                   mode="w", encoding="utf-8") as model_ini_file:
             model_ini_file.write(model_save_rand_path)
 
-        print("Dataset: Saving last saved dataset dir path into instance attr")
+        model_save_time = (datetime.now() - datetime_start).total_seconds()
+        model_save_time = round(model_save_time, 1)
+
+        print("Saving last saved model and dataset dir path into instance attrs")
         bert_model_inst.last_saved_model_dir = model_save_rand_path  # Double assigning attr in addition to save_model()
         bert_model_inst.last_saved_dataset_dir = dataset_save_new_path  # Double assigning attr in addition to save_model()
 
@@ -228,8 +235,9 @@ async def bert_load_model(
             f"Pretrained Model download dir: {BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH}\n"
             f"Trained Model common load dir: {BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH}\n"
             f"Trained Model loaded dir path: {blue_color}{model_load_path}{reset_color}\n"
-
-            f"Trained Model loading time: {model_load_time}\n")
+            f"Dataset loading and copying time: {dataset_load_copy_time}\n"
+            f"Trained Model loading time: {model_load_time}\n"
+            f"Trained Model saving time: {model_save_time}\n")
         print(log_text)
 
         json_response = JSONResponse(
