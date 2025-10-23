@@ -172,9 +172,6 @@ class BERT_OPTIONS:
     # TRAINED MODELS BASE PATH OPTIONS
     BERT_TRAINED_MODELS_BASE_PATH: str = "WORKING_DATA/trained_product_bert_models"
     BERT_TRAINED_MODELS_SAVE_DIR_PREFIX: str = "trained_bert"
-    # SAVED MODELS BASE PATH OPTIONS
-    BERT_SAVED_MODEL_EXTRA_BASE_DIR: str = "saved_model_extra_data"
-    BERT_SAVED_MODEL_METADATA_FILE_NAME: str = "model_metadata.pt"
     # DATASETS CSV OPTIONS
     BERT_INITIAL_DATASET_CSV_PATH: str = "ML_BERT_train_datasets/product_init_train_dataset"
     BERT_TRAIN_DATASET_FILE_EXTENSIONS: tuple = ("xlsx", "xls", "txt", "csv")
