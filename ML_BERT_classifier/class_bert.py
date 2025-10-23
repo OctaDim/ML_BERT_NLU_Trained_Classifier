@@ -9,10 +9,12 @@ from torch.utils.data import DataLoader, TensorDataset
 from transformers import BertForSequenceClassification, BertTokenizer
 
 from configs.console_colors import CONSOLE_COLORS
-from configs.settings import REDIS_OPTIONS, BERT_OPTIONS
+from configs.hard_constants import HARD_CONST
+from configs.settings import REDIS_OPTIONS
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
     redis_save_key_mapping_dict)
-from utils_common.normalized_path import get_full_file_normal_path, get_full_dir_normal_path
+from utils_common.normalized_path import (
+    get_full_file_normal_path, get_full_dir_normal_path)
 
 
 class ClassifierBERT:
@@ -302,26 +304,26 @@ class ClassifierBERT:
             self.last_saved_model_dir = model_save_dir_path
             self.last_saved_dataset_dir = dataset_save_dir_path
 
-            saved_model_extra_dir = BERT_OPTIONS.BERT_SAVED_MODEL_EXTRA_BASE_DIR
-            saved_model_extra_dir_path = get_full_dir_normal_path(
-                all_dir_str_parts=[model_save_dir_path, saved_model_extra_dir])
-            os.makedirs(saved_model_extra_dir_path, exist_ok=True)
+            model_save_extra_dir_path = get_full_dir_normal_path(
+                all_dir_str_parts=[model_save_dir_path,
+                                   HARD_CONST.SAVED_MODEL_EXTRA_DIR])
+            os.makedirs(model_save_extra_dir_path, exist_ok=True)
 
-            model_metadata_f_name = BERT_OPTIONS.BERT_SAVED_MODEL_METADATA_FILE_NAME
-            save_model_metadata_fpath = get_full_file_normal_path(
-                all_dir_str_parts=[model_save_dir_path, saved_model_extra_dir],
-                file_name_with_ext=model_metadata_f_name)
-            save_model_metadata = {
+            model_save_metadata_fpath = get_full_file_normal_path(
+                all_dir_str_parts=[model_save_dir_path,
+                                   HARD_CONST.SAVED_MODEL_EXTRA_DIR],
+                file_name_with_ext=HARD_CONST.SAVED_MODEL_METADATA_PT_FN)
+            model_save_metadata = {
                 "labels": self.labels,
                 "model_name": self.model_name,
                 "cache_dir": self.cache_dir,
                 "max_len": self.max_len,
                 "device": self.device,
                 "last_saved_model_dir": self.last_saved_model_dir,
-                "last_saved_dataset_dir": self.last_saved_dataset_dir, }
-            torch.save(obj=save_model_metadata,
-                       f=save_model_metadata_fpath)
-            print(">>>>>>> save_model_metadata:", save_model_metadata)
+                "last_saved_dataset_dir": self.last_saved_dataset_dir}
+            torch.save(obj=model_save_metadata,
+                       f=model_save_metadata_fpath)
+            print(">>>>>>> save_model_metadata:", model_save_metadata)
         except Exception as error:
             error_log = f"BERT Model saving [ERROR]: error: {error}"
             print(error_log)
@@ -344,11 +346,10 @@ class ClassifierBERT:
             self.tokenizer = BertTokenizer.from_pretrained(model_load_dir_path)
             self.last_saved_model_dir = model_load_dir_path
 
-            saved_model_extra_dir = BERT_OPTIONS.BERT_SAVED_MODEL_EXTRA_BASE_DIR
-            model_metadata_f_name = BERT_OPTIONS.BERT_SAVED_MODEL_METADATA_FILE_NAME
             load_model_metadata_fpath = get_full_file_normal_path(
-                all_dir_str_parts=[model_load_dir_path, saved_model_extra_dir],
-                file_name_with_ext=model_metadata_f_name)
+                all_dir_str_parts=[model_load_dir_path,
+                                   HARD_CONST.SAVED_MODEL_EXTRA_DIR],
+                file_name_with_ext=HARD_CONST.SAVED_MODEL_METADATA_PT_FN)
 
             loaded_model_metadata = torch.load(f=load_model_metadata_fpath)
             self.labels = loaded_model_metadata["labels"]
