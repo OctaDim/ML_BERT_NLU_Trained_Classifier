@@ -1,13 +1,16 @@
+import json
 import os
 import shutil
 from datetime import datetime
 from typing import Annotated
 
+import aiofiles
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
+from configs.hard_constants import HARD_CONST
 from configs.settings import (
     BERT_MODEL_NAMES, BERT_OPTIONS, ALCHEMY_OPTIONS, BASE_DIR)
 from db_postgres.postgres_async_conn.pgs_async_connection import (
@@ -16,7 +19,8 @@ from db_postgres.postgres_async_conn.postgres_async_session import (
     PostgresSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
-from db_postgres.postgres_models.direct_predict_model import DirectPredictModel
+from db_postgres.postgres_models.direct_predict_model import (
+    DirectPredictModel)
 from db_postgres.postgres_models.trained_bert_model import (
     TrainedBertModel)
 from db_postgres.postgres_queries.qry_deactivate_all_direct_cat_text_records import (
@@ -131,7 +135,7 @@ async def bert_load_model(
     try:
         print("Model: Loading model data from directory")
         datetime_start = datetime.now()
-        model_load_path = get_full_dir_normal_path([model_load_path, ])
+        model_load_path = get_full_dir_normal_path([model_load_path])
         error_log = bert_model_inst.load_model(
             model_load_dir_path=model_load_path)
         if error_log:
@@ -149,8 +153,21 @@ async def bert_load_model(
         dataset_save_new_name = dataset_save_path_dirs[-1]  # Dataset dir as dataset name
 
         print("Dataset: Copying model loaded dataset into new random dir:")
-        # TODO: Getting last dataset dir from saved model file, not from instance
-        loaded_model_dataset_subdir = bert_model_inst.last_saved_dataset_dir
+        loaded_model_extra_data_fpath = get_full_file_normal_path(
+            all_dir_str_parts=[model_load_path,
+                               HARD_CONST.SAVED_MODEL_EXTRA_DIR],
+            file_name_with_ext=HARD_CONST.SAVED_MODEL_EXTRA_DATA_JSON_FN)
+        async with (aiofiles.open(
+                file=loaded_model_extra_data_fpath,
+                mode="r", encoding="utf-8") as model_extra_data_f):
+            json_data = await model_extra_data_f.read()
+            loaded_model_extra_data = json.loads(json_data)
+
+        loaded_model_dataset_name = loaded_model_extra_data["saved dataset name"]
+        loaded_model_dataset_subdir = get_full_dir_normal_path(
+            all_dir_str_parts=[model_load_path,
+                               HARD_CONST.SAVED_MODEL_EXTRA_DIR,
+                               loaded_model_dataset_name])
         shutil.copytree(src=loaded_model_dataset_subdir,
                         dst=dataset_save_new_dir_path,
                         dirs_exist_ok=True)
@@ -196,20 +213,63 @@ async def bert_load_model(
         model_save_time = (datetime.now() - datetime_start).total_seconds()
         model_save_time = round(model_save_time, 1)
 
+        print("Extra Data: Copying loaded model dataset into extra dir")
+        datetime_start = datetime.now()
+        model_save_rand_dir_subdir = get_full_dir_normal_path(
+            all_dir_str_parts=[model_save_rand_path,
+                               HARD_CONST.SAVED_MODEL_EXTRA_DIR,
+                               dataset_save_new_name])
+        shutil.copytree(src=loaded_model_dataset_subdir,
+                        dst=model_save_rand_dir_subdir,
+                        dirs_exist_ok=True)
+
+        print("Extra Data: Writing loaded model-dataset extra data into json")
+        model_save_rand_path_dirs = model_save_rand_path.split(os.sep)
+        model_save_rand_name = model_save_rand_path_dirs[-1]  # Same as new model directory name
+
+        saved_model_extra_dir_path = get_full_dir_normal_path(
+            all_dir_str_parts=[model_save_rand_path,
+                               HARD_CONST.SAVED_MODEL_EXTRA_DIR])
+        os.makedirs(saved_model_extra_dir_path, exist_ok=True)
+
+        saved_model_extra_data_fpath = get_full_file_normal_path(
+            all_dir_str_parts=[model_save_rand_path,
+                               HARD_CONST.SAVED_MODEL_EXTRA_DIR],
+            file_name_with_ext=HARD_CONST.SAVED_MODEL_EXTRA_DATA_JSON_FN)
+        saved_model_extra_data = {
+            "saved model name": model_save_rand_name,
+            "saved dataset name": dataset_save_new_name,
+            "original model saving path": model_save_rand_path,
+            "original dataset saving path": dataset_save_new_dir_path,
+            "account_id": account_data.account_id,
+            "account_username": account_data.account_username,
+            # "save_after_train_flag": save_after_train_flag,
+            "original dataset name": loaded_model_dataset_name,
+            "original dataset dir": loaded_model_dataset_subdir}
+        async with aiofiles.open(
+                file=saved_model_extra_data_fpath,
+                mode="w", encoding="utf-8") as model_extra_data_f:
+            json_data = json.dumps(obj=saved_model_extra_data,
+                                   indent=4, ensure_ascii=False)
+            await model_extra_data_f.write(json_data)
+
+        extra_data_save_time = (datetime.now() - datetime_start).total_seconds()
+        extra_data_save_time = round(extra_data_save_time, 1)
+
         print("Saving last saved model and dataset dir path into instance attrs")
         bert_model_inst.last_saved_model_dir = model_save_rand_path  # Double assigning attr in addition to save_model()
         bert_model_inst.last_saved_dataset_dir = dataset_save_new_dir_path  # Double assigning attr in addition to save_model()
 
         print("Getting loaded-copied csv category-text file path:")
-        direct_cat_text_csv_fname = BERT_OPTIONS.BERT_DIRECT_CATEGORY_TEXT_CSV_FILE_NAME
+        direct_cat_text_csv_f_name = BERT_OPTIONS.BERT_DIRECT_CATEGORY_TEXT_CSV_FILE_NAME
         loaded_direct_cat_text_fpath = get_full_file_normal_path(
-            all_dir_str_parts=[loaded_model_dataset_subdir, ],  # equal dataset_save_new_dir_path
-            file_name_with_ext=direct_cat_text_csv_fname)
+            all_dir_str_parts=[loaded_model_dataset_subdir],  # equal dataset_save_new_dir_path
+            file_name_with_ext=direct_cat_text_csv_f_name)
 
         print("Getting category-text dicts list from loaded-copied csv file:")
         with open(file=loaded_direct_cat_text_fpath,
-                  mode="r", encoding="utf-8") as direct_cat_text_csvf:
-            direct_cat_text = CsvDirectCategoryText(direct_cat_text_csvf)
+                  mode="r", encoding="utf-8") as direct_cat_text_csv_f:
+            direct_cat_text = CsvDirectCategoryText(direct_cat_text_csv_f)
             loaded_direct_cat_text_list = direct_cat_text.get_direct_categories_texts_list()
         # print(f"loaded_direct_cat_text_list: {loaded_direct_cat_text_list}")  # Too long
         print(f"type(loaded_direct_cat_text_list): {type(loaded_direct_cat_text_list)}")
@@ -264,14 +324,15 @@ async def bert_load_model(
         log_text = (
             f"BERT Model loaded [OK]:\n"
             f"username: {auth_data.username}\n"
-            f"Pretrained Model init: {BERT_OPTIONS.BERT_MODEL_INIT}\n"
-            f"Pretrained Model name: {BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED}\n"
-            f"Pretrained Model download dir: {BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH}\n"
-            f"Trained Model common load dir: {BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH}\n"
-            f"Trained Model loaded dir path: {blue_color}{model_load_path}{reset_color}\n"
-            f"Dataset loading and copying time: {dataset_load_copy_time}\n"
-            f"Trained Model loading time: {model_load_time}\n"
-            f"Trained Model saving time: {model_save_time}\n")
+            f"pretrained model init: {BERT_OPTIONS.BERT_MODEL_INIT}\n"
+            f"pretrained model name: {BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED}\n"
+            f"pretrained model download dir: {BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH}\n"
+            f"trained model common load dir: {BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH}\n"
+            f"trained model loaded dir path: {blue_color}{model_load_path}{reset_color}\n"
+            f"dataset loading and copying time: {dataset_load_copy_time}\n"
+            f"trained model loading time: {model_load_time}\n"
+            f"trained model saving time: {model_save_time}\n"
+            f"extra data saving time: {extra_data_save_time}\n")
         print(log_text)
 
         json_response = JSONResponse(

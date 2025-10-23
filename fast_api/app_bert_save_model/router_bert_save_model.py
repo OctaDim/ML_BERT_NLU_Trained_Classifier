@@ -1,13 +1,16 @@
+import json
 import os
 import shutil
 from datetime import datetime, timedelta
 from typing import Annotated
 
+import aiofiles
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
+from configs.hard_constants import HARD_CONST
 from configs.settings import (
     BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, REDIS_OPTIONS, STATUSES,
     ALCHEMY_OPTIONS)
@@ -150,13 +153,16 @@ async def bert_save_model(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=log_text)
 
+    new_model_path_dirs = model_save_path.split(os.sep)
+    new_model_name = new_model_path_dirs[-1]  # Same as new model directory name
+
     try:
         print("Dataset: Copying csv dataset files into saved model subdir")
         datetime_start = datetime.now()
-        saved_model_extra_dir = BERT_OPTIONS.BERT_SAVED_MODEL_EXTRA_BASE_DIR
         saved_model_dataset_subdir_path = get_full_dir_normal_path(
-            [model_save_path, saved_model_extra_dir, dataset_name])
-        #TODO: Saving last dataset dir into saved model dir file, not into instance
+            all_dir_str_parts=[model_save_path,
+                               HARD_CONST.SAVED_MODEL_EXTRA_DIR,
+                               dataset_name])
         shutil.copytree(src=train_dataset_dir,
                         dst=saved_model_dataset_subdir_path,
                         dirs_exist_ok=True)
@@ -199,6 +205,38 @@ async def bert_save_model(
         model_save_time = (datetime.now() - datetime_start).total_seconds()
         model_save_time = round(model_save_time, 1)
 
+        print("Extra Data: Writing saved model-dataset extra data into json")
+        datetime_start = datetime.now()
+        saved_model_extra_dir_path = get_full_dir_normal_path(
+            all_dir_str_parts=[model_save_path,
+                               HARD_CONST.SAVED_MODEL_EXTRA_DIR])
+        os.makedirs(saved_model_extra_dir_path, exist_ok=True)
+
+        saved_model_extra_data_fpath = get_full_file_normal_path(
+            all_dir_str_parts=[model_save_path,
+                               HARD_CONST.SAVED_MODEL_EXTRA_DIR],
+            file_name_with_ext=HARD_CONST.SAVED_MODEL_EXTRA_DATA_JSON_FN)
+        saved_model_extra_data = {
+            "saved model name": new_model_name,
+            "saved dataset name": dataset_name,
+            "original model saving path": model_save_path,
+            "original dataset saving path": saved_model_dataset_subdir_path,
+            "account_id": account_data.account_id,
+            "account_username": account_data.account_username,
+            "save_after_train_flag": save_after_train_flag,
+            "original dataset name": dataset_name,
+            "original dataset dir": train_dataset_dir}
+        async with aiofiles.open(
+                file=saved_model_extra_data_fpath,
+                mode="w", encoding="utf-8") as model_extra_data_f:
+            json_data = json.dumps(obj=saved_model_extra_data,
+                                   indent=4, ensure_ascii=False)
+            await model_extra_data_f.write(json_data)
+
+        extra_data_save_time = (datetime.now() - datetime_start).total_seconds()
+        extra_data_save_time = round(extra_data_save_time, 1)
+
+        print("Saving last saved model and dataset dirs into instance attrs:")
         bert_model_inst.last_saved_model_dir = model_save_path  # Double assigning attr in addition to save_model()
         bert_model_inst.last_saved_dataset_dir = saved_model_dataset_subdir_path  # Double assigning attr in addition to save_model()
 
@@ -235,12 +273,6 @@ async def bert_save_model(
                 ongoing_session=pgs_session,
                 new_data=trained_model_upd_data)
 
-        model_save_time = (datetime.now() - datetime_start).total_seconds()
-        model_save_time = round(model_save_time, 1)
-
-        new_model_path_dirs = model_save_path.split(os.sep)
-        new_model_name = new_model_path_dirs[-1]  # Same as new model directory name
-
         if save_after_train_flag:
             redis_update = {
                 "train_status": STATUSES.STATUS_TRAINED_MODEL_SAVE_FINISH_EN,
@@ -260,13 +292,14 @@ async def bert_save_model(
         log_text = (
             f"BERT Model saved [OK]:\n"
             f"username: {auth_data.username}\n"
-            f"Pretrained Model init: {BERT_OPTIONS.BERT_MODEL_INIT}\n"
-            f"Pretrained Model name: {BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED}\n"
-            f"Pretrained Model download dir: {BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH}\n"
-            f"Trained Model common save dir: {BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH}\n"
-            f"Trained Model saved dir path: {blue_color}{model_save_path}{reset_color}\n"
-            f"Dataset saving time: {dataset_save_time}\n"
-            f"Trained Model saving time: {model_save_time}\n")
+            f"pretrained model init: {BERT_OPTIONS.BERT_MODEL_INIT}\n"
+            f"pretrained model name: {BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED}\n"
+            f"pretrained model download dir: {BERT_OPTIONS.BERT_INITIAL_MODEL_DOWNLOAD_PATH}\n"
+            f"trained model common save dir: {BERT_OPTIONS.BERT_TRAINED_MODELS_BASE_PATH}\n"
+            f"trained model saved dir path: {blue_color}{model_save_path}{reset_color}\n"
+            f"dataset saving time: {dataset_save_time}\n"
+            f"model saving time: {model_save_time}\n"
+            f"extra data saving time: {extra_data_save_time}\n")
 
         if save_after_train_flag:
             log_text = (
