@@ -72,3 +72,5 @@ SQLAlchemy==2.0.43
 asyncpg==0.30.0
 alembic==1.16.5
 async-timeout==5.0.1
+sqladmin==0.21.0
+bcrypt==4.3.0
