@@ -3,10 +3,15 @@ from typing import AsyncGenerator
 
 import uvicorn
 from fastapi import FastAPI
+from sqladmin import Admin
+from starlette.applications import Starlette
+from starlette.middleware.sessions import SessionMiddleware
 
 from ML_BERT_classifier.init_bert import init_and_start_bert_model
-from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS, ALCHEMY_OPTIONS
-from db_postgres.postgres_async_conn.pgs_async_connection import close_all_db_connections
+from admin_panel.admin_auth_role import AdminAuthRoleAuthBackend
+from admin_panel.admin_direct_predict import DirectPredictAdmin
+from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS, ALCHEMY_OPTIONS, FASTAPI_SESSION_KEY
+from db_postgres.postgres_async_conn.pgs_async_connection import close_all_db_connections, PostgresConnection
 from db_postgres.postgres_init.db_tables_initialization import initialize_db_tables
 from fast_api.app_add_single_category.router_add_single_category import router_bert_add_single_category
 from fast_api.app_add_text_category.router_add_text_category import router_bert_add_text_category
@@ -92,11 +97,48 @@ async def fast_api_lifespan(app: FastAPI) -> AsyncGenerator:
     await lifespan_on_shutdown()
 
 
-def create_fastapi_application() -> FastAPI:
+def setup_admin_panel(
+        application: FastAPI | Starlette,
+        fastapi_session_key: str
+) -> Admin:
+    authentication_backend = AdminAuthRoleAuthBackend(
+        secret_key=fastapi_session_key)
+    admin = Admin(
+        app=application,
+        engine=PostgresConnection().engine,
+        authentication_backend=authentication_backend,
+        session_maker=None,
+        base_url="/admin-api",
+        title="Admin Panel",
+        logo_url=None,
+        favicon_url=None,
+        middlewares=None,
+        debug=False,
+        templates_dir="templates")
+    admin.add_view(DirectPredictAdmin)
+    return admin
+
+
+def create_fastapi_application() -> SessionMiddleware:
     fastapi_app = FastAPI(lifespan=fast_api_lifespan)
     for cur_router in routers_list:
         fastapi_app.include_router(router=cur_router, )
-    return fastapi_app
+
+    setup_admin_panel(application=fastapi_app,
+                      fastapi_session_key=FASTAPI_SESSION_KEY)
+
+    fastapi_app_with_middleware = SessionMiddleware(
+        app=fastapi_app,
+        secret_key=FASTAPI_SESSION_KEY,
+        session_cookie="admin_session",
+        max_age=600,
+        path="/",
+        same_site="lax",  # "lax", "strict" or "none"
+        https_only=False,
+        domain=None)
+
+    # return fastapi_app
+    return fastapi_app_with_middleware
 
 
 def run_uvicorn_fastapi_server():
