@@ -64,6 +64,24 @@ API_USERNAME: str = api_conf_parser.get(section=api_conf_name, option="API_USERN
 API_PASSWORD: str = api_conf_parser.get(section=api_conf_name, option="API_PASSWORD")
 
 
+# GETTING SQLADMIN INI CONFIGS #########################################
+@dataclass(frozen=True)
+class SQLADMIN_CONFIG_NAMES:
+    SQLADMIN_PRODUCT_ANY_IP = "SQLAdmin_any_ip_prod_configs"
+
+sqladmin_ini_full_path = os.path.join(BASE_DIR, ".configs_sqladmin.ini")
+sqladmin_ini_normal_path = os.path.normpath(sqladmin_ini_full_path)
+sqladmin_conf_parser = ConfigParser()
+sqladmin_conf_parser.read(filenames=sqladmin_ini_normal_path)
+
+if cur_external_ip == "___.___.___.___":
+    sqladmin_conf_name = SQLADMIN_CONFIG_NAMES.SQLADMIN_PRODUCT_ANY_IP  # Certain configs can be defined
+else:
+    sqladmin_conf_name = SQLADMIN_CONFIG_NAMES.SQLADMIN_PRODUCT_ANY_IP
+
+SQLADMIN_SESSION_KEY = sqladmin_conf_parser.get(section=sqladmin_conf_name, option="SECRET_SESSION_KEY")
+
+
 # GETTING REDIS INI CONFIGS ############################################
 @dataclass(frozen=True)
 class REDIS_CONFIG_NAMES:
@@ -125,6 +143,12 @@ POSTGRES_PASSWORD = postgres_conf_parser.get(section=postgres_conf_name, option=
 POSTGRES_HOST = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_HOST")
 POSTGRES_PORT = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_PORT") or None
 POSTGRES_DB_NAME = postgres_conf_parser.get(section=postgres_conf_name, option="POSTGRES_DB_NAME")
+
+
+@dataclass(frozen=True)
+class ADMIN_PANEL_OPTIONS:
+    DATASET_ACTION_NAME = "Перенести записи в обучающий ML датасет"
+    DATASET_CONFIRM_MSG = "ПОДТВЕРДИТЕ перенос выбранных данных в обучающий датасет"
 
 
 @dataclass(frozen=True)
