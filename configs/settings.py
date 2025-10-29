@@ -66,20 +66,22 @@ API_PASSWORD: str = api_conf_parser.get(section=api_conf_name, option="API_PASSW
 
 # GETTING SQLADMIN INI CONFIGS #########################################
 @dataclass(frozen=True)
-class SQLADMIN_CONFIG_NAMES:
-    SQLADMIN_PRODUCT_ANY_IP = "SQLAdmin_any_ip_prod_configs"
+class FASTAPI_CONFIG_NAMES:
+    FASTAPI_PRODUCT_ANY_IP = "FastAPI_any_ip_prod_configs"
 
-sqladmin_ini_full_path = os.path.join(BASE_DIR, ".configs_sqladmin.ini")
-sqladmin_ini_normal_path = os.path.normpath(sqladmin_ini_full_path)
-sqladmin_conf_parser = ConfigParser()
-sqladmin_conf_parser.read(filenames=sqladmin_ini_normal_path)
+
+fastapi_ini_full_path = os.path.join(BASE_DIR, ".configs_fastapi.ini")
+fastapi_ini_normal_path = os.path.normpath(fastapi_ini_full_path)
+fastapi_conf_parser = ConfigParser()
+fastapi_conf_parser.read(filenames=fastapi_ini_normal_path)
 
 if cur_external_ip == "___.___.___.___":
-    sqladmin_conf_name = SQLADMIN_CONFIG_NAMES.SQLADMIN_PRODUCT_ANY_IP  # Certain configs can be defined
+    fastapi_conf_name = FASTAPI_CONFIG_NAMES.FASTAPI_PRODUCT_ANY_IP  # Certain configs can be defined
 else:
-    sqladmin_conf_name = SQLADMIN_CONFIG_NAMES.SQLADMIN_PRODUCT_ANY_IP
+    fastapi_conf_name = FASTAPI_CONFIG_NAMES.FASTAPI_PRODUCT_ANY_IP
 
-SQLADMIN_SESSION_KEY = sqladmin_conf_parser.get(section=sqladmin_conf_name, option="SECRET_SESSION_KEY")
+FASTAPI_SESSION_KEY = fastapi_conf_parser.get(section=fastapi_conf_name,
+                                              option="FASTAPI_SESSION_KEY")
 
 
 # GETTING REDIS INI CONFIGS ############################################
