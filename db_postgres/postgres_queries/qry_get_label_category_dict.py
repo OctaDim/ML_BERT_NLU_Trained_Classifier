@@ -1,5 +1,3 @@
-from typing import Dict
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db_postgres.postgres_models.label_category_model import (
