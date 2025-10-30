@@ -1,18 +1,12 @@
-from enum import Enum
 from typing import Optional
 
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
+from configs.enums import USER_ROLE
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
 from db_postgres.postgres_models.orm_models_fields_mixins import (
     ActiveMix, CreateUpdateMix)
-
-
-class UserRole(Enum):
-    SUPERADMIN = "superadmin"
-    ADMIN = "admin"
-    USER = "user"
 
 
 class AuthRoleModel(Base, ActiveMix, CreateUpdateMix):
@@ -25,5 +19,5 @@ class AuthRoleModel(Base, ActiveMix, CreateUpdateMix):
 
     auth_username: Mapped[Optional[str]] = mapped_column(unique=True)
     auth_hashed_password: Mapped[Optional[str]] = mapped_column()
-    auth_role: Mapped[Optional[UserRole]] = mapped_column(
-        default=UserRole.USER)
+    auth_role: Mapped[Optional[USER_ROLE]] = mapped_column(
+        default=USER_ROLE.USER)
