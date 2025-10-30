@@ -10,7 +10,7 @@ from db_postgres.postgres_models.orm_models_fields_mixins import (
 
 
 class DraftCategoryTextModel(Base, ActiveMix,
-                             CreateUpdateMix, CreateReasonMix):
+                             CreateReasonMix, CreateUpdateMix):
     __tablename__ = "draft_category_text"
 
     id: Mapped[int] = mapped_column(primary_key=True)

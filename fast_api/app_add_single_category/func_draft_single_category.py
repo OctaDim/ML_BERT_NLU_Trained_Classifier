@@ -109,38 +109,56 @@ async def draft_add_single_category(
                 ongoing_session=pgs_session)
 
         if update_category in cur_cat_lab_dict:
-            new_draft_category = "category already exists in dataset"
+            existing_category = update_category
+            new_draft_category = "category exists in dataset"
+            current_status = DRAFT_STATUS.DRAFT_SKIPPED
+            active_val = False
+            creation_reason = (f"single cat: {update_category}, "
+                               f"active: {active_val}, {new_draft_category}")
         elif update_category in draft_categories_list:
-            new_draft_category = "category already exists in db drafts"
+            existing_category = None
+            new_draft_category = "category exists in db drafts"
+            current_status = DRAFT_STATUS.DRAFT_SKIPPED
+            active_val = False
+            creation_reason = (f"single category: {update_category}, "
+                               f"active: {active_val}, {new_draft_category}")
         else:
-            print("Postgres DB Saving single category to draft db data:")
-            pgs_conn = PostgresConnection()
-            async with PostgresSession(async_engine=pgs_conn.engine,
-                                       log_good_ops=log_pgs_good_ops
-                                       ) as pgs_session:
-                creation_reason = (f"single category added to db draft: "
-                                   f"{update_category}")
+            existing_category = None
+            new_draft_category = update_category
+            current_status = DRAFT_STATUS.DRAFT_ADDED
+            active_val = True
+            creation_reason = (f"single category: {update_category}, "
+                               f"active: {active_val}, {new_draft_category}")
 
-                customer_id = await find_create_customer_qry(
-                    ongoing_session=pgs_session,
-                    account_username=account_data.account_username,
-                    account_id=account_data.account_id,
-                    creation_reason=creation_reason)
+        print("Postgres DB Saving single category to draft db data:")
+        pgs_conn = PostgresConnection()
+        async with PostgresSession(async_engine=pgs_conn.engine,
+                                   log_good_ops=log_pgs_good_ops
+                                   ) as pgs_session:
+            customer_id = await find_create_customer_qry(
+                ongoing_session=pgs_session,
+                account_username=account_data.account_username,
+                account_id=account_data.account_id,
+                creation_reason=creation_reason)
 
-                new_draft_data = {
-                    "customer_id": customer_id,
-                    "account_id": account_data.account_id,
-                    "account_username": account_data.account_username,
-                    "draft_category": update_category,
-                    "current_status": DRAFT_STATUS.DRAFT_ADDED}
+            new_draft_data = {
+                "customer_id": customer_id,
+                "account_id": account_data.account_id,
+                "account_username": account_data.account_username,
+                "existing_category": existing_category,
+                "draft_category": update_category,
+                "current_status": current_status,
+                "active": active_val,
+                "creation_reason": creation_reason}
 
-                await save_new_model_data_qry(
-                    ModelClassORM=DraftCategoryTextModel,
-                    ongoing_session=pgs_session,
-                    new_data=new_draft_data)
-                new_draft_category = update_category
-                print(f"Postgres DB single category saved as draft [OK]:\n"
-                      f"new_draft_category: {new_draft_category}\n")
+            await save_new_model_data_qry(
+                ModelClassORM=DraftCategoryTextModel,
+                ongoing_session=pgs_session,
+                new_data=new_draft_data)
+            print(f"Postgres DB single category saved as draft [OK]:\n"
+                  f"new_draft_category: {new_draft_category}\n")
+            new_draft_category = update_category
+
         common_csv_f_note = "db draft table used instead of dataset"
         new_csv_files_data = {
             "lab_cat_csv_path": common_csv_f_note,

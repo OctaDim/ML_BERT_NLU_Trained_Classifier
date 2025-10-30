@@ -14,3 +14,4 @@ class DRAFT_STATUS(Enum):
     types also should be deleted and reinitialized in Postgres DB"""
     DRAFT_ADDED: str = "draft added"
     DATASET_ADDED: str = "dataset added"
+    DRAFT_SKIPPED: str = "draft skipped"
