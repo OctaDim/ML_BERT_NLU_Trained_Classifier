@@ -10,6 +10,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from ML_BERT_classifier.init_bert import init_and_start_bert_model
 from admin_panel.admin_auth_role import AdminAuthRoleAuthBackend
 from admin_panel.admin_direct_predict import DirectPredictAdmin
+from admin_panel.admin_draft_category_text import DraftCategoryTextAdmin
 from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS, ALCHEMY_OPTIONS, FASTAPI_SESSION_KEY
 from db_postgres.postgres_async_conn.pgs_async_connection import close_all_db_connections, PostgresConnection
 from db_postgres.postgres_init.db_tables_initialization import initialize_db_tables
@@ -63,6 +64,11 @@ routers_list = [
     router_develop_test_endpoint,
 ]
 
+admin_panel_views = [
+    DirectPredictAdmin,
+    DraftCategoryTextAdmin,
+]
+
 
 def run_redis():
     # TODO: Check Redis is available and start Redis if not
@@ -108,14 +114,15 @@ def setup_admin_panel(
         engine=PostgresConnection().engine,
         authentication_backend=authentication_backend,
         session_maker=None,
-        base_url="/admin-api",
+        base_url="/admin",
         title="Admin Panel",
         logo_url=None,
         favicon_url=None,
         middlewares=None,
         debug=False,
         templates_dir="templates")
-    admin.add_view(DirectPredictAdmin)
+    for cur_admin_view in admin_panel_views:
+        admin.add_view(cur_admin_view)
     return admin
 
 
