@@ -8,38 +8,58 @@ from db_postgres.postgres_models.direct_predict_model import (
 
 
 class DirectPredictAdmin(ModelView, model=DirectPredictModel):
-    name = "Direct Predict"
-    name_plural = "Direct Predicts"
-    icon = "Some Icon"
+    name = "DIRECT PREDICT"
+    name_plural = "DIRECT PREDICTS"
+    icon = "octadim"
 
-    column_list = [DirectPredictModel.id,
-                   DirectPredictModel.account_id,
-                   DirectPredictModel.account_username,
-                   DirectPredictModel.direct_category,
-                   DirectPredictModel.direct_text,
-                   # DirectPredictModel.updated_at,
-                   DirectPredictModel.created_at, ]
+    column_list = [
+        DirectPredictModel.id,
+        DirectPredictModel.account_id,
+        DirectPredictModel.account_username,
+        DirectPredictModel.direct_category,
+        DirectPredictModel.direct_text,
+        # DirectPredictModel.updated_at,
+        DirectPredictModel.created_at, ]
 
-    column_searchable_list = [DirectPredictModel.account_id,
-                              DirectPredictModel.account_username,
-                              DirectPredictModel.direct_category,
-                              DirectPredictModel.direct_text,
-                              DirectPredictModel.created_at, ]
+    column_labels = {
+        DirectPredictModel.id: "ID",
+        DirectPredictModel.account_id: "Account-ID",
+        DirectPredictModel.account_username: "Account-Username",
+        DirectPredictModel.direct_category: "Direct Category",
+        DirectPredictModel.direct_text: "Direct Text",
+        DirectPredictModel.created_at: "Created",
+        DirectPredictModel.updated_at: "Updated",
+        DirectPredictModel.active: "Active", }
 
-    # column_filters = [DirectPredictModel.direct_category,
-    #                   DirectPredictModel.active,
-    #                   DirectPredictModel.created_at]
+    column_searchable_list = [
+        DirectPredictModel.account_id,
+        DirectPredictModel.account_username,
+        DirectPredictModel.direct_category,
+        DirectPredictModel.direct_text,
+        DirectPredictModel.created_at, ]
 
-    column_default_sort = [(DirectPredictModel.created_at, False)]  # True - ascending, False - descending
+    # TODO: Settle issue with filter fields names or objs error
+    # column_filters = [
+    #     DirectPredictModel.direct_category,
+    #     DirectPredictModel.active,
+    #     DirectPredictModel.created_at, ]
 
-    form_columns = ["account_id",
-                    "account_username",
-                    "direct_category",
-                    "direct_text",
-                    "active"]
+    column_default_sort = [
+        (DirectPredictModel.created_at, False), ]  # True - ascending, False - descending
 
-    # form_excluded_columns = [
-    #     "id", "created_at", "updated_at", "creation_reason"]  # If form_columns not defined
+    form_columns = [
+        DirectPredictModel.account_id,
+        DirectPredictModel.account_username,
+        DirectPredictModel.direct_category,
+        DirectPredictModel.direct_text,
+        DirectPredictModel.active,
+    ]
+
+    # form_excluded_columns = [  # If form_columns not defined
+    #     "id",
+    #     "created_at",
+    #     "updated_at",
+    #     "creation_reason", ]
 
     page_size = 200
     page_size_options = [25, 50, 100, 200]
@@ -63,7 +83,8 @@ class DirectPredictAdmin(ModelView, model=DirectPredictModel):
             add_in_detail=True,
             include_in_schema=True)
     async def custom_action_process(self, request: Request) -> RedirectResponse:
-        selected_ids_list = request.query_params.get("pks").split(sep=",")
-        print("admin panel: selected_ids_list: ", selected_ids_list)
+        selected_ids_str = request.query_params.get("pks").split(sep=",")
+        selected_ids_int = [int(ids_str) for ids_str in selected_ids_str]
+        print("admin panel: selected_ids_int: ", selected_ids_int)
         referer = request.headers.get("referer", "/admin")
         return RedirectResponse(referer)

@@ -149,8 +149,8 @@ POSTGRES_DB_NAME = postgres_conf_parser.get(section=postgres_conf_name, option="
 
 @dataclass(frozen=True)
 class ADMIN_PANEL_OPTIONS:
-    DATASET_ACTION_NAME = "Перенести записи в обучающий ML датасет"
-    DATASET_CONFIRM_MSG = "ПОДТВЕРДИТЕ перенос выбранных данных в обучающий датасет"
+    DATASET_ACTION_NAME = "TRANSFER SELECTED ITEMS IN ML DATASET"
+    DATASET_CONFIRM_MSG = "CONFIRM TRANSFER ACTION !?"
 
 
 @dataclass(frozen=True)
