@@ -110,7 +110,7 @@ async def add_draft_single_category(
         if update_category in cur_cat_lab_dict:
             existing_category = update_category
             new_draft_category = "category exists in dataset"
-            current_status = DRAFT_STATUS.DRAFT_SKIPPED
+            current_status = DRAFT_STATUS.DATASET_EXISTS
             active_val = False
             creation_reason = (f"single cat: {update_category}, "
                                f"active: {active_val}, {new_draft_category}")
@@ -120,17 +120,18 @@ async def add_draft_single_category(
             #  into db and csv at once
             existing_category = None
             new_draft_category = "category exists in db drafts"
-            current_status = DRAFT_STATUS.DRAFT_SKIPPED
+            current_status = DRAFT_STATUS.DRAFT_EXISTS
             active_val = False
             creation_reason = (f"single category: {update_category}, "
                                f"active: {active_val}, {new_draft_category}")
         else:
             existing_category = None
-            new_draft_category = update_category
+            new_draft_category = f"draft category: {update_category}"
             current_status = DRAFT_STATUS.DRAFT_ADDED
             active_val = True
             creation_reason = (f"single category: {update_category}, "
-                               f"active: {active_val}, {new_draft_category}")
+                               f"active: {active_val}, "
+                               f"new draft category: {new_draft_category}")
 
         print("DB Postgres Saving single category to draft db data:")
         pgs_conn = PostgresConnection()
@@ -159,7 +160,6 @@ async def add_draft_single_category(
                 new_data=new_draft_data)
             print(f"DB Postgres single category saved as draft [OK]:\n"
                   f"new_draft_category: {new_draft_category}\n")
-            new_draft_category = update_category
 
         common_csv_f_note = "db draft table used instead of dataset"
         new_csv_files_data = {
