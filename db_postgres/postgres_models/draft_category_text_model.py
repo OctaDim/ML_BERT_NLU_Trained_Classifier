@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from configs.enums import DRAFT_STATUS
@@ -23,5 +23,8 @@ class DraftCategoryTextModel(Base, ActiveMix,
     draft_category: Mapped[str] = mapped_column()
     draft_text: Mapped[Optional[str]] = mapped_column()
 
+    # current_status: Mapped[DRAFT_STATUS] = mapped_column(
+    #     default=DRAFT_STATUS.DRAFT_ADDED)
     current_status: Mapped[DRAFT_STATUS] = mapped_column(
+        Enum(DRAFT_STATUS, values_callable=lambda obj: [e.value for e in obj]),
         default=DRAFT_STATUS.DRAFT_ADDED)
