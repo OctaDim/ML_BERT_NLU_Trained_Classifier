@@ -11,6 +11,8 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
     name = "DRAFT CATEGORY-TEXT"
     name_plural = "DRAFTS CATEGORY-TEXT"
     icon = "octadim"
+    page_size = 200
+    page_size_options = [25, 50, 100, 200]
 
     column_list = [
         DraftCategoryTextModel.id,
@@ -45,12 +47,26 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
 
     # TODO: Settle issue with filter fields names or objs error
     # column_filters = [
-    #     DraftCategoryTextModel.direct_category,
+    #     DraftCategoryTextModel.account_id,
+    #     DraftCategoryTextModel.account_username,
+    #     DraftCategoryTextModel.existing_category,
+    #     DraftCategoryTextModel.draft_category,
+    #     DraftCategoryTextModel.draft_text,
+    #     DraftCategoryTextModel.current_status,
     #     DraftCategoryTextModel.active,
     #     DraftCategoryTextModel.created_at, ]
 
     column_default_sort = [
         (DraftCategoryTextModel.created_at, False), ]  # True - ascending, False - descending
+
+    column_sortable_list = [
+        DraftCategoryTextModel.account_id,
+        DraftCategoryTextModel.account_username,
+        DraftCategoryTextModel.existing_category,
+        DraftCategoryTextModel.draft_category,
+        DraftCategoryTextModel.draft_text,
+        DraftCategoryTextModel.current_status,
+        DraftCategoryTextModel.created_at, ]
 
     form_columns = [
         DraftCategoryTextModel.draft_category,
@@ -64,8 +80,13 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
     #     "updated_at",
     #     "creation_reason", ]
 
-    page_size = 200
-    page_size_options = [25, 50, 100, 200]
+    @staticmethod
+    def format_current_status(model, attribute):
+        list_display_value = model.current_status.value
+        return list_display_value
+
+    column_formatters = {DraftCategoryTextModel.current_status: format_current_status}
+    column_formatters_detail = {DraftCategoryTextModel.current_status: format_current_status}
 
     def can_view_details(self, request: Request) -> bool:
         return False
