@@ -14,8 +14,8 @@ from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
 from fast_api.app_add_single_category.func_add_single_category import (
     add_save_single_category)
-from fast_api.app_add_single_category.func_draft_single_category import (
-    draft_add_single_category)
+from fast_api.app_add_single_category.func_add_draft_single_category import (
+    add_draft_single_category)
 from fast_api.app_add_single_category.scheme_add_single_category import (
     SingleCategoryDataBert)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
@@ -51,24 +51,25 @@ async def bert_add_single_category(
 
     try:
         datetime_start = datetime.now()
-        if BERT_OPTIONS.BERT_DATASET_VIA_DRAFT_SINGLE_CATEGORY:  # Adding single category to db draft
-            new_csv_files_data = await draft_add_single_category(
+        if BERT_OPTIONS.BERT_DATASET_VIA_DRAFT_SINGLE_CATEGORY:  # Adding single category to db draft only (not csv)
+            new_csv_files_data = await add_draft_single_category(
                 account_data=account_data,
                 update_category=upd_single_category,
                 bert_model_inst=bert_model_inst)
-        else:  # Adding single category into dataset at once
+        else:  # Adding single category into db and csv dataset at once
             new_csv_files_data = await add_save_single_category(
                 account_data=account_data,
                 update_category=upd_single_category,
                 bert_model_inst=bert_model_inst)
+
+        adding_time = (datetime.now() - datetime_start).total_seconds()
+        adding_time = round(adding_time, 1)
 
         new_lab_cat_csv_path = new_csv_files_data.get("lab_cat_csv_path")
         new_text_lab_csv_path = new_csv_files_data.get("text_lab_csv_path")
         dataset_ini_file_path = new_csv_files_data.get("last_saved_dataset_ini_fpath")
         new_category = new_csv_files_data.get("new_category")
 
-        adding_time = (datetime.now() - datetime_start).total_seconds()
-        adding_time = round(adding_time, 1)
         json_response = JSONResponse(
             content={
                 "message": "BERT single category added [OK]",

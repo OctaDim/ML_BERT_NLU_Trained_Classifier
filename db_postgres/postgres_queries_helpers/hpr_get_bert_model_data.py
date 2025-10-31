@@ -25,27 +25,27 @@ async def get_postgres_bert_model_data_hpr() -> Dict[str, any]:
     async with PostgresSession(async_engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
-        print("DB Postgres Getting labels categories data:")
+        print("DB Postgres Getting labels-categories data:")
         pgs_lab_cat_dict = await get_label_category_dict_qry(
             ongoing_session=pgs_session,
             reversed_category_label_dict=False)
         print(f"pgs_lab_cat_dict: {pgs_lab_cat_dict}")  # Too long
         print(f"len(pgs_lab_cat_dict): {len(pgs_lab_cat_dict)}")
 
-        print("DB Postgres Getting texts labels dict data:")
+        print("DB Postgres Getting texts-labels dict data:")
         pgs_text_lab_dict = await get_label_text_dict_qry(
             ongoing_session=pgs_session,
             reversed_text_label_dict=True)
         # print(f"pgs_text_lab_dict: {pgs_text_lab_dict}")  # Too long
         print(f"len(pgs_text_lab_dict): {len(pgs_text_lab_dict)}")
 
-        print("DB Postgres Getting labels texts dicts list data:")
+        print("DB Postgres Getting labels-texts dicts list data:")
         pgs_lab_text_dicts_list = await get_label_text_dicts_list_qry(
             ongoing_session=pgs_session)
         # print(f"pgs_lab_text_dicts_list: {pgs_lab_text_dicts_list}")  # Too long
         print(f"len(pgs_lab_text_dicts_list): {len(pgs_lab_text_dicts_list)}")
 
-        print("DB Postgres Getting direct categories texts dicts list data:")
+        print("DB Postgres Getting direct categories-texts dicts list data:")
         pgs_direct_cat_text_dicts_list = await get_direct_cat_text_dicts_list_qry(
             ongoing_session=pgs_session)
         # print(f"pgs_direct_cat_text_dicts_list: {pgs_direct_cat_text_dicts_list}")  # Too long

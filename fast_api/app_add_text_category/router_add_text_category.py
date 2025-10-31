@@ -11,7 +11,10 @@ from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_OPTIONS
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
-from fast_api.app_account_data.scheme_account_data import AccountDataBert
+from fast_api.app_account_data.scheme_account_data import (
+    AccountDataBert)
+from fast_api.app_add_text_category.func_add_draft_text_category import (
+    add_draft_text_category_pair)
 from fast_api.app_add_text_category.func_add_save_text_category import (
     add_save_single_text_category)
 from fast_api.app_add_text_category.scheme_add_text_category import (
@@ -50,7 +53,14 @@ async def bert_add_text_category(
 
     try:
         datetime_start = datetime.now()
-        new_csv_files_data = await add_save_single_text_category(
+        if BERT_OPTIONS.BERT_DATASET_VIA_DRAFT_CATEGORY_TEXT:  # Adding text-category pair to db draft only (not csv)
+            new_csv_files_data = await add_draft_text_category_pair(
+            account_data=account_data,
+            update_text=update_text,
+            update_category=update_category,
+            bert_model_inst=bert_model_inst)
+        else:  # Adding text-category pair into db and csv dataset at once
+            new_csv_files_data = await add_save_single_text_category(
             account_data=account_data,
             update_text=update_text,
             update_category=update_category,

@@ -29,14 +29,14 @@ from utils_specific.get_last_saved_dataset_path import (
     get_last_saved_dataset_dir_path)
 
 
-async def draft_add_single_category(
+async def add_draft_single_category(
         account_data: AccountDataBert,
         update_category: str,
         bert_model_inst: ClassifierBERT
 ) -> dict:
     log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
-    print("Postgres DB Getting current category-label dictionary from db:")
+    print("DB Postgres Getting current category-label dictionary:")
     pgs_conn = PostgresConnection()
     async with PostgresSession(async_engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
@@ -94,13 +94,11 @@ async def draft_add_single_category(
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=error_log)
-    else:  # Postgres DB category-label data exists (if pgs_cat_lab_dict:)
+    else:  # if pgs_cat_lab_dict: Postgres DB category-label data exists
         cur_cat_lab_dict = pgs_cat_lab_dict
 
     try:
-        print("Checking single category already exists:")
-        print("cur_cat_lab_dict: ", cur_cat_lab_dict)
-        print("update_category: ", update_category)
+        print("DB Postgres Getting current draft categories list:")
         pgs_conn = PostgresConnection()
         async with PostgresSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
@@ -108,6 +106,7 @@ async def draft_add_single_category(
             draft_categories_list = await get_draft_category_list_qry(
                 ongoing_session=pgs_session)
 
+        print("Checking single category already exists:")
         if update_category in cur_cat_lab_dict:
             existing_category = update_category
             new_draft_category = "category exists in dataset"
@@ -116,6 +115,9 @@ async def draft_add_single_category(
             creation_reason = (f"single cat: {update_category}, "
                                f"active: {active_val}, {new_draft_category}")
         elif update_category in draft_categories_list:
+            # TODO: Can be replaced with adding to draft with
+            #  DRAFT_STATUS.DATASET_ADDED and auto-saving new category
+            #  into db and csv at once
             existing_category = None
             new_draft_category = "category exists in db drafts"
             current_status = DRAFT_STATUS.DRAFT_SKIPPED
@@ -130,7 +132,7 @@ async def draft_add_single_category(
             creation_reason = (f"single category: {update_category}, "
                                f"active: {active_val}, {new_draft_category}")
 
-        print("Postgres DB Saving single category to draft db data:")
+        print("DB Postgres Saving single category to draft db data:")
         pgs_conn = PostgresConnection()
         async with PostgresSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
@@ -155,7 +157,7 @@ async def draft_add_single_category(
                 ModelClassORM=DraftCategoryTextModel,
                 ongoing_session=pgs_session,
                 new_data=new_draft_data)
-            print(f"Postgres DB single category saved as draft [OK]:\n"
+            print(f"DB Postgres single category saved as draft [OK]:\n"
                   f"new_draft_category: {new_draft_category}\n")
             new_draft_category = update_category
 

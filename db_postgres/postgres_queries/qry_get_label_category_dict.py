@@ -17,9 +17,9 @@ async def get_label_category_dict_qry(
         fields_values_filter=None,
         order_by_fields=LabelCategoryModel.label_index,
         return_scalars=False)
+    # print(f"####### pgs_lab_cat_objs: {pgs_lab_cat_objs}")
     print(f"####### type(pgs_lab_cat_objs): {type(pgs_lab_cat_objs)}")
     print(f"####### len(pgs_lab_cat_objs): {len(pgs_lab_cat_objs)}")
-    # print(f"####### pgs_lab_cat_objs: {pgs_lab_cat_objs}")
 
     pgs_lab_cat_lab_dict = {}
     for cur_record in pgs_lab_cat_objs:

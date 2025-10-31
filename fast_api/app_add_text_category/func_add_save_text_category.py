@@ -1,5 +1,3 @@
-# import asyncio
-# from functools import partial
 import os
 import shutil
 
@@ -190,10 +188,8 @@ async def add_save_single_text_category(
             all_dir_str_parts=[prev_dataset_dir],
             file_name_with_ext=BERT_OPTIONS.BERT_DIRECT_CATEGORY_TEXT_CSV_FILE_NAME)
 
-    new_category = None
-    new_text = None
-    lab_cat_csv_path = None
-    text_lab_csv_path = None
+    new_category, new_text = None, None
+    lab_cat_csv_path, text_lab_csv_path = None, None
     direct_cat_text_csv_path = None
 
     try:
