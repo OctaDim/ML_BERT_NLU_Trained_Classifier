@@ -122,14 +122,14 @@ async def add_draft_single_category(
             new_draft_category = "category exists in db drafts"
             current_status = DRAFT_STATUS.DRAFT_EXISTS
             active_val = False
-            creation_reason = (f"single category: {update_category}, "
+            creation_reason = (f"single cat: {update_category}, "
                                f"active: {active_val}, {new_draft_category}")
         else:
             existing_category = None
             new_draft_category = f"draft category: {update_category}"
             current_status = DRAFT_STATUS.DRAFT_ADDED
             active_val = True
-            creation_reason = (f"single category: {update_category}, "
+            creation_reason = (f"single cat: {update_category}, "
                                f"active: {active_val}, "
                                f"new draft category: {new_draft_category}")
 
