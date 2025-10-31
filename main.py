@@ -12,6 +12,7 @@ from admin_panel.admin_auth_role import AdminAuthRoleAuthBackend
 from admin_panel.admin_direct_predict import DirectPredictAdmin
 from admin_panel.admin_draft_category_text import DraftCategoryTextAdmin
 from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS, ALCHEMY_OPTIONS, FASTAPI_SESSION_KEY
+from configs.labels import LABELS
 from db_postgres.postgres_async_conn.pgs_async_connection import close_all_db_connections, PostgresConnection
 from db_postgres.postgres_init.db_tables_initialization import initialize_db_tables
 from fast_api.app_add_single_category.router_add_single_category import router_bert_add_single_category
@@ -115,7 +116,7 @@ def setup_admin_panel(
         authentication_backend=authentication_backend,
         session_maker=None,
         base_url="/admin",
-        title="Admin Panel",
+        title=LABELS.ADMIN_PANEL,
         logo_url=None,
         favicon_url=None,
         middlewares=None,

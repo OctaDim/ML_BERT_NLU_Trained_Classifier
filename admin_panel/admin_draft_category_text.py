@@ -3,14 +3,15 @@ from fastapi.responses import RedirectResponse
 from sqladmin import ModelView, action
 
 from configs.settings import ADMIN_PANEL_OPTIONS
+from configs.labels import LABELS
 from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
 
 
 class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
-    name = "DRAFT CATEGORY-TEXT"
-    name_plural = "DRAFTS CATEGORY-TEXT"
-    icon = "octadim"
+    name = LABELS.DRAFT_CATEGORY_TEXT
+    name_plural = LABELS.DRAFTS_CATEGORY_TEXT
+    icon = LABELS.ICON
     page_size = 200
     page_size_options = [25, 50, 100, 200]
 
@@ -26,15 +27,15 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
         DraftCategoryTextModel.created_at, ]
 
     column_labels = {
-        DraftCategoryTextModel.id: "ID",
-        DraftCategoryTextModel.account_id: "Account-ID",
-        DraftCategoryTextModel.account_username: "Account-Username",
-        DraftCategoryTextModel.existing_category: "Existing Category",
-        DraftCategoryTextModel.draft_category: "Draft Category",
-        DraftCategoryTextModel.draft_text: "Draft Text",
-        DraftCategoryTextModel.current_status: "Status",
-        DraftCategoryTextModel.updated_at: "Updated",
-        DraftCategoryTextModel.created_at: "Created", }
+        DraftCategoryTextModel.id: LABELS.ID,
+        DraftCategoryTextModel.account_id: LABELS.ACCOUNT_ID,
+        DraftCategoryTextModel.account_username: LABELS.ACCOUNT_USERNAME,
+        DraftCategoryTextModel.existing_category: LABELS.EXISTING_CATEGORY,
+        DraftCategoryTextModel.draft_category: LABELS.DRAFT_CATEGORY,
+        DraftCategoryTextModel.draft_text: LABELS.DRAFT_TEXT,
+        DraftCategoryTextModel.current_status: LABELS.DRAFT_STATUS,
+        DraftCategoryTextModel.updated_at: LABELS.CREATED,
+        DraftCategoryTextModel.created_at: LABELS.UPDATED, }
 
     column_searchable_list = [
         DraftCategoryTextModel.account_id,
