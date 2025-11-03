@@ -1,9 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
 from db_postgres.postgres_models.direct_predict_model import (
     DirectPredictModel)
 from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
@@ -37,22 +33,3 @@ async def get_direct_category_by_text(
     direct_category = direct_predict_objs[0].direct_category  # Latest direct category
     print(f"direct_category: {direct_category}")
     return direct_category
-
-
-if __name__ == "__main__":
-    import asyncio
-
-
-    async def test_obtain_direct_category_by_text():
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
-            direct_category = await get_direct_category_by_text(
-                ongoing_session=pgs_session,
-                account_id="30",
-                account_username="globalhome",
-                direct_text="врач по глазам")
-            print(f"direct_category: {direct_category}")
-
-
-    asyncio.run(main=test_obtain_direct_category_by_text(),
-                debug=True)
