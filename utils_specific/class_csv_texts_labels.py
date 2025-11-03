@@ -12,7 +12,7 @@ class CsvTextLabel:
     def get_text_label_dict(
             self,
             reversed_label_text_dict: bool = False
-    ) -> dict[str: int] | dict[int: str]:
+    ) -> dict[str, int] | dict[int, str]:
         text_lab_text_dict = {}
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)

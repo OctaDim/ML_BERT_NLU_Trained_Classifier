@@ -1,5 +1,3 @@
-from typing import Dict
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 

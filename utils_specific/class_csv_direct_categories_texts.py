@@ -12,7 +12,7 @@ class CsvDirectCategoryText:
 
     def get_direct_text_category_dict(
             self, reversed_direct_cat_text: bool = False
-    ) -> dict[str: str]:
+    ) -> dict[str, str]:
         text_cat_text_dict = {}
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)

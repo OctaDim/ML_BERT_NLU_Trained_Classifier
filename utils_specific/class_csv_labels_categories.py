@@ -12,7 +12,7 @@ class CsvLabelCategory:
 
     def get_label_category_dict(
             self, reversed_category_label: bool = False
-    ) -> dict[int: str] | dict[str: int]:
+    ) -> dict[int, str] | dict[str, int]:
         lab_cat_lab_dict = {}
         self.csv_file_obj.seek(0)
         csv_dict_reader = csv.DictReader(self.csv_file_obj)
