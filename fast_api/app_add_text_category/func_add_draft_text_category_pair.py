@@ -48,10 +48,6 @@ async def add_draft_text_category_pair(
         pgs_lab_cat_dict = await get_label_category_dict_qry(
             ongoing_session=pgs_session,
             reversed_category_label_dict=False)
-        # print("DB Postgres Getting current category-label dictionary:")
-        # pgs_cat_lab_dict = await get_label_category_dict_qry(
-        #     ongoing_session=pgs_session,
-        #     reversed_category_label_dict=True)
 
         print("DB Postgres Getting texts-labels dict data:")
         pgs_text_lab_dict = await get_label_text_dict_qry(
@@ -61,7 +57,6 @@ async def add_draft_text_category_pair(
         print(f"len(pgs_text_lab_dict): {len(pgs_text_lab_dict)}")
 
     if not pgs_lab_cat_dict or not pgs_text_lab_dict:
-        # if not pgs_cat_lab_dict or not pgs_text_lab_dict:
         if bert_model_inst.last_saved_dataset_dir:
             cur_dataset_dir_path = bert_model_inst.last_saved_dataset_dir
         else:
@@ -111,34 +106,6 @@ async def add_draft_text_category_pair(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=error_log)
 
-        #     print("Getting current category-label dictionary from csv file:")
-        #     with open(file=cur_lab_cat_csv_path,
-        #               mode="r", encoding="utf-8") as prev_lab_cat_csv_f:
-        #         csf_lab_cat = CsvLabelCategory(prev_lab_cat_csv_f)
-        #         cur_cat_lab_csv_dict = csf_lab_cat.get_label_category_dict(
-        #             reversed_category_label=True)
-        #     print(f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}")  # Too long
-        #     print(f"type(cur_cat_lab_csv_dict): {type(cur_cat_lab_csv_dict)}")
-        #     print(f"len(cur_cat_lab_csv_dict): {len(cur_cat_lab_csv_dict)}")
-        #     if not cur_cat_lab_csv_dict:
-        #         error_log = (f"Empty or wrong label-category csv data [ERROR]:\n"
-        #                      f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
-        #                      f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}\n")
-        #         print(error_log)
-        #         raise HTTPException(
-        #             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #             detail=error_log)
-        #     cur_cat_lab_dict = cur_cat_lab_csv_dict
-        # except Exception as lab_cat_csv_file_error:
-        #     error_log = (f"Getting label-category csv file data [ERROR]:\n"
-        #                  f"error: {lab_cat_csv_file_error}\n"
-        #                  f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
-        #                  f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}\n")
-        #     print(error_log)
-        #     raise HTTPException(
-        #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #         detail=error_log)
-
         print("Getting previous text-label csv path:")
         cur_text_lab_csv_path = None
         try:
@@ -175,10 +142,8 @@ async def add_draft_text_category_pair(
                 detail=error_log)
     else:  # if pgs_cat_lab_dict and pgs_text_lab_dict: Postgres DB cat-lab and text-lab data exists
         cur_lab_cat_dict = pgs_lab_cat_dict
-        # cur_cat_lab_dict = pgs_cat_lab_dict
         cur_text_lab_dict = pgs_text_lab_dict
 
-    print(1111111111111111111111111111111111111111111111111111111111111)
     try:
         print("Checking update text already exists in dataset:")
         dataset_text_exists_flag = update_text in cur_text_lab_dict
@@ -313,7 +278,6 @@ async def add_draft_text_category_pair(
                 new_data=new_draft_data)
             print(f"Postgres DB category-text pair saved as draft [OK]:\n"
                   f"new_draft_category: {new_draft_category}\n")
-            new_draft_category = update_category
 
         common_csv_f_note = "db draft table used instead of dataset"
         new_csv_files_data = {
