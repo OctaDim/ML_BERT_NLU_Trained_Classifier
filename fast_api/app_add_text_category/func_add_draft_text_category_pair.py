@@ -12,9 +12,8 @@ from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
 from db_postgres.postgres_queries.qry_find_create_customer import (
     find_create_customer_qry)
-from db_postgres.postgres_queries.qry_get_draft_category_list import (
-    get_draft_category_list_qry)
-from db_postgres.postgres_queries.qry_get_draft_category_text_dicts_list import get_draft_cat_text_dicts_list_qry
+from db_postgres.postgres_queries.qry_get_draft_category_text_dicts_list import (
+    get_draft_cat_text_dicts_list_qry)
 from db_postgres.postgres_queries.qry_get_label_category_dict import (
     get_label_category_dict_qry)
 from db_postgres.postgres_queries.qry_get_label_text_dict import (
@@ -45,10 +44,14 @@ async def add_draft_text_category_pair(
     async with PostgresSession(async_engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
-        print("DB Postgres Getting current category-label dictionary:")
-        pgs_cat_lab_dict = await get_label_category_dict_qry(
+        print("DB Postgres Getting current label-category dictionary:")
+        pgs_lab_cat_dict = await get_label_category_dict_qry(
             ongoing_session=pgs_session,
-            reversed_category_label_dict=True)
+            reversed_category_label_dict=False)
+        # print("DB Postgres Getting current category-label dictionary:")
+        # pgs_cat_lab_dict = await get_label_category_dict_qry(
+        #     ongoing_session=pgs_session,
+        #     reversed_category_label_dict=True)
 
         print("DB Postgres Getting texts-labels dict data:")
         pgs_text_lab_dict = await get_label_text_dict_qry(
@@ -57,7 +60,8 @@ async def add_draft_text_category_pair(
         print(f"pgs_text_lab_dict: {pgs_text_lab_dict}")  # Too long
         print(f"len(pgs_text_lab_dict): {len(pgs_text_lab_dict)}")
 
-    if not pgs_cat_lab_dict or not pgs_text_lab_dict:
+    if not pgs_lab_cat_dict or not pgs_text_lab_dict:
+        # if not pgs_cat_lab_dict or not pgs_text_lab_dict:
         if bert_model_inst.last_saved_dataset_dir:
             cur_dataset_dir_path = bert_model_inst.last_saved_dataset_dir
         else:
@@ -78,34 +82,62 @@ async def add_draft_text_category_pair(
                 all_dir_str_parts=[cur_dataset_dir_path],
                 file_name_with_ext=BERT_OPTIONS.BERT_LABEL_CATEGORY_CSV_FILE_NAME)
 
-            print("Getting current category-label dictionary from csv file:")
+            print("Getting current label-category dictionary from csv file:")
             with open(file=cur_lab_cat_csv_path,
                       mode="r", encoding="utf-8") as prev_lab_cat_csv_f:
                 csf_lab_cat = CsvLabelCategory(prev_lab_cat_csv_f)
-                cur_cat_lab_csv_dict = csf_lab_cat.get_label_category_dict(
-                    reversed_category_label=True)
-            print(f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}")  # Too long
-            print(f"type(cur_cat_lab_csv_dict): {type(cur_cat_lab_csv_dict)}")
-            print(f"len(cur_cat_lab_csv_dict): {len(cur_cat_lab_csv_dict)}")
+                cur_lab_cat_csv_dict = csf_lab_cat.get_label_category_dict(
+                    reversed_category_label=False)
+            print(f"cur_lab_cat_csv_dict: {cur_lab_cat_csv_dict}")  # Too long
+            print(f"type(cur_lab_cat_csv_dict): {type(cur_lab_cat_csv_dict)}")
+            print(f"len(cur_lab_cat_csv_dict): {len(cur_lab_cat_csv_dict)}")
 
-            if not cur_cat_lab_csv_dict:
+            if not cur_lab_cat_csv_dict:
                 error_log = (f"Empty or wrong label-category csv data [ERROR]:\n"
                              f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
-                             f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}\n")
+                             f"cur_lab_cat_csv_dict: {cur_lab_cat_csv_dict}\n")
                 print(error_log)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=error_log)
-            cur_cat_lab_dict = cur_cat_lab_csv_dict
+            cur_lab_cat_dict = cur_lab_cat_csv_dict
         except Exception as lab_cat_csv_file_error:
             error_log = (f"Getting label-category csv file data [ERROR]:\n"
                          f"error: {lab_cat_csv_file_error}\n"
                          f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
-                         f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}\n")
+                         f"cur_lab_cat_csv_dict: {cur_lab_cat_csv_dict}\n")
             print(error_log)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=error_log)
+
+        #     print("Getting current category-label dictionary from csv file:")
+        #     with open(file=cur_lab_cat_csv_path,
+        #               mode="r", encoding="utf-8") as prev_lab_cat_csv_f:
+        #         csf_lab_cat = CsvLabelCategory(prev_lab_cat_csv_f)
+        #         cur_cat_lab_csv_dict = csf_lab_cat.get_label_category_dict(
+        #             reversed_category_label=True)
+        #     print(f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}")  # Too long
+        #     print(f"type(cur_cat_lab_csv_dict): {type(cur_cat_lab_csv_dict)}")
+        #     print(f"len(cur_cat_lab_csv_dict): {len(cur_cat_lab_csv_dict)}")
+        #     if not cur_cat_lab_csv_dict:
+        #         error_log = (f"Empty or wrong label-category csv data [ERROR]:\n"
+        #                      f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
+        #                      f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}\n")
+        #         print(error_log)
+        #         raise HTTPException(
+        #             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #             detail=error_log)
+        #     cur_cat_lab_dict = cur_cat_lab_csv_dict
+        # except Exception as lab_cat_csv_file_error:
+        #     error_log = (f"Getting label-category csv file data [ERROR]:\n"
+        #                  f"error: {lab_cat_csv_file_error}\n"
+        #                  f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
+        #                  f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}\n")
+        #     print(error_log)
+        #     raise HTTPException(
+        #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #         detail=error_log)
 
         print("Getting previous text-label csv path:")
         cur_text_lab_csv_path = None
@@ -142,53 +174,115 @@ async def add_draft_text_category_pair(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=error_log)
     else:  # if pgs_cat_lab_dict and pgs_text_lab_dict: Postgres DB cat-lab and text-lab data exists
-        cur_cat_lab_dict = pgs_cat_lab_dict
+        cur_lab_cat_dict = pgs_lab_cat_dict
+        # cur_cat_lab_dict = pgs_cat_lab_dict
         cur_text_lab_dict = pgs_text_lab_dict
 
+    print(1111111111111111111111111111111111111111111111111111111111111)
     try:
+        print("Checking update text already exists in dataset:")
+        dataset_text_exists_flag = update_text in cur_text_lab_dict
+        print(f"dataset_text_exists_flag: {dataset_text_exists_flag}")
+
+        print("Checking update category already exists in dataset:")
+        label_by_text = cur_text_lab_dict.get(update_text)
+        category_by_text = cur_lab_cat_dict.get(label_by_text)
+        dataset_cat_exists_flag = True if category_by_text else False
+        print(f"dataset_cat_exists_flag: {dataset_cat_exists_flag}")
+
         print("DB Postgres Getting current draft categories list:")
         pgs_conn = PostgresConnection()
         async with PostgresSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
-            draft_categories_list = await get_draft_category_list_qry(
-                ongoing_session=pgs_session)
             draft_cat_text_list = await get_draft_cat_text_dicts_list_qry(
                 ongoing_session=pgs_session)
-
-        print(111111111111111111111111111111111111111111111111111111111)
-        dataset_cat_exists_flag = update_category in cur_cat_lab_dict
-        dataset_text_exists_flag = update_text in cur_text_lab_dict
-        print(f"dataset_cat_exists_flag: {dataset_cat_exists_flag}")
-        print(f"dataset_text_exists_flag: {dataset_text_exists_flag}")
 
         category_text_dict = {"draft_category": update_category,
                               "draft_text": update_text}
         draft_cat_text_exists_flag = category_text_dict in draft_cat_text_list
         print(f"draft_cat_text_exists_flag: {draft_cat_text_exists_flag}")
 
-        print("Checking single category already exists:")
-        if update_category in cur_cat_lab_dict:
-            existing_category = update_category
-            new_draft_category = "category exists in dataset"
-            current_status = DRAFT_STATUS.DRAFT_SKIPPED
+        if dataset_text_exists_flag and dataset_cat_exists_flag:
+            dataset_existing_cat = update_category
+            dataset_existing_text = update_text
+            new_draft_category = "category exists in dataset"  # Just return info
+            new_draft_text = "text exists in dataset"  # Just return info
+            current_status = DRAFT_STATUS.DATASET_EXISTS
             active_val = False
-            creation_reason = (f"single cat: {update_category}, "
-                               f"active: {active_val}, {new_draft_category}")
-        elif update_category in draft_categories_list:
-            existing_category = None
-            new_draft_category = "category exists in db drafts"
-            current_status = DRAFT_STATUS.DRAFT_SKIPPED
-            active_val = False
-            creation_reason = (f"single category: {update_category}, "
-                               f"active: {active_val}, {new_draft_category}")
-        else:
-            existing_category = None
-            new_draft_category = update_category
-            current_status = DRAFT_STATUS.DRAFT_ADDED
-            active_val = True
-            creation_reason = (f"single category: {update_category}, "
-                               f"active: {active_val}, {new_draft_category}")
+            creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
+                               f"active: {active_val}, "
+                               f"new_draft_category: {new_draft_category},"
+                               f"new_draft_text: {new_draft_text}")
+        elif dataset_text_exists_flag:  # and not dataset_cat_exists_flag
+            if draft_cat_text_exists_flag:
+                dataset_existing_cat = None
+                dataset_existing_text = update_text
+                new_draft_category = "category exists in db drafts"  # Just return info
+                new_draft_text = "text exists in db drafts"  # Just return info
+                current_status = DRAFT_STATUS.DRAFT_EXISTS
+                active_val = False
+                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
+                                   f"active: {active_val}, "
+                                   f"new_draft_category: {new_draft_category},"
+                                   f"new_draft_text: {new_draft_text}")
+            else:
+                dataset_existing_cat = None
+                dataset_existing_text = update_text
+                new_draft_category = update_category  # Just return info
+                new_draft_text = update_text  # Just return info
+                current_status = DRAFT_STATUS.DRAFT_ADDED
+                active_val = True
+                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
+                                   f"active: {active_val}, "
+                                   f"new_draft_category: {new_draft_category},"
+                                   f"new_draft_text: {new_draft_text}")
+        elif dataset_cat_exists_flag:  # and not dataset_text_exists_flag
+            if draft_cat_text_exists_flag:
+                dataset_existing_cat = update_category
+                dataset_existing_text = None
+                new_draft_category = "category exists in db drafts"  # Just return info
+                new_draft_text = "text exists in db drafts"  # Just return info
+                current_status = DRAFT_STATUS.DRAFT_EXISTS
+                active_val = False
+                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
+                                   f"active: {active_val}, "
+                                   f"new_draft_category: {new_draft_category},"
+                                   f"new_draft_text: {new_draft_text}")
+            else:
+                dataset_existing_cat = update_category
+                dataset_existing_text = None
+                new_draft_category = update_category  # Just return info
+                new_draft_text = update_text  # Just return info
+                current_status = DRAFT_STATUS.DRAFT_ADDED
+                active_val = True
+                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
+                                   f"active: {active_val}, "
+                                   f"new_draft_category: {new_draft_category},"
+                                   f"new_draft_text: {new_draft_text}")
+        else:  # if not dataset_text_exists_flag and not dataset_cat_exists_flag
+            if draft_cat_text_exists_flag:
+                dataset_existing_cat = None
+                dataset_existing_text = None
+                new_draft_category = "category exists in db drafts"  # Just return info
+                new_draft_text = "text exists in db drafts"  # Just return info
+                current_status = DRAFT_STATUS.DRAFT_EXISTS
+                active_val = False
+                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
+                                   f"active: {active_val}, "
+                                   f"new_draft_category: {new_draft_category},"
+                                   f"new_draft_text: {new_draft_text}")
+            else:
+                dataset_existing_cat = None
+                dataset_existing_text = None
+                new_draft_category = update_category  # Just return info
+                new_draft_text = update_text  # Just return info
+                current_status = DRAFT_STATUS.DRAFT_ADDED
+                active_val = True
+                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
+                                   f"active: {active_val}, "
+                                   f"new_draft_category: {new_draft_category},"
+                                   f"new_draft_text: {new_draft_text}")
 
         print("Postgres DB Saving single category to draft db data:")
         pgs_conn = PostgresConnection()
@@ -205,8 +299,10 @@ async def add_draft_text_category_pair(
                 "customer_id": customer_id,
                 "account_id": account_data.account_id,
                 "account_username": account_data.account_username,
-                "existing_category": existing_category,
+                "ds_existing_category": dataset_existing_cat,
                 "draft_category": update_category,
+                "ds_existing_text": dataset_existing_text,
+                "draft_text": update_text,
                 "current_status": current_status,
                 "active": active_val,
                 "creation_reason": creation_reason}
@@ -225,7 +321,8 @@ async def add_draft_text_category_pair(
             "text_lab_csv_path": common_csv_f_note,
             "direct_cat_text_csv_path": common_csv_f_note,
             "last_saved_dataset_ini_fpath": common_csv_f_note,
-            "new_category": new_draft_category}
+            "new_category": new_draft_category,
+            "new_text": new_draft_text}
         return new_csv_files_data
     except Exception as error:
         error_log = (f"BERT save category-text pair as db draft [ERROR]: "
