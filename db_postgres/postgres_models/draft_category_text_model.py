@@ -19,7 +19,8 @@ class DraftCategoryTextModel(Base, ActiveMix,
     account_id: Mapped[str] = mapped_column()
     account_username: Mapped[str] = mapped_column()
 
-    existing_category: Mapped[Optional[str]] = mapped_column()
+    ds_existing_category: Mapped[Optional[str]] = mapped_column()
+    ds_existing_text: Mapped[Optional[str]] = mapped_column()
     draft_category: Mapped[str] = mapped_column()
     draft_text: Mapped[Optional[str]] = mapped_column()
 
