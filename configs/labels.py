@@ -11,6 +11,7 @@ class LABELS:
     ACCOUNT_ID = "Aкаунт-ID"
     ACCOUNT_USERNAME = "Aкаунт-Username"
     EXISTING_CATEGORY = "Категория в датасете"
+    EXISTING_TEXT = "Текст в датасете"
     DRAFT_CATEGORY = "Категория в черновике"
     DRAFT_TEXT = "Текст в черновике"
     DRAFT_STATUS = "Статус черновика"
