@@ -146,20 +146,20 @@ async def add_draft_text_category_pair(
 
     try:
         print("Checking update text already exists in dataset:")
-        dataset_text_exists_flag = update_text in cur_text_lab_dict
-        print(f"dataset_text_exists_flag: {dataset_text_exists_flag}")
+        ds_text_exists_flag = update_text in cur_text_lab_dict
+        print(f"ds_text_exists_flag: {ds_text_exists_flag}")
 
-        print("Checking update category already exists in dataset:")
+        print("Checking update category already exists in dataset by text:")
         dataset_label_by_text = cur_text_lab_dict.get(update_text)
         dataset_cat_by_text = cur_lab_cat_dict.get(dataset_label_by_text)
+        ds_cat_by_text_exists_flag = dataset_cat_by_text == update_category
         print(f"dataset_label_by_text: {dataset_label_by_text}")
         print(f"dataset_cat_by_text: {dataset_cat_by_text}")
+        print(f"ds_cat_by_text_exists_flag: {ds_cat_by_text_exists_flag}")
 
-        if dataset_cat_by_text == update_category:
-            dataset_cat_exists_flag = True
-        else:
-            dataset_cat_exists_flag = False
-        print(f"dataset_cat_exists_flag: {dataset_cat_exists_flag}")
+        print("Getting dataset category if already exists in all dataset:")
+        all_ds_cat_exists_flag = update_category in cur_lab_cat_dict.values()
+        all_ds_existing_cat = update_category if all_ds_cat_exists_flag else None
 
         print("DB Postgres Getting current draft categories list:")
         pgs_conn = PostgresConnection()
@@ -174,8 +174,8 @@ async def add_draft_text_category_pair(
         draft_cat_text_exists_flag = category_text_dict in draft_cat_text_list
         print(f"draft_cat_text_exists_flag: {draft_cat_text_exists_flag}")
 
-        if dataset_text_exists_flag and dataset_cat_exists_flag:
-            dataset_existing_cat = update_category
+        if ds_text_exists_flag and ds_cat_by_text_exists_flag:
+            dataset_existing_cat = all_ds_existing_cat
             dataset_existing_text = update_text
             new_draft_category = "draft category: category exists in dataset"  # Just return info
             new_draft_text = "draft text: text exists in dataset"  # Just return info
@@ -185,9 +185,9 @@ async def add_draft_text_category_pair(
                                f"active: {active_val}, "
                                f"new_draft_category: {new_draft_category},"
                                f"new_draft_text: {new_draft_text}")
-        elif dataset_text_exists_flag:  # and not dataset_cat_exists_flag
+        elif ds_text_exists_flag:  # and not ds_cat_by_text_exists_flag
             if draft_cat_text_exists_flag:
-                dataset_existing_cat = None
+                dataset_existing_cat = all_ds_existing_cat
                 dataset_existing_text = update_text
                 new_draft_category = "draft category: category exists in db drafts"  # Just return info
                 new_draft_text = "draft text: text exists in db drafts"  # Just return info
@@ -198,17 +198,17 @@ async def add_draft_text_category_pair(
                                    f"new_draft_category: {new_draft_category},"
                                    f"new_draft_text: {new_draft_text}")
             else:
-                dataset_existing_cat = None
+                dataset_existing_cat = all_ds_existing_cat
                 dataset_existing_text = update_text
                 new_draft_category = f"draft category: {update_category}"  # Just return info
                 new_draft_text = "draft text: text exists in dataset"  # Just return info
-                current_status = DRAFT_STATUS.DRAFT_ADDED
+                current_status = DRAFT_STATUS.OVERRIDING_DRAFT_ADDED
                 active_val = True
                 creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
                                    f"active: {active_val}, "
                                    f"new_draft_category: {new_draft_category},"
                                    f"new_draft_text: {new_draft_text}")
-        elif dataset_cat_exists_flag:  # and not dataset_text_exists_flag
+        elif ds_cat_by_text_exists_flag:  # and not ds_text_exists_flag
             if draft_cat_text_exists_flag:
                 dataset_existing_cat = update_category
                 dataset_existing_text = None
@@ -231,12 +231,9 @@ async def add_draft_text_category_pair(
                                    f"active: {active_val}, "
                                    f"new_draft_category: {new_draft_category},"
                                    f"new_draft_text: {new_draft_text}")
-        else:  # if not dataset_text_exists_flag and not dataset_cat_exists_flag
+        else:  # if not ds_text_exists_flag and not ds_cat_by_text_exists_flag
             if draft_cat_text_exists_flag:
-                if update_category in cur_lab_cat_dict.values():
-                    dataset_existing_cat = update_category
-                else:
-                    dataset_existing_cat = None
+                dataset_existing_cat = all_ds_existing_cat
                 dataset_existing_text = None
                 new_draft_category = "draft category: category exists in db drafts"  # Just return info
                 new_draft_text = "draft text: text exists in db drafts"  # Just return info
@@ -247,10 +244,7 @@ async def add_draft_text_category_pair(
                                    f"new_draft_category: {new_draft_category},"
                                    f"new_draft_text: {new_draft_text}")
             else:
-                if update_category in cur_lab_cat_dict.values():
-                    dataset_existing_cat = update_category
-                else:
-                    dataset_existing_cat = None
+                dataset_existing_cat = all_ds_existing_cat
                 dataset_existing_text = None
                 new_draft_category = f"draft category: {update_category}"  # Just return info
                 new_draft_text = f"draft text: {update_text}"  # Just return info

@@ -14,6 +14,8 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
     icon = LABELS.ICON
     page_size = 200
     page_size_options = [25, 50, 100, 200]
+    can_create = False
+    can_delete = False
 
     column_list = [
         DraftCategoryTextModel.id,
@@ -72,9 +74,9 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
         (DraftCategoryTextModel.created_at, False), ]  # True - ascending, False - descending
 
     column_sortable_list = [
-        # DraftCategoryTextModel.account_id,
-        # DraftCategoryTextModel.account_username,
-        DraftCategoryTextModel.account_data,
+        DraftCategoryTextModel.account_id,
+        DraftCategoryTextModel.account_username,
+        # DraftCategoryTextModel.account_data,
         DraftCategoryTextModel.ds_existing_category,
         DraftCategoryTextModel.draft_category,
         DraftCategoryTextModel.ds_existing_text,
@@ -148,8 +150,6 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
         formated_data = None
         if model.created_at:
             formated_data = model.created_at.strftime("%d-%m-%Y %H:%M:%S")
-            print(f"formated_data: {formated_data}")
-            print(f"type(formated_data): {type(formated_data)}")
         return formated_data
 
     column_formatters = {
@@ -160,17 +160,17 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
         DraftCategoryTextModel.current_status: format_current_status,
         DraftCategoryTextModel.created_at: format_created_at, }
 
-    def can_view_details(self, request: Request) -> bool:
-        return False
-
-    def can_create(self, request: Request) -> bool:
-        return False
-
-    def can_edit(self, request: Request) -> bool:
-        return False
-
-    def can_delete(self, request: Request) -> bool:
-        return False
+    # def can_view_details(self, request: Request) -> bool:
+    #     return False
+    #
+    # def can_create(self, request: Request) -> bool:
+    #     return False
+    #
+    # def can_edit(self, request: Request) -> bool:
+    #     return False
+    #
+    # def can_delete(self, request: Request) -> bool:
+    #     return False
 
     @action(name="custom_action",
             label=ADMIN_PANEL_OPTIONS.DATASET_ACTION_NAME,
