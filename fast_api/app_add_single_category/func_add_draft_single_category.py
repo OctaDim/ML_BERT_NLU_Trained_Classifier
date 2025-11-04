@@ -106,33 +106,34 @@ async def add_draft_single_category(
             draft_categories_list = await get_draft_category_list_qry(
                 ongoing_session=pgs_session)
 
-        print("Checking single category already exists:")
+        print("Checking single category already exists in dataset or in drafts:")
         if update_category in cur_cat_lab_dict:
-            existing_category = update_category
-            new_draft_category = "category exists in dataset"
+            ds_existing_cat = update_category
+            new_draft_category = "category exists in dataset"  # Just return info
             current_status = DRAFT_STATUS.DATASET_EXISTS
             active_val = False
             creation_reason = (f"single cat: {update_category}, "
-                               f"active: {active_val}, {new_draft_category}")
+                               f"active: {active_val}, "
+                               f"new draft category: {new_draft_category}")
         elif update_category in draft_categories_list:
             # TODO: Can be replaced with adding to draft with
             #  DRAFT_STATUS.DATASET_ADDED and auto-saving new category
             #  into db and csv at once
-            existing_category = None
-            new_draft_category = "category exists in db drafts"
+            ds_existing_cat = None
+            new_draft_category = "category exists in db drafts"  # Just return info
             current_status = DRAFT_STATUS.DRAFT_EXISTS
             active_val = False
             creation_reason = (f"single cat: {update_category}, "
-                               f"active: {active_val}, {new_draft_category}")
+                               f"active: {active_val}, "
+                               f"new draft category: {new_draft_category}")
         else:
-            existing_category = None
-            new_draft_category = f"draft category: {update_category}"
+            ds_existing_cat = None
+            new_draft_category = f"draft category: {update_category}"  # Just return info
             current_status = DRAFT_STATUS.DRAFT_ADDED
             active_val = True
             creation_reason = (f"single cat: {update_category}, "
                                f"active: {active_val}, "
                                f"new draft category: {new_draft_category}")
-
         print("DB Postgres Saving single category to draft db data:")
         pgs_conn = PostgresConnection()
         async with PostgresSession(async_engine=pgs_conn.engine,
@@ -148,7 +149,7 @@ async def add_draft_single_category(
                 "customer_id": customer_id,
                 "account_id": account_data.account_id,
                 "account_username": account_data.account_username,
-                "existing_category": existing_category,
+                "ds_existing_cat": ds_existing_cat,
                 "draft_category": update_category,
                 "current_status": current_status,
                 "active": active_val,
