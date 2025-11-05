@@ -248,7 +248,7 @@ async def add_draft_text_category_pair(
                 dataset_existing_text = None
                 new_draft_category = f"draft category: {update_category}"  # Just return info
                 new_draft_text = f"draft text: {update_text}"  # Just return info
-                current_status = DRAFT_STATUS.DRAFT_ADDED
+                current_status = DRAFT_STATUS.NEW_CLASS_DRAFT_ADDED
                 active_val = True
                 creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
                                    f"active: {active_val}, "

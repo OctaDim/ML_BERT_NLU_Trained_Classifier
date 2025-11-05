@@ -108,7 +108,7 @@ async def add_draft_single_category(
 
         print("Checking single category already exists in dataset or in drafts:")
         if update_category in cur_cat_lab_dict:
-            ds_existing_cat = update_category
+            dataset_existing_cat = update_category
             new_draft_category = "category exists in dataset"  # Just return info
             current_status = DRAFT_STATUS.DATASET_EXISTS
             active_val = False
@@ -116,10 +116,7 @@ async def add_draft_single_category(
                                f"active: {active_val}, "
                                f"new draft category: {new_draft_category}")
         elif update_category in draft_categories_list:
-            # TODO: Can be replaced with adding to draft with
-            #  DRAFT_STATUS.DATASET_ADDED and auto-saving new category
-            #  into db and csv at once
-            ds_existing_cat = None
+            dataset_existing_cat = None
             new_draft_category = "category exists in db drafts"  # Just return info
             current_status = DRAFT_STATUS.DRAFT_EXISTS
             active_val = False
@@ -127,9 +124,9 @@ async def add_draft_single_category(
                                f"active: {active_val}, "
                                f"new draft category: {new_draft_category}")
         else:
-            ds_existing_cat = None
+            dataset_existing_cat = None
             new_draft_category = f"draft category: {update_category}"  # Just return info
-            current_status = DRAFT_STATUS.DRAFT_ADDED
+            current_status = DRAFT_STATUS.NEW_CLASS_DRAFT_ADDED
             active_val = True
             creation_reason = (f"single cat: {update_category}, "
                                f"active: {active_val}, "
@@ -149,7 +146,7 @@ async def add_draft_single_category(
                 "customer_id": customer_id,
                 "account_id": account_data.account_id,
                 "account_username": account_data.account_username,
-                "ds_existing_cat": ds_existing_cat,
+                "ds_existing_category": dataset_existing_cat,
                 "draft_category": update_category,
                 "current_status": current_status,
                 "active": active_val,
