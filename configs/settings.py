@@ -148,12 +148,6 @@ POSTGRES_DB_NAME = postgres_conf_parser.get(section=postgres_conf_name, option="
 
 
 @dataclass(frozen=True)
-class ADMIN_PANEL_OPTIONS:
-    DATASET_ACTION_NAME = "TRANSFER SELECTED ITEMS IN ML DATASET"
-    DATASET_CONFIRM_MSG = "CONFIRM TRANSFER ACTION !?"
-
-
-@dataclass(frozen=True)
 class FASTAPI_OPTIONS:
     LOG_LEVEL = "debug"
     USE_COLORS = True

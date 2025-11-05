@@ -16,6 +16,13 @@ class LABELS:
     DRAFT_CATEGORY = "КЛАСС В ЧЕРНОВИКЕ"
     DRAFT_TEXT = "ТЕКСТ В ЧЕРНОВИКЕ"
     DRAFT_STATUS = "СТАТУС ЧЕРНОВИКА"
-    ACTIVE_STATUS = "АКТИВНЫЙ"
+    ACTIVE_STATUS = "УНИКАЛЬНЫЙ"
     CREATED = "СОЗДАНО"
     UPDATED = "ОБНОВЛЕНО"
+
+
+@dataclass(frozen=True)
+class MESSAGES:
+    DATASET_ACTION_NAME = "Добавить выбранные черновики в обучающий датасет"
+    DATASET_CONFIRM_MSG = "Подтердите добавление в обучающий датасет !?"
+    RECORDS_NOT_SELECTED = "Не выбрано ни одного черновика"

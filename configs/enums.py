@@ -12,9 +12,10 @@ class USER_ROLE(Enum):
 class DRAFT_STATUS(Enum):
     """NOTE: If changed enums names here, containing tables and data
     types also should be deleted and reinitialized in Postgres DB"""
-    DRAFT_ADDED: str = "Черновик"
-    OVERRIDING_DRAFT_ADDED = "Черновик с Перекрытием"
-    DRAFT_INACTIVE: str = "Неактивный Черновик"
-    DATASET_ADDED: str = "Перенесено в Датасет"
-    DRAFT_EXISTS: str = "Уже есть в Черновике"
-    DATASET_EXISTS: str = "Уже есть в Датасете"
+    DRAFT_ADDED: str = "ЧЕРНОВИК"
+    OVERRIDING_DRAFT_ADDED = "ЧЕРНОВИК с ПЕРЕКРЫТИЕМ"
+    NEW_CLASS_DRAFT_ADDED = "ЧЕРНОВИК с НОВЫМ КЛАССОМ"
+    DRAFT_INACTIVE: str = "неактивный черновик"
+    DATASET_ADDED: str = "перенесено в датасет"
+    DRAFT_EXISTS: str = "уже есть в черновике"
+    DATASET_EXISTS: str = "уже есть в датасете"

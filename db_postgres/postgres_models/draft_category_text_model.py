@@ -23,7 +23,7 @@ class DraftCategoryTextModel(Base, ActiveMix,
     ds_existing_category: Mapped[Optional[str]] = mapped_column()
     draft_category: Mapped[str] = mapped_column()
     ds_existing_text: Mapped[Optional[str]] = mapped_column()
-    draft_text: Mapped[str] = mapped_column()
+    draft_text: Mapped[Optional[str]] = mapped_column()
 
     current_status: Mapped[DRAFT_STATUS] = mapped_column(
         Enum(DRAFT_STATUS, values_callable=lambda obj: [e.value for e in obj]),

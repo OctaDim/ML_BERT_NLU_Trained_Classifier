@@ -2,7 +2,7 @@ from fastapi import Request
 from fastapi.responses import RedirectResponse
 from sqladmin import ModelView, action
 
-from configs.settings import ADMIN_PANEL_OPTIONS
+from configs.labels_messages import MESSAGES
 from db_postgres.postgres_models.direct_predict_model import (
     DirectPredictModel)
 
@@ -77,8 +77,8 @@ class DirectPredictAdmin(ModelView, model=DirectPredictModel):
         return False
 
     @action(name="custom_action",
-            label=ADMIN_PANEL_OPTIONS.DATASET_ACTION_NAME,
-            confirmation_message=ADMIN_PANEL_OPTIONS.DATASET_CONFIRM_MSG,
+            label=MESSAGES.DATASET_ACTION_NAME,
+            confirmation_message=MESSAGES.DATASET_CONFIRM_MSG,
             add_in_list=True,
             add_in_detail=True,
             include_in_schema=True)

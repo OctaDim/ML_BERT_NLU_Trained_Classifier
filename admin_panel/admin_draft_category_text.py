@@ -1,9 +1,9 @@
 from fastapi import Request
 from fastapi.responses import RedirectResponse
 from sqladmin import ModelView, action
+from starlette.responses import HTMLResponse
 
-from configs.labels import LABELS
-from configs.settings import ADMIN_PANEL_OPTIONS
+from configs.labels_messages import LABELS, MESSAGES
 from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
 
@@ -173,14 +173,27 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
     #     return False
 
     @action(name="custom_action",
-            label=ADMIN_PANEL_OPTIONS.DATASET_ACTION_NAME,
-            confirmation_message=ADMIN_PANEL_OPTIONS.DATASET_CONFIRM_MSG,
+            label=MESSAGES.DATASET_ACTION_NAME,
+            confirmation_message=MESSAGES.DATASET_CONFIRM_MSG,
             add_in_list=True,
             add_in_detail=True,
             include_in_schema=True)
-    async def custom_action_process(self, request: Request) -> RedirectResponse:
-        selected_ids_str = request.query_params.get("pks").split(sep=",")
-        selected_ids_int = [int(ids_str) for ids_str in selected_ids_str]
-        print("admin panel: selected_ids_int: ", selected_ids_int)
+    async def custom_action_process(
+            self, request: Request
+    ) -> RedirectResponse | HTMLResponse:
         referer = request.headers.get("referer", "/admin")
+        request_selected_ids_str = request.query_params.get("pks")
+        if not request_selected_ids_str:
+            error_msg = MESSAGES.RECORDS_NOT_SELECTED
+            html_content = f"""<script>
+            alert("{error_msg}");
+            window.location.href = "{referer}";
+            </script>"""
+            return HTMLResponse(html_content)
+
+        selected_ids_str_list = request_selected_ids_str.split(sep=",")
+        print("selected_ids_str_list: ", selected_ids_str_list)
+
+        selected_ids_int_list = [int(ids_str) for ids_str in selected_ids_str_list]
+        print("selected_ids_int_list: ", selected_ids_int_list)
         return RedirectResponse(referer)
