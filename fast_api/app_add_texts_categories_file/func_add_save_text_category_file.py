@@ -151,7 +151,7 @@ async def add_save_multi_text_category_file(
             print("Getting previous csv category-text dicts list:")
             with open(file=prev_direct_cat_text_csv_path,
                       mode="r", encoding="utf-8") as prev_direct_cat_text_csv_f:
-                csf_direct_cat_text = CsvDirectCategoryText(prev_text_lab_csv_f)
+                csf_direct_cat_text = CsvDirectCategoryText(prev_direct_cat_text_csv_f)
                 prev_direct_cat_text_csv_list = csf_direct_cat_text.get_direct_categories_texts_list()
             # print(f"prev_direct_cat_text_csv_list: {prev_direct_cat_text_csv_list}")  # Too long
             print(f"type(prev_direct_cat_text_csv_list): {type(prev_direct_cat_text_csv_list)}")
