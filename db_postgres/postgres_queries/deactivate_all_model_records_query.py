@@ -7,7 +7,7 @@ from sqlalchemy.orm import DeclarativeMeta
 from db_postgres.postgres_async_conn.pgs_async_connection import Base
 
 
-async def deactivate_all_orm_model_records(
+async def deactivate_all_model_records_qry(
         ongoing_session: AsyncSession,
         ModelClassORM: Type[Base] | DeclarativeMeta
 ) -> None:

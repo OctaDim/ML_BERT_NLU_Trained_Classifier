@@ -11,7 +11,7 @@ from db_postgres.postgres_queries_utils.merge_obj_ongoing_session import (
     merge_obj_to_ongoing_session)
 
 
-async def save_direct_cat_text_list_qry(
+async def save_direct_cat_text_dicts_list_qry(
         ongoing_session: AsyncSession,
         direct_cat_text_dicts_list: List[Dict[str, str]],
         creation_reason: str = None,

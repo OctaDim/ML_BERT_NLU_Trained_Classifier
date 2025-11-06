@@ -15,10 +15,10 @@ from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
     cache_unique_lab_cat_dict_qry)
 from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
-from db_postgres.postgres_queries.qry_save_direct_category_text_list import (
-    save_direct_cat_text_list_qry)
-from db_postgres.postgres_queries.qry_save_label_text_list import (
-    save_label_text_list_qry)
+from db_postgres.postgres_queries.qry_save_direct_categ_text_dicts_list import (
+    save_direct_cat_text_dicts_list_qry)
+from db_postgres.postgres_queries.qry_save_label_text_dicts_list import (
+    save_label_text_dicts_list_qry)
 from db_postgres.postgres_queries.qry_save_new_model_data import (
     save_new_model_data_qry)
 from db_postgres.postgres_queries_helpers.hpr_get_bert_model_data import (
@@ -247,13 +247,13 @@ async def init_and_start_bert_model():
                 print(f"Postgres DB labels categories saved [OK]:\n"
                       f"label_category_dict: {label_category_dict}\n")
 
-                await save_label_text_list_qry(
+                await save_label_text_dicts_list_qry(
                     ongoing_session=pgs_session,
                     label_text_dicts_list=lab_text_dicts_list,
                     creation_reason=creation_reason,
                     save_only_unique=True)
 
-                await save_direct_cat_text_list_qry(
+                await save_direct_cat_text_dicts_list_qry(
                     ongoing_session=pgs_session,
                     direct_cat_text_dicts_list=direct_cat_text_dicts_list,
                     creation_reason=creation_reason,
@@ -290,13 +290,13 @@ async def init_and_start_bert_model():
                 print(f"Postgres DB labels-categories saved [OK]:\n"
                       f"label_category_dict: {label_category_dict}\n")
 
-                await save_label_text_list_qry(
+                await save_label_text_dicts_list_qry(
                     ongoing_session=pgs_session,
                     label_text_dicts_list=lab_text_dicts_list,
                     creation_reason=creation_reason,
                     save_only_unique=True)
 
-                await save_direct_cat_text_list_qry(
+                await save_direct_cat_text_dicts_list_qry(
                     ongoing_session=pgs_session,
                     direct_cat_text_dicts_list=direct_cat_text_dicts_list,
                     creation_reason=creation_reason,

@@ -23,16 +23,16 @@ from db_postgres.postgres_models.direct_predict_model import (
     DirectPredictModel)
 from db_postgres.postgres_models.trained_bert_model import (
     TrainedBertModel)
-from db_postgres.postgres_queries.qry_deactivate_all_direct_cat_text_records import (
-    deactivate_all_orm_model_records)
+from db_postgres.postgres_queries.deactivate_all_model_records_query import (
+    deactivate_all_model_records_qry)
 from db_postgres.postgres_queries.qry_find_create_customer import (
     find_create_customer_qry)
 from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
 from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
     get_last_saved_model_dir_qry)
-from db_postgres.postgres_queries.qry_save_direct_category_text_list import (
-    save_direct_cat_text_list_qry)
+from db_postgres.postgres_queries.qry_save_direct_categ_text_dicts_list import (
+    save_direct_cat_text_dicts_list_qry)
 from db_postgres.postgres_queries.qry_save_new_model_data import (
     save_new_model_data_qry)
 from fast_api.app_account_data.scheme_account_data import (
@@ -297,11 +297,11 @@ async def bert_load_model(
                 dataset_csv_dir=dataset_save_new_dir_path,
                 creation_reason=creation_reason)
 
-            await deactivate_all_orm_model_records(
+            await deactivate_all_model_records_qry(
                 ongoing_session=pgs_session,
                 ModelClassORM=DirectPredictModel)
 
-            await save_direct_cat_text_list_qry(
+            await save_direct_cat_text_dicts_list_qry(
                 ongoing_session=pgs_session,
                 direct_cat_text_dicts_list=loaded_direct_cat_text_list,
                 creation_reason=creation_reason,

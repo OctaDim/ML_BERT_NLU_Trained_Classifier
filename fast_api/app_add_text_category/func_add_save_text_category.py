@@ -16,8 +16,8 @@ from db_postgres.postgres_queries.qry_find_create_customer import (
     find_create_customer_qry)
 from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
-from db_postgres.postgres_queries.qry_save_direct_category_text_list import (
-    save_direct_cat_text_list_qry)
+from db_postgres.postgres_queries.qry_save_direct_categ_text_dicts_list import (
+    save_direct_cat_text_dicts_list_qry)
 from db_postgres.postgres_queries.qry_save_label_text_dict import (
     save_unique_text_lab_dict_qry)
 from db_postgres.postgres_queries_helpers.hpr_get_bert_model_data import (
@@ -568,7 +568,7 @@ async def add_save_single_text_category(
                         "direct_category": update_category,
                         "direct_text": update_text}
                     direct_predict_dicts_list = [direct_predict_new_data, ]
-                    await save_direct_cat_text_list_qry(
+                    await save_direct_cat_text_dicts_list_qry(
                         ongoing_session=pgs_session,
                         direct_cat_text_dicts_list=direct_predict_dicts_list,
                         creation_reason=creation_reason,

@@ -20,10 +20,10 @@ from db_postgres.postgres_queries.qry_find_create_customer import (
     find_create_customer_qry)
 from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
-from db_postgres.postgres_queries.qry_save_direct_category_text_list import (
-    save_direct_cat_text_list_qry)
-from db_postgres.postgres_queries.qry_save_label_text_list import (
-    save_label_text_list_qry)
+from db_postgres.postgres_queries.qry_save_direct_categ_text_dicts_list import (
+    save_direct_cat_text_dicts_list_qry)
+from db_postgres.postgres_queries.qry_save_label_text_dicts_list import (
+    save_label_text_dicts_list_qry)
 from db_postgres.postgres_queries_helpers.hpr_get_bert_model_data import (
     get_postgres_bert_model_data_hpr)
 from fast_api.app_account_data.scheme_account_data import (
@@ -456,7 +456,7 @@ async def add_save_multi_text_category_file(
                 print(f"Postgres DB labels-categories saved [OK]")
                 print(f"upd_lab_cat_dict: {upd_lab_cat_dict}")  # Too long
 
-                await save_label_text_list_qry(
+                await save_label_text_dicts_list_qry(
                     ongoing_session=pgs_session,
                     label_text_dicts_list=upd_lab_text_dicts_list,
                     creation_reason=creation_reason,
@@ -464,7 +464,7 @@ async def add_save_multi_text_category_file(
                 print(f"Postgres DB texts-labels saved [OK]")
                 print(f"upd_lab_text_dicts_list: {upd_lab_text_dicts_list}")  # Too long
 
-                await save_direct_cat_text_list_qry(
+                await save_direct_cat_text_dicts_list_qry(
                     ongoing_session=pgs_session,
                     direct_cat_text_dicts_list=upd_direct_text_cat_dicts_list,
                     creation_reason=creation_reason,

@@ -8,7 +8,7 @@ from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
     get_model_rows_flex_query)
 
 
-async def get_direct_categ_text_by_acc_dict_qry(
+async def get_direct_cat_text_by_acc_dict_qry(
         ongoing_session: AsyncSession,
         account_id: str = None,
         account_username: str = None,

@@ -17,8 +17,8 @@ from db_postgres.postgres_async_conn.postgres_async_session import (
     PostgresSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
-from db_postgres.postgres_queries.qry_get_direct_category_text_by_acc_dict import (
-    get_direct_categ_text_by_acc_dict_qry)
+from db_postgres.postgres_queries.qry_get_direct_categ_text_by_acc_dict import (
+    get_direct_cat_text_by_acc_dict_qry)
 from db_postgres.postgres_queries.qry_get_label_category_dict import (
     get_label_category_dict_qry)
 from db_postgres.postgres_queries.qry_get_last_dataset_name_and_dir import (
@@ -70,7 +70,7 @@ async def bert_get_categories_list(
                 reversed_category_label_dict=False)
             pgs_predict_cat_list = list(pgs_predict_lab_cat_dict.values())
 
-            pgs_direct_text_cat_dict = await get_direct_categ_text_by_acc_dict_qry(
+            pgs_direct_text_cat_dict = await get_direct_cat_text_by_acc_dict_qry(
                 ongoing_session=pgs_session,
                 account_id=account_data.account_id,
                 account_username=account_data.account_username,

@@ -11,7 +11,7 @@ from db_postgres.postgres_queries_utils.merge_obj_ongoing_session import (
     merge_obj_to_ongoing_session)
 
 
-async def save_label_text_list_qry(
+async def save_label_text_dicts_list_qry(
         ongoing_session: AsyncSession,
         label_text_dicts_list: List[Dict[str, int | str]],
         creation_reason: str = None,
