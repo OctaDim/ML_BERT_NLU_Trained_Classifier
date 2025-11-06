@@ -77,19 +77,21 @@ async def add_draft_single_category(
             print(f"len(cur_cat_lab_csv_dict): {len(cur_cat_lab_csv_dict)}")
 
             if not cur_cat_lab_csv_dict:
-                error_log = (f"Empty or wrong label-category csv data [ERROR]:\n"
-                             f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
-                             f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}\n")
+                error_log = (
+                    f"Empty or wrong label-category csv data [ERROR]:\n"
+                    f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
+                    f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}\n")
                 print(error_log)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=error_log)
             cur_cat_lab_dict = cur_cat_lab_csv_dict
         except Exception as lab_cat_csv_file_error:
-            error_log = (f"Getting label-category csv file data [ERROR]:\n"
-                         f"error: {lab_cat_csv_file_error}\n"
-                         f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
-                         f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}\n")
+            error_log = (
+                f"Getting label-category csv file data [ERROR]:\n"
+                f"error: {lab_cat_csv_file_error}\n"
+                f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
+                f"cur_cat_lab_csv_dict: {cur_cat_lab_csv_dict}\n")
             print(error_log)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -109,28 +111,28 @@ async def add_draft_single_category(
         print("Checking single category already exists in dataset or in drafts:")
         if update_category in cur_cat_lab_dict:
             dataset_existing_cat = update_category
-            new_draft_category = "category exists in dataset"  # Just return info
+            new_draft_cat_info = f"exists in dataset: {update_category}"  # Just return info
             current_status = DRAFT_STATUS.DATASET_EXISTS
             active_val = False
             creation_reason = (f"single cat: {update_category}, "
                                f"active: {active_val}, "
-                               f"new draft category: {new_draft_category}")
+                               f"new draft category: {new_draft_cat_info}")
         elif update_category in draft_categories_list:
             dataset_existing_cat = None
-            new_draft_category = "category exists in db drafts"  # Just return info
+            new_draft_cat_info = f"exists in drafts: {update_category}"  # Just return info
             current_status = DRAFT_STATUS.DRAFT_EXISTS
             active_val = False
             creation_reason = (f"single cat: {update_category}, "
                                f"active: {active_val}, "
-                               f"new draft category: {new_draft_category}")
+                               f"new draft category: {new_draft_cat_info}")
         else:
             dataset_existing_cat = None
-            new_draft_category = f"draft category: {update_category}"  # Just return info
+            new_draft_cat_info = f"new draft category: {update_category}"  # Just return info
             current_status = DRAFT_STATUS.NEW_CLASS_DRAFT_ADDED
             active_val = True
             creation_reason = (f"single cat: {update_category}, "
                                f"active: {active_val}, "
-                               f"new draft category: {new_draft_category}")
+                               f"new draft category: {new_draft_cat_info}")
         print("DB Postgres Saving single category to draft db data:")
         pgs_conn = PostgresConnection()
         async with PostgresSession(async_engine=pgs_conn.engine,
@@ -157,7 +159,7 @@ async def add_draft_single_category(
                 ongoing_session=pgs_session,
                 new_data=new_draft_data)
             print(f"DB Postgres single category saved as draft [OK]:\n"
-                  f"new_draft_category: {new_draft_category}\n")
+                  f"new_draft_cat_info: {new_draft_cat_info}\n")
 
         common_csv_f_note = "db draft table used instead of dataset"
         new_csv_files_data = {
@@ -165,7 +167,7 @@ async def add_draft_single_category(
             "text_lab_csv_path": common_csv_f_note,
             "direct_cat_text_csv_path": common_csv_f_note,
             "last_saved_dataset_ini_fpath": common_csv_f_note,
-            "new_category": new_draft_category}
+            "new_category": new_draft_cat_info}
         return new_csv_files_data
     except Exception as error:
         error_log = (f"BERT save single category as database draft [ERROR]: "

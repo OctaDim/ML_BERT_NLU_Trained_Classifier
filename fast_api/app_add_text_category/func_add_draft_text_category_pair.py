@@ -88,19 +88,21 @@ async def add_draft_text_category_pair(
             print(f"len(cur_lab_cat_csv_dict): {len(cur_lab_cat_csv_dict)}")
 
             if not cur_lab_cat_csv_dict:
-                error_log = (f"Empty or wrong label-category csv data [ERROR]:\n"
-                             f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
-                             f"cur_lab_cat_csv_dict: {cur_lab_cat_csv_dict}\n")
+                error_log = (
+                    f"Empty or wrong label-category csv data [ERROR]:\n"
+                    f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
+                    f"cur_lab_cat_csv_dict: {cur_lab_cat_csv_dict}\n")
                 print(error_log)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=error_log)
             cur_lab_cat_dict = cur_lab_cat_csv_dict
         except Exception as lab_cat_csv_file_error:
-            error_log = (f"Getting label-category csv file data [ERROR]:\n"
-                         f"error: {lab_cat_csv_file_error}\n"
-                         f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
-                         f"cur_lab_cat_csv_dict: {cur_lab_cat_csv_dict}\n")
+            error_log = (
+                f"Getting label-category csv file data [ERROR]:\n"
+                f"error: {lab_cat_csv_file_error}\n"
+                f"cur_lab_cat_csv_path: {cur_lab_cat_csv_path}\n"
+                f"cur_lab_cat_csv_dict: {cur_lab_cat_csv_dict}\n")
             print(error_log)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -123,19 +125,21 @@ async def add_draft_text_category_pair(
             print(f"len(cur_text_lab_csv_dict): {len(cur_text_lab_csv_dict)}")
 
             if not cur_text_lab_csv_dict:
-                error_log = (f"Empty or wrong text-label csv data [ERROR]:\n"
-                             f"cur_text_lab_csv_path: {cur_text_lab_csv_path}\n"
-                             f"cur_text_lab_csv_dict: {cur_text_lab_csv_dict}\n")
+                error_log = (
+                    f"Empty or wrong text-label csv data [ERROR]:\n"
+                    f"cur_text_lab_csv_path: {cur_text_lab_csv_path}\n"
+                    f"cur_text_lab_csv_dict: {cur_text_lab_csv_dict}\n")
                 print(error_log)
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=error_log)
             cur_text_lab_dict = cur_text_lab_csv_dict
         except Exception as text_lab_csv_file_error:
-            error_log = (f"Getting text-label csv file data [ERROR]:\n"
-                         f"error: {text_lab_csv_file_error}\n"
-                         f"cur_text_lab_csv_path: {cur_text_lab_csv_path}\n"
-                         f"cur_text_lab_csv_dict: {cur_text_lab_csv_dict}\n")
+            error_log = (
+                f"Getting text-label csv file data [ERROR]:\n"
+                f"error: {text_lab_csv_file_error}\n"
+                f"cur_text_lab_csv_path: {cur_text_lab_csv_path}\n"
+                f"cur_text_lab_csv_dict: {cur_text_lab_csv_dict}\n")
             print(error_log)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -177,83 +181,93 @@ async def add_draft_text_category_pair(
         if ds_text_exists_flag and ds_cat_by_text_exists_flag:
             dataset_existing_cat = all_ds_existing_cat
             dataset_existing_text = update_text
-            new_draft_category = "draft category: category exists in dataset"  # Just return info
-            new_draft_text = "draft text: text exists in dataset"  # Just return info
+            new_draft_cat_info = f"draft category exists in dataset: {update_category}"  # Just return info
+            new_draft_text_info = f"draft text exists in dataset: {update_text}"  # Just return info
             current_status = DRAFT_STATUS.DATASET_EXISTS
             active_val = False
-            creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
-                               f"active: {active_val}, "
-                               f"new_draft_category: {new_draft_category},"
-                               f"new_draft_text: {new_draft_text}")
+            creation_reason = (
+                f"cat-text pair: {update_category}-{update_text[:15]}, "
+                f"active: {active_val}, "
+                f"new_draft_cat_info: {new_draft_cat_info},"
+                f"new_draft_text_info: {new_draft_text_info}")
         elif ds_text_exists_flag:  # and not ds_cat_by_text_exists_flag
             if draft_cat_text_exists_flag:
                 dataset_existing_cat = all_ds_existing_cat
                 dataset_existing_text = update_text
-                new_draft_category = "draft category: category exists in db drafts"  # Just return info
-                new_draft_text = "draft text: text exists in db drafts"  # Just return info
+                new_draft_cat_info = f"draft category exists in drafts: {update_category}"  # Just return info
+                new_draft_text_info = f"draft text exists in drafts: {update_text}"  # Just return info
                 current_status = DRAFT_STATUS.DRAFT_EXISTS
                 active_val = False
-                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
-                                   f"active: {active_val}, "
-                                   f"new_draft_category: {new_draft_category},"
-                                   f"new_draft_text: {new_draft_text}")
+                creation_reason = (
+                    f"cat-text pair: {update_category}-{update_text[:15]}, "
+                    f"active: {active_val}, "
+                    f"new_draft_cat_info: {new_draft_cat_info},"
+                    f"new_draft_text_info: {new_draft_text_info}")
             else:
                 dataset_existing_cat = all_ds_existing_cat
                 dataset_existing_text = update_text
-                new_draft_category = f"draft category: {update_category}"  # Just return info
-                new_draft_text = "draft text: text exists in dataset"  # Just return info
+                new_draft_cat_info = f"new draft category: {update_category}"  # Just return info
+                new_draft_text_info = f"draft text exists in dataset: {update_text}"  # Just return info
                 current_status = DRAFT_STATUS.OVERRIDING_DRAFT_ADDED
                 active_val = True
-                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
-                                   f"active: {active_val}, "
-                                   f"new_draft_category: {new_draft_category},"
-                                   f"new_draft_text: {new_draft_text}")
+                creation_reason = (
+                    f"cat-text pair: {update_category}-{update_text[:15]}, "
+                    f"active: {active_val}, "
+                    f"new_draft_cat_info: {new_draft_cat_info},"
+                    f"new_draft_text_info: {new_draft_text_info}")
         elif ds_cat_by_text_exists_flag:  # and not ds_text_exists_flag
             if draft_cat_text_exists_flag:
                 dataset_existing_cat = update_category
                 dataset_existing_text = None
-                new_draft_category = "category exists in db drafts"  # Just return info
-                new_draft_text = "text exists in db drafts"  # Just return info
+                new_draft_cat_info = f"draft category exists in drafts: {update_category}"  # Just return info
+                new_draft_text_info = f"draft text exists in drafts: {update_text}"  # Just return info
                 current_status = DRAFT_STATUS.DRAFT_EXISTS
                 active_val = False
-                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
-                                   f"active: {active_val}, "
-                                   f"new_draft_category: {new_draft_category},"
-                                   f"new_draft_text: {new_draft_text}")
+                creation_reason = (
+                    f"cat-text pair: {update_category}-{update_text[:15]}, "
+                    f"active: {active_val}, "
+                    f"new_draft_cat_info: {new_draft_cat_info},"
+                    f"new_draft_text_info: {new_draft_text_info}")
             else:
                 dataset_existing_cat = update_category
                 dataset_existing_text = None
-                new_draft_category = "draft category: category exists in dataset"  # Just return info
-                new_draft_text = f"draft text: {update_text}"  # Just return info
+                new_draft_cat_info = f"draft category exists in dataset: {update_category}"  # Just return info
+                new_draft_text_info = f"new draft text: {update_text}"  # Just return info
                 current_status = DRAFT_STATUS.DRAFT_ADDED
                 active_val = True
-                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
-                                   f"active: {active_val}, "
-                                   f"new_draft_category: {new_draft_category},"
-                                   f"new_draft_text: {new_draft_text}")
+                creation_reason = (
+                    f"cat-text pair: {update_category}-{update_text[:15]}, "
+                    f"active: {active_val}, "
+                    f"new_draft_cat_info: {new_draft_cat_info},"
+                    f"new_draft_text_info: {new_draft_text_info}")
         else:  # if not ds_text_exists_flag and not ds_cat_by_text_exists_flag
             if draft_cat_text_exists_flag:
                 dataset_existing_cat = all_ds_existing_cat
                 dataset_existing_text = None
-                new_draft_category = "draft category: category exists in db drafts"  # Just return info
-                new_draft_text = "draft text: text exists in db drafts"  # Just return info
+                new_draft_cat_info = f"draft category exists in drafts: {update_category}"  # Just return info
+                new_draft_text_info = f"draft text: text exists in drafts: {update_text}"  # Just return info
                 current_status = DRAFT_STATUS.DRAFT_EXISTS
                 active_val = False
-                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
-                                   f"active: {active_val}, "
-                                   f"new_draft_category: {new_draft_category},"
-                                   f"new_draft_text: {new_draft_text}")
+                creation_reason = (
+                    f"cat-text pair: {update_category}-{update_text[:15]}, "
+                    f"active: {active_val}, "
+                    f"new_draft_cat_info: {new_draft_cat_info},"
+                    f"new_draft_text_info: {new_draft_text_info}")
             else:
                 dataset_existing_cat = all_ds_existing_cat
                 dataset_existing_text = None
-                new_draft_category = f"draft category: {update_category}"  # Just return info
-                new_draft_text = f"draft text: {update_text}"  # Just return info
-                current_status = DRAFT_STATUS.NEW_CLASS_DRAFT_ADDED
+                new_draft_cat_info = f"new draft category: {update_category}"  # Just return info
+                new_draft_text_info = f"new draft text: {update_text}"  # Just return info
+                if dataset_existing_cat:
+                    current_status = DRAFT_STATUS.DRAFT_ADDED
+                else:
+                    current_status = DRAFT_STATUS.NEW_CLASS_DRAFT_ADDED
                 active_val = True
-                creation_reason = (f"cat-text: {update_category}-{update_text[:15]}, "
-                                   f"active: {active_val}, "
-                                   f"new_draft_category: {new_draft_category},"
-                                   f"new_draft_text: {new_draft_text}")
+                creation_reason = (
+                    f"cat-text pair: {update_category}-{update_text[:15]}, "
+                    f"active: {active_val}, "
+                    f"new_draft_cat_info: {new_draft_cat_info},"
+                    f"new_draft_text_info: {new_draft_text_info}")
 
         print("Postgres DB Saving single category to draft db data:")
         pgs_conn = PostgresConnection()
@@ -283,7 +297,8 @@ async def add_draft_text_category_pair(
                 ongoing_session=pgs_session,
                 new_data=new_draft_data)
             print(f"Postgres DB category-text pair saved as draft [OK]:\n"
-                  f"new_draft_category: {new_draft_category}\n")
+                  f"new_draft_cat_info: {new_draft_cat_info}\n"
+                  f"new_draft_text_info: {new_draft_text_info}\n")
 
         common_csv_f_note = "db draft table used instead of dataset"
         new_csv_files_data = {
@@ -291,8 +306,8 @@ async def add_draft_text_category_pair(
             "text_lab_csv_path": common_csv_f_note,
             "direct_cat_text_csv_path": common_csv_f_note,
             "last_saved_dataset_ini_fpath": common_csv_f_note,
-            "new_category": new_draft_category,
-            "new_text": new_draft_text}
+            "new_category": new_draft_cat_info,
+            "new_text": new_draft_text_info}
         return new_csv_files_data
     except Exception as error:
         error_log = (f"BERT save category-text pair as db draft [ERROR]: "
