@@ -74,6 +74,7 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
         (DraftCategoryTextModel.created_at, False), ]  # True - ascending, False - descending
 
     column_sortable_list = [
+        DraftCategoryTextModel.id,
         DraftCategoryTextModel.account_id,
         DraftCategoryTextModel.account_username,
         # DraftCategoryTextModel.account_data,
