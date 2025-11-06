@@ -15,6 +15,8 @@ from configs.settings import (
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
+from fast_api.app_add_texts_categories_file.func_add_draft_text_category_file import (
+    add_draft_multi_text_category_file)
 from fast_api.app_add_texts_categories_file.func_add_save_text_category_file import (
     add_save_multi_text_category_file)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
@@ -119,11 +121,18 @@ async def bert_add_text_category_file(
 
     try:
         datetime_start = datetime.now()
-        new_csv_files_data = await add_save_multi_text_category_file(
-            account_data=account_data,
-            update_text_category_data=update_data_list,
-            bert_model_inst=bert_model_inst,
-            file_name=file_name)
+        if BERT_OPTIONS.BERT_DATASET_VIA_DRAFT_CATEG_TEXT_FILE:  # Adding multi text-category file to db draft only (not csv)
+            new_csv_files_data = await add_draft_multi_text_category_file(
+                account_data=account_data,
+                update_text_category_data=update_data_list,
+                bert_model_inst=bert_model_inst,
+                file_name=file_name)
+        else:  # Adding multi text-category file into db and csv dataset directly
+            new_csv_files_data = await add_save_multi_text_category_file(
+                account_data=account_data,
+                update_text_category_data=update_data_list,
+                bert_model_inst=bert_model_inst,
+                file_name=file_name)
         adding_time = (datetime.now() - datetime_start).total_seconds()
         adding_time = round(adding_time, 1)
 
@@ -171,7 +180,8 @@ async def bert_add_text_category_file(
               f"result_list: {blue_color}{result_list[:2]}.....{reset_color}\n")
         return json_response
     except Exception as error:
-        log_text = f"BERT router [ERROR]: error: {error}"
+        log_text = (f"BERT router Multi category-text file not added [ERROR]:"
+                    f" error: {error}")
         print(log_text)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

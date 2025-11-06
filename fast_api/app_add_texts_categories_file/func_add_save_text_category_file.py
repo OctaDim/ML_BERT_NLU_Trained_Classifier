@@ -200,10 +200,10 @@ async def add_save_multi_text_category_file(
     extended_lab_cat_dict = copy.copy(prev_lab_cat_dict)
     extended_text_lab_dict = copy.copy(prev_text_lab_dict)
 
-    empty_error_skipped_rows = []
-    new_categories_list = []
-    new_texts_list = []
-    result_list = []
+    empty_error_skipped_rows = []  # Just return info
+    new_categories_list = []  # Just return info
+    new_texts_list = []  # Just return info
+    result_list = []  # Just return info
 
     try:
         print("Group adding multi label-category file:")

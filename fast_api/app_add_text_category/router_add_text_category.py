@@ -59,7 +59,7 @@ async def bert_add_text_category(
                 update_text=update_text,
                 update_category=update_category,
                 bert_model_inst=bert_model_inst)
-        else:  # Adding text-category pair into db and csv dataset at once
+        else:  # Adding text-category pair into db and csv dataset directly
             new_csv_files_data = await add_save_single_text_category(
                 account_data=account_data,
                 update_text=update_text,
@@ -107,7 +107,8 @@ async def bert_add_text_category(
             f"new text: {blue_color}{new_text}{reset_color}\n")
         return json_response
     except Exception as error:
-        log_text = f"BERT router [ERROR]: error: {error}"
+        log_text = (f"BERT router Category-text pair not added [ERROR]: "
+                    f"error: {error}")
         print(log_text)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

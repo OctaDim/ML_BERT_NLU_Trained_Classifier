@@ -56,7 +56,7 @@ async def bert_add_single_category(
                 account_data=account_data,
                 update_category=upd_single_category,
                 bert_model_inst=bert_model_inst)
-        else:  # Adding single category into db and csv dataset at once
+        else:  # Adding single category into db and csv dataset directly
             new_csv_files_data = await add_save_single_category(
                 account_data=account_data,
                 update_category=upd_single_category,
@@ -97,7 +97,8 @@ async def bert_add_single_category(
             f"new category: {blue_color}{new_category}{reset_color}")
         return json_response
     except Exception as error:
-        log_text = f"BERT router [ERROR]: error: {error}"
+        log_text = (f"BERT router Single category not added [ERROR]: "
+                    f"error: {error}")
         print(log_text)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
