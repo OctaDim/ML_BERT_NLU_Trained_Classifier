@@ -25,4 +25,7 @@ class LABELS:
 class MESSAGES:
     DATASET_ACTION_NAME = "Добавить выбранные черновики в обучающий датасет"
     DATASET_CONFIRM_MSG = "Подтердите добавление в обучающий датасет !?"
-    RECORDS_NOT_SELECTED = "Не выбрано ни одного черновика"
+    RECORDS_NOT_SELECTED = "НЕ ВЫБРАНО НИ ОДНОГО ЧЕРНОВИКА"
+    DRAFTS_NOT_ALLOWED = "ВЫБРАНЫ НЕРАЗРЕШЁННЫЕ ЧЕРНОВИКИ"
+    DRAFTS_ADDED_SUCCESS = "ЧЕРНОВИКИ ДОБАВЛЕНЫ УСПЕШНО"
+    DRAFTS_SKIPPED = "ЧЕРНОВИКИ ПРОПУЩЕНЫ"

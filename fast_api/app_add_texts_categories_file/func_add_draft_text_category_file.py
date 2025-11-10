@@ -246,7 +246,8 @@ async def add_draft_multi_text_category_file(
                     new_draft_cat_info = f"new draft category: {cur_upd_cat}"  # Just return info
                     new_draft_text_info = f"draft text exists in dataset: {cur_upd_text}"  # Just return info
                     current_status = DRAFT_STATUS.OVERRIDING_DRAFT_ADDED
-                    active_val = True
+                    active_val = False  # Not allowed draft with overriding existing dataset category/class (tech task)
+                    # active_val = True
                     draft_creation_reason = (
                         f"cat-text file: {cur_upd_cat}-{cur_upd_text[:15]}, "
                         f"active: {active_val}, "
@@ -296,10 +297,12 @@ async def add_draft_multi_text_category_file(
                     new_draft_cat_info = f"new draft category: {cur_upd_cat}"  # Just return info
                     new_draft_text_info = f"new draft text: {cur_upd_text}"  # Just return info
                     if dataset_existing_cat:
+                        active_val = True
                         current_status = DRAFT_STATUS.DRAFT_ADDED
                     else:
-                        current_status = DRAFT_STATUS.NEW_CLASS_DRAFT_ADDED
-                    active_val = True
+                        current_status = DRAFT_STATUS.NEW_TEXT_CLASS_DRAFT_ADDED
+                        active_val = False  # Not allowed new text - new cat/class, only existing cat/class (tech task)
+                    # active_val = True
                     draft_creation_reason = (
                         f"cat-text file: {cur_upd_cat}-{cur_upd_text[:15]}, "
                         f"active: {active_val}, "
