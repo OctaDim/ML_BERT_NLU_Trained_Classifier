@@ -36,7 +36,7 @@ def create_where_for_partial_query(
                 prior_orm_query = prior_orm_query.where(column.is_(field_value))
             else:
                 if isinstance(field_value, (list, tuple)):
-                    prior_orm_query = prior_orm_query.where(column.in_(field_value))
+                    prior_orm_query = prior_orm_query.where(column.in_(*field_value))  # Unpacked list/tuple expected
                 else:
                     prior_orm_query = prior_orm_query.where(column == field_value)
     except Exception as error:
