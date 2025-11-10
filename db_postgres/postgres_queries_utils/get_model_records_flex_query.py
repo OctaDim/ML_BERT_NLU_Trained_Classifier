@@ -1,4 +1,4 @@
-from typing import Union, Optional, Tuple, Type, Any, Sequence, List
+from typing import Union, Optional, Tuple, Type, Any, Sequence, List, Dict
 
 from fastapi import HTTPException
 from sqlalchemy import select, UnaryExpression, Row, RowMapping
@@ -22,7 +22,7 @@ async def get_model_rows_flex_query(
         orm_model_class: Type[Base],
         ongoing_session: AsyncSession,
         selected_fields: Optional[Union[List[str], Tuple[str, ...], str, None]] = None,
-        fields_values_filter: dict = None,
+        fields_values_filter: Dict[str, Union[any, bool, list, tuple]] = None,
         order_by_fields: Optional[Union[str, Tuple[str, ...],
         UnaryExpression, Tuple[UnaryExpression, ...],
         InstrumentedAttribute, None]] = (
