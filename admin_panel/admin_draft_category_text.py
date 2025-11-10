@@ -3,9 +3,24 @@ from fastapi.responses import RedirectResponse
 from sqladmin import ModelView, action
 from starlette.responses import HTMLResponse
 
+from ML_BERT_classifier.init_bert import get_global_bert_model_inst
+from configs.enums import DRAFT_STATUS
 from configs.labels_messages import LABELS, MESSAGES
+from db_postgres.postgres_async_conn.pgs_async_connection import (
+    PostgresConnection)
+from db_postgres.postgres_async_conn.postgres_async_session import (
+    PostgresSession)
 from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
+from db_postgres.postgres_queries.qry_get_id_draft_dict_by_ids_list import (
+    get_id_draft_dict_by_ids_list_qry)
+from db_postgres.postgres_queries.qry_save_new_model_data import (
+    save_new_model_data_qry)
+from fast_api.app_account_data.scheme_account_data import AccountDataBert
+from fast_api.app_add_single_category.func_add_single_category import (
+    add_save_single_category)
+from fast_api.app_add_text_category.func_add_save_text_category import (
+    add_save_single_text_category)
 
 
 class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
@@ -197,4 +212,90 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
 
         selected_ids_int_list = [int(ids_str) for ids_str in selected_ids_str_list]
         print("selected_ids_int_list: ", selected_ids_int_list)
-        return RedirectResponse(referer)
+
+        pgs_conn = PostgresConnection()
+        async with PostgresSession(async_engine=pgs_conn.engine
+                                   ) as pgs_session:
+            id_draft_dicts_dict = await get_id_draft_dict_by_ids_list_qry(
+                ongoing_session=pgs_session,
+                drafts_ids_list=selected_ids_int_list)
+
+        not_allowed_drafts_ids = []
+        for cur_draft_id in selected_ids_int_list:
+            cur_draft_dict = id_draft_dicts_dict[cur_draft_id]
+            active = cur_draft_dict["active"]
+            if not active:
+                not_allowed_drafts_ids.append(cur_draft_id)
+
+        if not_allowed_drafts_ids:
+            error_msg = (f"{MESSAGES.DRAFTS_NOT_ALLOWED}: "
+                         f"{not_allowed_drafts_ids}")
+            html_content = f"""<script>
+            alert("{error_msg}");
+            window.location.href = "{referer}";
+            </script>"""
+            return HTMLResponse(html_content)
+
+        drafts_added_list = []
+        drafts_skipped_list = []
+        for cur_draft_id in selected_ids_int_list:
+            cur_draft_dict = id_draft_dicts_dict[cur_draft_id]
+            account_id = cur_draft_dict["account_id"]
+            account_username = cur_draft_dict["account_username"]
+            ds_existing_category = cur_draft_dict["ds_existing_category"]
+            draft_category = cur_draft_dict["draft_category"]
+            ds_existing_text = cur_draft_dict["ds_existing_text"]
+            draft_text = cur_draft_dict["draft_text"]
+
+            new_category_no_text_flag = all([
+                not ds_existing_category, draft_category,
+                not ds_existing_text, not draft_text])
+
+            exist_category_new_text_flag = all([
+                ds_existing_category, draft_category,
+                ds_existing_category == draft_category,
+                not ds_existing_text, draft_text])
+
+            account_data = AccountDataBert(
+                account_id=account_id,
+                account_username=account_username)
+
+            bert_model_instance = get_global_bert_model_inst()
+
+            print(ds_existing_category, draft_category, ds_existing_text, draft_text)
+
+            if new_category_no_text_flag:
+                await add_save_single_category(
+                    account_data=account_data,
+                    update_category=draft_category,
+                    bert_model_inst=bert_model_instance)
+                drafts_added_list.append(cur_draft_id)
+            elif exist_category_new_text_flag:
+                await add_save_single_text_category(
+                    account_data=account_data,
+                    update_text=draft_text,
+                    update_category=draft_category,
+                    bert_model_inst=bert_model_instance)
+                drafts_added_list.append(cur_draft_id)
+            else:
+                drafts_skipped_list.append(cur_draft_id)
+
+        pgs_conn = PostgresConnection()
+        async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+            for cur_added_draft_id in drafts_added_list:
+                await save_new_model_data_qry(
+                    ModelClassORM=DraftCategoryTextModel,
+                    ongoing_session=pgs_session,
+                    new_data={"id": cur_added_draft_id,
+                              "current_status": DRAFT_STATUS.DATASET_ADDED,
+                              "active": False})
+
+        error_msg = f"{MESSAGES.DRAFTS_ADDED_SUCCESS}: {drafts_added_list}"
+        if drafts_skipped_list:
+            error_msg = (f"{error_msg}, "
+                         f"{MESSAGES.DRAFTS_SKIPPED}: {drafts_added_list}")
+        html_content = f"""<script>
+        alert("{error_msg}");
+        window.location.href = "{referer}";
+        </script>"""
+        return HTMLResponse(html_content)  # if not result info msg: return RedirectResponse(referer)
