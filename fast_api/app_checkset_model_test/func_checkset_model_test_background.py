@@ -60,7 +60,7 @@ async def background_checkset_test_model(
     step_counter = 1
     for cur_test_text, cur_test_category in checkset_data_list:
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine,
+        async with PgsAsyncSession(engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             direct_predicted_category = await get_direct_category_by_text(

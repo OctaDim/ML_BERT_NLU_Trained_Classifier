@@ -79,7 +79,7 @@ async def bert_load_model(
     else:
         print("Postgres DB Getting last saved model directory path:")
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine,
+        async with PgsAsyncSession(engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             pgs_last_saved_model_dir = get_last_saved_model_dir_qry(
@@ -277,7 +277,7 @@ async def bert_load_model(
 
         print("Postgres DB Saving loaded model and dataset data:")
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine,
+        async with PgsAsyncSession(engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             creation_reason = (f"model loaded from: {model_load_path}, "

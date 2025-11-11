@@ -78,7 +78,7 @@ async def bert_train_model(
     try:
         print("Postgres DB Getting last saved dataset directory and dataset name:")
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine,
+        async with PgsAsyncSession(engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             pgs_last_dataset_data = await get_last_dataset_name_and_dir_qry(
@@ -134,7 +134,7 @@ async def bert_train_model(
 
         print("Postgres DB Getting label-category dictionary:")
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine,
+        async with PgsAsyncSession(engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             pgs_new_lab_cat_dict = await get_label_category_dict_qry(
@@ -228,7 +228,7 @@ async def bert_train_model(
 
             print("DB Postgres saving before_reinit_model table data:")
             pgs_conn = PgsAsyncConnection()
-            async with PgsAsyncSession(async_engine=pgs_conn.engine,
+            async with PgsAsyncSession(engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 creation_reason = f"reserved before train: {dataset_name}"
@@ -290,7 +290,7 @@ async def bert_train_model(
 
         print("Postgres DB Getting text-label train data:")
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine,
+        async with PgsAsyncSession(engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             pgs_lab_text_dicts_list = await get_label_text_dicts_list_qry(

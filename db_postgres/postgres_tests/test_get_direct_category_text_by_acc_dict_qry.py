@@ -13,7 +13,7 @@ async def test_get_direct_category_text_by_acc_dict_qry():
     account_username = "globalhome"
 
     pgs_conn = PgsAsyncConnection()
-    async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
+    async with PgsAsyncSession(engine=pgs_conn.engine) as pgs_session:
         pgs_direct_cat_dict = await get_direct_cat_text_by_acc_dict_qry(
             ongoing_session=pgs_session,
             account_id=account_id,

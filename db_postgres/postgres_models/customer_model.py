@@ -1,6 +1,7 @@
 from typing import Optional
 
 from sqlalchemy import UniqueConstraint
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db_postgres.postgres_conn_async.pgs_async_connection import Base
@@ -29,3 +30,10 @@ class CustomerModel(Base, ActiveMix, CreateUpdateMix, CreateReasonMix):
     #     argument='Master',
     #     order_by='Master.full_name',
     #     back_populates="master_categories")
+
+    @hybrid_property
+    def account_data(self):
+        username_str = self.account_username or "_____"
+        id_str = self.account_id or "___"
+        field_value = f"{username_str} / {id_str}"
+        return field_value

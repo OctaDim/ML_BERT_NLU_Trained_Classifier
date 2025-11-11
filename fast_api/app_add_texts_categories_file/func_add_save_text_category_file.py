@@ -428,7 +428,7 @@ async def add_save_multi_text_category_file(
             print(f"upd_direct_text_cat_dicts_list: {upd_direct_text_cat_dicts_list[:2]}")  # Too long
 
             pgs_conn = PgsAsyncConnection()
-            async with PgsAsyncSession(async_engine=pgs_conn.engine,
+            async with PgsAsyncSession(engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 creation_reason = (f"uploaded file: {file_name}, "

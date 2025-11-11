@@ -4,16 +4,25 @@ from sqladmin import ModelView, action
 from starlette.responses import HTMLResponse
 
 from ML_BERT_classifier.init_bert import get_global_bert_model_inst
+from admin_panel.custom_override_classes import (
+    CustomBooleanFilter, CustomStaticValuesFilter)
 from configs.enums import DRAFT_STATUS
 from configs.labels_messages import LABELS, MESSAGES
+from configs.settings import ALCHEMY_OPTIONS
 from db_postgres.postgres_conn_async.pgs_async_connection import (
     PgsAsyncConnection)
 from db_postgres.postgres_conn_async.postgres_async_session import (
     PgsAsyncSession)
+from db_postgres.postgres_conn_sync.pgs_sync_connection import (
+    PostgresSyncConn)
+from db_postgres.postgres_conn_sync.postgres_sync_session import (
+    PgsSyncSession)
 from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
 from db_postgres.postgres_queries.qry_get_id_draft_dict_by_ids_list import (
     get_id_draft_dict_by_ids_list_qry)
+from db_postgres.postgres_queries.qry_get_draft_active_data_tuples_sync import (
+    get_sync_active_drafts_data)
 from db_postgres.postgres_queries.qry_save_new_model_data import (
     save_new_model_data_qry)
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
@@ -63,7 +72,7 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
     column_searchable_list = [
         DraftCategoryTextModel.account_id,
         DraftCategoryTextModel.account_username,
-        DraftCategoryTextModel.account_data,
+        # DraftCategoryTextModel.account_data,
         DraftCategoryTextModel.ds_existing_category,
         DraftCategoryTextModel.draft_category,
         DraftCategoryTextModel.ds_existing_text,
@@ -72,27 +81,63 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
         DraftCategoryTextModel.active,
         DraftCategoryTextModel.created_at, ]
 
-    # TODO: Settle issue with filter fields names or objs error
-    # column_filters = [
-    #     DraftCategoryTextModel.account_id,
-    #     DraftCategoryTextModel.account_username,
-    #     DraftCategoryTextModel.account_data,
-    #     DraftCategoryTextModel.ds_existing_category,
-    #     DraftCategoryTextModel.draft_category,
-    #     DraftCategoryTextModel.ds_existing_text,
-    #     DraftCategoryTextModel.draft_text,
-    #     DraftCategoryTextModel.current_status,
-    #     DraftCategoryTextModel.active,
-    #     DraftCategoryTextModel.created_at, ]
+    @property
+    def column_filters(self):
+        pgs_sync_conn = PostgresSyncConn()
+        with PgsSyncSession(
+                engine=pgs_sync_conn.engine,
+                log_good_ops=ALCHEMY_OPTIONS.ALCHEMY_ORM_RAW_SQL_LOGS
+        ) as pgs_sync_session:
+            active_drafts_data = get_sync_active_drafts_data(
+                ongoing_sync_session=pgs_sync_session)
+        category_values = active_drafts_data["filter_cat_values"]
+        text_values = active_drafts_data["filter_text_values"]
+        acc_id_values = active_drafts_data["filter_acc_id_values"]
+        username_values = active_drafts_data["filter_username_values"]
+
+        column_filters_list = [
+            CustomBooleanFilter(
+                column=DraftCategoryTextModel.active,
+                title=LABELS.ACTIVE_STATUS),
+            CustomStaticValuesFilter(
+                column=DraftCategoryTextModel.draft_category,
+                values=category_values,
+                title=LABELS.DRAFT_CATEGORY),
+            CustomStaticValuesFilter(
+                column=DraftCategoryTextModel.draft_text,
+                values=text_values,
+                title=LABELS.DRAFT_TEXT),
+            # CustomForeignKeyFilter(
+            #     foreign_key=DraftCategoryTextModel.customer_id,
+            #     foreign_display_field=CustomerModel.account_id,
+            #     foreign_model=CustomerModel,
+            #     title=LABELS.ACCOUNT_ID),
+            # CustomForeignKeyFilter(
+            #     foreign_key=DraftCategoryTextModel.customer_id,
+            #     foreign_display_field=CustomerModel.account_username,
+            #     foreign_model=CustomerModel,
+            #     title=LABELS.ACCOUNT_USERNAME),
+            CustomStaticValuesFilter(
+                column=DraftCategoryTextModel.account_username,
+                values=username_values,
+                title=LABELS.ACCOUNT_USERNAME),
+            CustomStaticValuesFilter(
+                column=DraftCategoryTextModel.account_id,
+                values=acc_id_values,
+                title=LABELS.ACCOUNT_ID),
+        ]
+        return column_filters_list
 
     column_default_sort = [
-        (DraftCategoryTextModel.created_at, False), ]  # True - ascending, False - descending
+        (DraftCategoryTextModel.active, True),
+        (DraftCategoryTextModel.created_at, True),
+    ]  # True - ascending, False - descending
 
     column_sortable_list = [
         DraftCategoryTextModel.id,
         DraftCategoryTextModel.account_id,
         DraftCategoryTextModel.account_username,
-        # DraftCategoryTextModel.account_data,
+        # DraftCategoryTextModel.account_data,  # Property not allowed
         DraftCategoryTextModel.ds_existing_category,
         DraftCategoryTextModel.draft_category,
         DraftCategoryTextModel.ds_existing_text,
@@ -214,8 +259,10 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
         print("selected_ids_int_list: ", selected_ids_int_list)
 
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine
-                                   ) as pgs_session:
+        async with PgsAsyncSession(
+                engine=pgs_conn.engine,
+                log_good_ops=ALCHEMY_OPTIONS.ALCHEMY_ORM_RAW_SQL_LOGS
+        ) as pgs_session:
             id_draft_dicts_dict = await get_id_draft_dict_by_ids_list_qry(
                 ongoing_session=pgs_session,
                 drafts_ids_list=selected_ids_int_list)
@@ -281,7 +328,7 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
                 drafts_skipped_list.append(cur_draft_id)
 
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
+        async with PgsAsyncSession(engine=pgs_conn.engine) as pgs_session:
             for cur_added_draft_id in drafts_added_list:
                 await save_new_model_data_qry(
                     ModelClassORM=DraftCategoryTextModel,

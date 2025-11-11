@@ -57,7 +57,7 @@ async def bert_predict_single_text(
 
         print("Postgres DB Check direct category prediction availability:")
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
+        async with PgsAsyncSession(engine=pgs_conn.engine) as pgs_session:
             pgs_direct_category = await get_direct_category_by_text(
                 ongoing_session=pgs_session,
                 account_id=account_data.account_id,

@@ -50,7 +50,7 @@ async def bert_get_last_dataset_name(
 
         print("Postgres DB Getting last saved dataset dir and dataset name:")
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine,
+        async with PgsAsyncSession(engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             pgs_last_dataset_data = await get_last_dataset_name_and_dir_qry(

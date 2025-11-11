@@ -226,7 +226,7 @@ async def init_and_start_bert_model():
         if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
             print("Postgres DB saving lab-cat, lab-text file data:")
             pgs_conn = PgsAsyncConnection()
-            async with PgsAsyncSession(async_engine=pgs_conn.engine,
+            async with PgsAsyncSession(engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 creation_reason = (f"service restarted, csv file: "
@@ -269,7 +269,7 @@ async def init_and_start_bert_model():
 
         if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
             pgs_conn = PgsAsyncConnection()
-            async with PgsAsyncSession(async_engine=pgs_conn.engine,
+            async with PgsAsyncSession(engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 creation_reason = (f"service restarted, pgs data: "
@@ -326,7 +326,7 @@ async def init_and_start_bert_model():
 
         if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
             pgs_conn = PgsAsyncConnection()
-            async with PgsAsyncSession(async_engine=pgs_conn.engine,
+            async with PgsAsyncSession(engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 creation_reason = (f"service restart init: "
@@ -364,7 +364,7 @@ async def init_and_start_bert_model():
         if not model_load_error_log:
             if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
                 pgs_conn = PgsAsyncConnection()
-                async with PgsAsyncSession(async_engine=pgs_conn.engine,
+                async with PgsAsyncSession(engine=pgs_conn.engine,
                                            log_good_ops=log_pgs_good_ops
                                            ) as pgs_session:
                     if not pgs_all_data_flag:

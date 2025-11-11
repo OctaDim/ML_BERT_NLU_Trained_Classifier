@@ -1,7 +1,6 @@
 from typing import Union
 
-from sqlalchemy.ext.asyncio import (
-    create_async_engine)
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import text
 
@@ -14,49 +13,50 @@ Base = declarative_base()
 
 
 class PgsAsyncConnection(metaclass=SingletonMeta):
-    def __init__(self,
-                 user: str = None,
-                 password: Union[str, None] = None,
-                 host: str = None,
-                 port: int = None,
-                 db_name: str = None,
-                 **kwargs) -> None:
-        self.db_user = POSTGRES_USER if user is None else user
-        self.db_password = POSTGRES_PASSWORD if password is None else password
-        self.db_host = POSTGRES_HOST if host is None else host
-        self.db_port = POSTGRES_PORT if port is None else port
-        self.db_name = POSTGRES_DB_NAME if db_name is None else db_name
+    def __init__(
+            self,
+            user: str = None,
+            password: Union[str, None] = None,
+            host: str = None,
+            port: int = None,
+            db_name: str = None,
+            async_driver_prefix: str = "postgresql+asyncpg",
+            **kwargs
+    ) -> None:
+        db_user = POSTGRES_USER if user is None else user
+        db_password = POSTGRES_PASSWORD if password is None else password
+        db_host = POSTGRES_HOST if host is None else host
+        db_port = POSTGRES_PORT if port is None else port
+        db_name = POSTGRES_DB_NAME if db_name is None else db_name
 
-        async_driver_prefix = "postgresql+asyncpg"
-        self.orm_engine_url = (
-            f"{async_driver_prefix}://{self.db_user}:{self.db_password}@"
-            f"{self.db_host}:{self.db_port}/{self.db_name}")
-
+        self.orm_engine_url = (f"{async_driver_prefix}://"
+                               f"{db_user}:{db_password}@"
+                               f"{db_host}:{db_port}/{db_name}")
         self.engine = self.create_async_engine()
 
-    def create_async_engine(self):
+    def create_async_engine(self) -> AsyncEngine:
         try:
-            engine = create_async_engine(
+            async_engine = create_async_engine(
                 url=self.orm_engine_url,
-                echo=ALCHEMY_OPTIONS.ALCHEMY_ORM_RAW_SQL_CONSOLE_LOGS,
+                echo=ALCHEMY_OPTIONS.ALCHEMY_ORM_RAW_SQL_LOGS,
                 future=ALCHEMY_OPTIONS.ALCHEMY_USE_FUTURE_ALCHEMY,
                 pool_pre_ping=ALCHEMY_OPTIONS.ALCHEMY_POOL_PRE_PING,
                 pool_size=ALCHEMY_OPTIONS.ALCHEMY_CONST_CONN_POOL_SIZE,
                 max_overflow=ALCHEMY_OPTIONS.ALCHEMY_TEMP_CONN_MAX_OVERFLOW,
                 pool_recycle=ALCHEMY_OPTIONS.ALCHEMY_POOL_RECYCLE,
                 pool_timeout=ALCHEMY_OPTIONS.ALCHEMY_POOL_TIMEOUT, )
-            print("Postgres DB ENGINE CREATED [OK]")
-            return engine
+            print("Postgres DB ASYNC ENGINE CREATED [OK]")
+            return async_engine
         except Exception as error:
-            print(f"Postgres DB ENGINE CREATING [ERROR]: "
+            print(f"Postgres DB ASYNC ENGINE CREATING [ERROR]: "
                   f"error: {error}")
             raise
 
     async def db_health_check(self) -> bool:
         """Check database connection availability (health status)"""
         try:
-            async with self.engine.connect() as engine_conn:
-                await engine_conn.execute(text("SELECT 1"))
+            async with self.engine.connect() as async_engine_conn:
+                await async_engine_conn.execute(text("SELECT 1"))
             return True
         except Exception as error:
             error_log = (f"Postgres DB HEALTH check [ERROR]: "
@@ -68,12 +68,12 @@ class PgsAsyncConnection(metaclass=SingletonMeta):
         """Close all database connections"""
         try:
             await self.engine.dispose()
-            print(f"Postgres DB CONNECTIONS CLOSED successfully [OK]")
+            print(f"Postgres DB ASYNC CONNECTIONS CLOSED successfully [OK]")
         except Exception as error:
-            print(f"Postgres DB CONNECTIONS CLOSING [ERROR]: "
+            print(f"Postgres DB ASYNC CONNECTIONS CLOSING [ERROR]: "
                   f"error: {error}")
 
 
-async def close_all_db_connections():
+async def close_all_db_connections() -> None:
     pgs_conn = PgsAsyncConnection()
     await pgs_conn.dispose_connection()

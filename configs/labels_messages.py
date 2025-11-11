@@ -16,10 +16,12 @@ class LABELS:
     DRAFT_CATEGORY = "КЛАСС В ЧЕРНОВИКЕ"
     DRAFT_TEXT = "ТЕКСТ В ЧЕРНОВИКЕ"
     DRAFT_STATUS = "СТАТУС ЧЕРНОВИКА"
-    ACTIVE_STATUS = "УНИКАЛЬНЫЙ"
+    ACTIVE_STATUS = "РАЗРЕШЁННЫЕ"
     CREATED = "СОЗДАНО"
     UPDATED = "ОБНОВЛЕНО"
-
+    ALLOWED_RECS = "Разрешённые ✅"
+    NOT_ALLOWED_RECS = "Неразрешённые ❌"
+    ALL_RECS = "Все"
 
 @dataclass(frozen=True)
 class MESSAGES:

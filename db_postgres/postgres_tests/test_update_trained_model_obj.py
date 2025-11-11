@@ -19,7 +19,7 @@ async def update_model_object_test():
         # {"username": "тест_2", "account_id": "222", },
     ]
     pgs_conn = PgsAsyncConnection()
-    async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
+    async with PgsAsyncSession(engine=pgs_conn.engine) as pgs_session:
         print(f"pgs_conn: {pgs_session}")
         for cur_data in new_update_data:
             await merge_obj_to_ongoing_session(
