@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     async def test_obtain_direct_category_by_text():
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
+        async with PgsAsyncSession(engine=pgs_conn.engine) as pgs_session:
             direct_category = await get_direct_category_by_text(
                 ongoing_session=pgs_session,
                 account_id="30",

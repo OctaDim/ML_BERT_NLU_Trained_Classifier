@@ -41,7 +41,7 @@ async def add_draft_multi_text_category_file(
     log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
     pgs_conn = PgsAsyncConnection()
-    async with PgsAsyncSession(async_engine=pgs_conn.engine,
+    async with PgsAsyncSession(engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
         print("DB Postgres Getting current label-category dictionary:")
@@ -150,7 +150,7 @@ async def add_draft_multi_text_category_file(
 
     print("DB Postgres Getting customer id and current draft categories list:")
     pgs_conn = PgsAsyncConnection()
-    async with PgsAsyncSession(async_engine=pgs_conn.engine,
+    async with PgsAsyncSession(engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
         customer_creation_reason = (
@@ -327,7 +327,7 @@ async def add_draft_multi_text_category_file(
 
         print("Postgres DB Saving single category to draft db data:")
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine,
+        async with PgsAsyncSession(engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             await save_draft_cat_text_dicts_list_qry(

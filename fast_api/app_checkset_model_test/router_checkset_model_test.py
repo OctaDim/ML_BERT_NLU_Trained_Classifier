@@ -154,7 +154,7 @@ async def bert_start_checkset_model_test(
 
     print("Postgres DB Getting last saved model directory path:")
     pgs_conn = PgsAsyncConnection()
-    async with PgsAsyncSession(async_engine=pgs_conn.engine,
+    async with PgsAsyncSession(engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
         pgs_last_saved_model_dir = await get_last_saved_model_dir_qry(

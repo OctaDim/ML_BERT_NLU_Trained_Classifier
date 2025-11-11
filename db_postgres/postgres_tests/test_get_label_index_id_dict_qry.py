@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
 async def test_get_label_index_id_dict_qry():
     pgs_conn = PgsAsyncConnection()
-    async with PgsAsyncSession(async_engine=pgs_conn.engine,
+    async with PgsAsyncSession(engine=pgs_conn.engine,
                                log_good_ops=True) as pgs_session:
         pgs_lab_index_and_id_dict = await get_label_idx_and_id_dict_qry(
             ongoing_session=pgs_session)

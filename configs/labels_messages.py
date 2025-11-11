@@ -16,15 +16,17 @@ class LABELS:
     DRAFT_CATEGORY = "КЛАСС В ЧЕРНОВИКЕ"
     DRAFT_TEXT = "ТЕКСТ В ЧЕРНОВИКЕ"
     DRAFT_STATUS = "СТАТУС ЧЕРНОВИКА"
-    ACTIVE_STATUS = "УНИКАЛЬНЫЙ"
+    ACTIVE_STATUS = "РАЗРЕШЁННЫЕ"
     CREATED = "СОЗДАНО"
     UPDATED = "ОБНОВЛЕНО"
-
+    ALLOWED_RECS = "Разрешённые ✅"
+    NOT_ALLOWED_RECS = "Неразрешённые ❌"
+    ALL_RECS = "Все"
 
 @dataclass(frozen=True)
 class MESSAGES:
-    DATASET_ACTION_NAME = "Добавить выбранные черновики в обучающий датасет"
-    DATASET_CONFIRM_MSG = "Подтердите добавление в обучающий датасет !?"
+    DATASET_ACTION_NAME = "ДОБАВИТЬ ВЫБРАННЫЕ ЧЕРНОВИКИ В ОБУЧАЮЩИЙ ДАТАСЕТ"
+    DATASET_CONFIRM_MSG = "ПОДТВЕРДИТЕ ДОБАВЛЕНИЕ В ОБУЧАЮЩИЙ ДАТАСЕТ ⁉️"
     RECORDS_NOT_SELECTED = "НЕ ВЫБРАНО НИ ОДНОГО ЧЕРНОВИКА"
     DRAFTS_NOT_ALLOWED = "ВЫБРАНЫ НЕРАЗРЕШЁННЫЕ ЧЕРНОВИКИ"
     DRAFTS_ADDED_SUCCESS = "ЧЕРНОВИКИ ДОБАВЛЕНЫ УСПЕШНО"

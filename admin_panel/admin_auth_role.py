@@ -22,7 +22,7 @@ class AdminAuthRoleAuthBackend(AuthenticationBackend):
         password = form.get("password")
 
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine
+        async with PgsAsyncSession(engine=pgs_conn.engine
                                    ) as pgs_session:
 
             fields_filter = {"auth_username": username,

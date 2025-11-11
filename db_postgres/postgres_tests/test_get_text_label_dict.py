@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     async def test_get_text_label_dict_qry():
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
+        async with PgsAsyncSession(engine=pgs_conn.engine) as pgs_session:
             pgs_text_lab_dict = await get_label_text_dict_qry(
                 ongoing_session=pgs_session,
                 reversed_text_label_dict=True)

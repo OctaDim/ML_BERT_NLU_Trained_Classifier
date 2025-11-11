@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     async def test_get_last_dataset_name_dir_qry():
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
+        async with PgsAsyncSession(engine=pgs_conn.engine) as pgs_session:
             await get_last_dataset_name_and_dir_qry(ongoing_session=pgs_session)
 
 

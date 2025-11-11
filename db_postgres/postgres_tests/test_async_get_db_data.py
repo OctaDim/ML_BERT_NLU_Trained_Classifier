@@ -15,7 +15,7 @@ async def get_records():
         get_model_rows_flex_query)
 
     pgs_conn = PgsAsyncConnection()
-    async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
+    async with PgsAsyncSession(engine=pgs_conn.engine) as pgs_session:
         print(pgs_session)
         pgs_lab_cat_recs = await get_model_rows_flex_query(
             orm_model_class=LabelCategoryModel,

@@ -14,7 +14,7 @@ async def test_get_model_records_via_flex_query():
         DirectPredictModel)
 
     pgs_conn = PgsAsyncConnection()
-    async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
+    async with PgsAsyncSession(engine=pgs_conn.engine) as pgs_session:
         fields_values_filter = {
             "active": True,
             # "label_index": [0, 1],

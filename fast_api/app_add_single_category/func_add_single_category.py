@@ -257,7 +257,7 @@ async def add_save_single_category(
         if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
             print("Postgres DB Single saving label-category data in data base:")
             pgs_conn = PgsAsyncConnection()
-            async with PgsAsyncSession(async_engine=pgs_conn.engine,
+            async with PgsAsyncSession(engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 creation_reason = (f"single category added: "

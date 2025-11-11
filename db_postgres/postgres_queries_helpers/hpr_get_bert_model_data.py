@@ -22,7 +22,7 @@ from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
 async def get_postgres_bert_model_data_hpr() -> Dict[str, any]:
     log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
     pgs_conn = PgsAsyncConnection()
-    async with PgsAsyncSession(async_engine=pgs_conn.engine,
+    async with PgsAsyncSession(engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
         print("DB Postgres Getting labels-categories data:")

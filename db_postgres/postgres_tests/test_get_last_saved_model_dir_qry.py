@@ -11,7 +11,7 @@ if __name__ == "__main__":
         # await initialize_db_tables()
         # await init_and_start_bert_model()
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
+        async with PgsAsyncSession(engine=pgs_conn.engine) as pgs_session:
             last_saved_model_dir_path = await get_last_saved_model_dir_qry(
                 ongoing_session=pgs_session)
         print(f"last_saved_model_dir_path: {last_saved_model_dir_path}")

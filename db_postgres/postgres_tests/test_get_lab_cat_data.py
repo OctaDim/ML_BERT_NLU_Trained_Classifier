@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
 
     pgs_conn = PgsAsyncConnection()
-    async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
+    async with PgsAsyncSession(engine=pgs_conn.engine) as pgs_session:
         label_category_records = asyncio.run(
             main=get_label_category_dict_qry(
                 ongoing_session=pgs_session,

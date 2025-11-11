@@ -38,7 +38,7 @@ async def add_draft_single_category(
 
     print("DB Postgres Getting current category-label dictionary:")
     pgs_conn = PgsAsyncConnection()
-    async with PgsAsyncSession(async_engine=pgs_conn.engine,
+    async with PgsAsyncSession(engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
         pgs_cat_lab_dict = await get_label_category_dict_qry(
@@ -102,7 +102,7 @@ async def add_draft_single_category(
     try:
         print("DB Postgres Getting current draft categories list:")
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine,
+        async with PgsAsyncSession(engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             draft_categories_list = await get_draft_category_list_qry(
@@ -135,7 +135,7 @@ async def add_draft_single_category(
                                f"new draft category: {new_draft_cat_info}")
         print("DB Postgres Saving single category to draft db data:")
         pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(async_engine=pgs_conn.engine,
+        async with PgsAsyncSession(engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             customer_id = await find_create_customer_qry(
