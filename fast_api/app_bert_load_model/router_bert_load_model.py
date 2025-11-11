@@ -13,10 +13,10 @@ from configs.console_colors import CONSOLE_COLORS
 from configs.hard_constants import HARD_CONST
 from configs.settings import (
     BERT_MODEL_NAMES, BERT_OPTIONS, ALCHEMY_OPTIONS, BASE_DIR)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from db_postgres.postgres_models.direct_predict_model import (
@@ -78,8 +78,8 @@ async def bert_load_model(
         model_load_path = request_load_model_dir
     else:
         print("Postgres DB Getting last saved model directory path:")
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine,
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             pgs_last_saved_model_dir = get_last_saved_model_dir_qry(
@@ -276,8 +276,8 @@ async def bert_load_model(
         print(f"len(loaded_direct_cat_text_list): {len(loaded_direct_cat_text_list)}")
 
         print("Postgres DB Saving loaded model and dataset data:")
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine,
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             creation_reason = (f"model loaded from: {model_load_path}, "

@@ -6,10 +6,10 @@ from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.enums import DRAFT_STATUS
 from configs.settings import (
     BERT_OPTIONS, ALCHEMY_OPTIONS)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_queries.qry_find_create_customer import (
     find_create_customer_qry)
 from db_postgres.postgres_queries.qry_get_draft_category_text_dicts_list import (
@@ -40,8 +40,8 @@ async def add_draft_multi_text_category_file(
 ) -> dict:
     log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
-    pgs_conn = PostgresConnection()
-    async with PostgresSession(async_engine=pgs_conn.engine,
+    pgs_conn = PgsAsyncConnection()
+    async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
         print("DB Postgres Getting current label-category dictionary:")
@@ -149,8 +149,8 @@ async def add_draft_multi_text_category_file(
         cur_text_lab_dict = pgs_text_lab_dict
 
     print("DB Postgres Getting customer id and current draft categories list:")
-    pgs_conn = PostgresConnection()
-    async with PostgresSession(async_engine=pgs_conn.engine,
+    pgs_conn = PgsAsyncConnection()
+    async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
         customer_creation_reason = (
@@ -326,8 +326,8 @@ async def add_draft_multi_text_category_file(
             upd_draft_cat_text_list.append(cur_draft_cat_text_data)
 
         print("Postgres DB Saving single category to draft db data:")
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine,
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             await save_draft_cat_text_dicts_list_qry(

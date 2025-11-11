@@ -1,13 +1,13 @@
-from db_postgres.postgres_async_conn.db_tables_manager import (
+from db_postgres.postgres_conn_async.db_tables_manager import (
     DBTablesManager)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection, Base)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection, Base)
 
 
 async def initialize_db_tables():
     from db_postgres.postgres_init import db_tables_init_imports as imports
     model_imports = imports  # DO NOT REMOVE!!!: for staying import above when auto linter
-    pgs_conn = PostgresConnection()
+    pgs_conn = PgsAsyncConnection()
     if await pgs_conn.db_health_check():
         tables_manager = DBTablesManager(pgs_async_engine=pgs_conn.engine)
         await tables_manager.create_tables(metadata=Base.metadata)

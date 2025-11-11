@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncEngine, async_sessionmaker, AsyncSession)
 
 
-class PostgresSession:
+class PgsAsyncSession:
     def __init__(self, async_engine: AsyncEngine,
                  log_good_ops: bool = False):
         self.engine = async_engine

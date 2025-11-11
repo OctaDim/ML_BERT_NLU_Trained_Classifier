@@ -14,10 +14,10 @@ from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS, REDIS_OPTIONS, STATUSES, BERT_MODEL_NAMES,
     ALCHEMY_OPTIONS)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
@@ -153,8 +153,8 @@ async def bert_start_checkset_model_test(
                             detail=log_text)
 
     print("Postgres DB Getting last saved model directory path:")
-    pgs_conn = PostgresConnection()
-    async with PostgresSession(async_engine=pgs_conn.engine,
+    pgs_conn = PgsAsyncConnection()
+    async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
         pgs_last_saved_model_dir = await get_last_saved_model_dir_qry(

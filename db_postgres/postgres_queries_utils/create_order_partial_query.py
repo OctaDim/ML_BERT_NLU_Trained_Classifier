@@ -3,7 +3,7 @@ from typing import Tuple, Type, Union
 from sqlalchemy import UnaryExpression
 from sqlalchemy.orm import Query
 
-from db_postgres.postgres_async_conn.pgs_async_connection import Base
+from db_postgres.postgres_conn_async.pgs_async_connection import Base
 
 
 def create_order_for_partial_query(

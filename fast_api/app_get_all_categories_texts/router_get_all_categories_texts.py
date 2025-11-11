@@ -9,10 +9,10 @@ from fastapi.responses import JSONResponse
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from db_postgres.postgres_queries.qry_get_direct_categ_text_by_acc_dict import (
@@ -58,8 +58,8 @@ async def bert_get_categories_texts_dict(
         datetime_start = datetime.now()
 
         print("Postgres DB Getting predict text-cat dictionary from db:")
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine,
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             pgs_predict_lab_cat_dict = await get_label_category_dict_qry(
@@ -108,8 +108,8 @@ async def bert_get_categories_texts_dict(
             category_texts_dict = pgs_per_category_texts_dict  # Just for compatibility with old requests to API
         else:
             print("Postgres DB Getting last saved dataset directory:")
-            pgs_conn = PostgresConnection()
-            async with PostgresSession(async_engine=pgs_conn.engine,
+            pgs_conn = PgsAsyncConnection()
+            async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 pgs_last_dataset_data = await get_last_dataset_name_and_dir_qry(

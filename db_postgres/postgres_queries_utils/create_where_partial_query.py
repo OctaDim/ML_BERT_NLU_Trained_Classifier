@@ -2,7 +2,7 @@ from typing import Type, Dict, List, Tuple
 
 from sqlalchemy import Select
 
-from db_postgres.postgres_async_conn.pgs_async_connection import Base
+from db_postgres.postgres_conn_async.pgs_async_connection import Base
 
 
 def create_where_for_partial_query(

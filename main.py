@@ -12,7 +12,7 @@ from admin_panel.admin_auth_role import AdminAuthRoleAuthBackend
 from admin_panel.admin_draft_category_text import DraftCategoryTextAdmin
 from configs.labels_messages import LABELS
 from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS, ALCHEMY_OPTIONS, FASTAPI_SESSION_KEY
-from db_postgres.postgres_async_conn.pgs_async_connection import close_all_db_connections, PostgresConnection
+from db_postgres.postgres_conn_async.pgs_async_connection import close_all_db_connections, PgsAsyncConnection
 from db_postgres.postgres_init.db_tables_initialization import initialize_db_tables
 from fast_api.app_add_single_category.router_add_single_category import router_bert_add_single_category
 from fast_api.app_add_text_category.router_add_text_category import router_bert_add_text_category
@@ -111,7 +111,7 @@ def setup_admin_panel(
         secret_key=fastapi_session_key)
     admin = Admin(
         app=application,
-        engine=PostgresConnection().engine,
+        engine=PgsAsyncConnection().engine,
         authentication_backend=authentication_backend,
         session_maker=None,
         base_url="/admin",

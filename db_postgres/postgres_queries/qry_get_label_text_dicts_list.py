@@ -3,10 +3,10 @@ from typing import Dict, List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_models.label_category_model import (
     LabelCategoryModel)
 from db_postgres.postgres_models.label_text_model import (
@@ -49,8 +49,8 @@ if __name__ == "__main__":
 
 
     async def test_get_label_text_list_qry():
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
             pgs_text_lab_list = await get_label_text_dicts_list_qry(
                 ongoing_session=pgs_session)
             for cur_row in pgs_text_lab_list:

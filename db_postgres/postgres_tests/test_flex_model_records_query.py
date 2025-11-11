@@ -1,10 +1,10 @@
 # ####################### DEBUG CODE (start) ###########################
 # ######################################################################
 async def test_get_model_records_via_flex_query():
-    from db_postgres.postgres_async_conn.pgs_async_connection import (
-        PostgresConnection)
-    from db_postgres.postgres_async_conn.postgres_async_session import (
-        PostgresSession)
+    from db_postgres.postgres_conn_async.pgs_async_connection import (
+        PgsAsyncConnection)
+    from db_postgres.postgres_conn_async.postgres_async_session import (
+        PgsAsyncSession)
     from db_postgres.postgres_models.label_category_model import (
         LabelCategoryModel)
     from db_postgres.postgres_models.customer_model import CustomerModel
@@ -13,8 +13,8 @@ async def test_get_model_records_via_flex_query():
     from db_postgres.postgres_models.direct_predict_model import (
         DirectPredictModel)
 
-    pgs_conn = PostgresConnection()
-    async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+    pgs_conn = PgsAsyncConnection()
+    async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
         fields_values_filter = {
             "active": True,
             # "label_index": [0, 1],

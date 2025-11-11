@@ -13,7 +13,7 @@ from meta_classes.singlton_meta import SingletonMeta
 Base = declarative_base()
 
 
-class PostgresConnection(metaclass=SingletonMeta):
+class PgsAsyncConnection(metaclass=SingletonMeta):
     def __init__(self,
                  user: str = None,
                  password: Union[str, None] = None,
@@ -75,5 +75,5 @@ class PostgresConnection(metaclass=SingletonMeta):
 
 
 async def close_all_db_connections():
-    pgs_conn = PostgresConnection()
+    pgs_conn = PgsAsyncConnection()
     await pgs_conn.dispose_connection()

@@ -1,10 +1,10 @@
 from typing import Dict
 
 from configs.settings import ALCHEMY_OPTIONS
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_queries.qry_get_direct_category_text_dicts_list import (
     get_direct_cat_text_dicts_list_qry)
 from db_postgres.postgres_queries.qry_get_label_category_dict import (
@@ -21,8 +21,8 @@ from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
 
 async def get_postgres_bert_model_data_hpr() -> Dict[str, any]:
     log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
-    pgs_conn = PostgresConnection()
-    async with PostgresSession(async_engine=pgs_conn.engine,
+    pgs_conn = PgsAsyncConnection()
+    async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
         print("DB Postgres Getting labels-categories data:")

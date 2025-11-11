@@ -8,10 +8,10 @@ from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     REDIS_OPTIONS, BERT_OPTIONS, BERT_MODEL_NAMES, STATUSES,
     ALCHEMY_OPTIONS)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_queries.qry_get_direct_category_by_text import (
     get_direct_category_by_text)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
@@ -59,8 +59,8 @@ async def background_checkset_test_model(
     right_categories_counter = 0
     step_counter = 1
     for cur_test_text, cur_test_category in checkset_data_list:
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine,
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             direct_predicted_category = await get_direct_category_by_text(

@@ -2,10 +2,10 @@ from typing import Tuple
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_models.dataset_model import DatasetModel
 from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
     get_model_rows_flex_query)
@@ -40,8 +40,8 @@ if __name__ == "__main__":
 
 
     async def test_get_last_dataset_name_dir_qry():
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
             await get_last_dataset_name_and_dir_qry(ongoing_session=pgs_session)
 
 

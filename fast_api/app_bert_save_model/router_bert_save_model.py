@@ -14,10 +14,10 @@ from configs.hard_constants import HARD_CONST
 from configs.settings import (
     BASE_DIR, BERT_MODEL_NAMES, BERT_OPTIONS, REDIS_OPTIONS, STATUSES,
     ALCHEMY_OPTIONS)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from db_postgres.postgres_models.trained_bert_model import (
@@ -70,8 +70,8 @@ async def bert_save_model(
     log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
     print("Postgres DB Getting last saved dataset directory and dataset name:")
-    pgs_conn = PostgresConnection()
-    async with PostgresSession(async_engine=pgs_conn.engine,
+    pgs_conn = PgsAsyncConnection()
+    async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
         pgs_last_dataset_data = await get_last_dataset_name_and_dir_qry(
@@ -241,8 +241,8 @@ async def bert_save_model(
         bert_model_inst.last_saved_dataset_dir = saved_model_dataset_subdir_path  # Double assigning attr in addition to save_model()
 
         print("Postgres DB Saving trained or saved model and dataset data:")
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine,
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             if save_after_train_flag:

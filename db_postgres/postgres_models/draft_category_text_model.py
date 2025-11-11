@@ -5,7 +5,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
 
 from configs.enums import DRAFT_STATUS
-from db_postgres.postgres_async_conn.pgs_async_connection import Base
+from db_postgres.postgres_conn_async.pgs_async_connection import Base
 from db_postgres.postgres_models.orm_models_fields_mixins import (
     ActiveMix, CreateUpdateMix, CreateReasonMix)
 

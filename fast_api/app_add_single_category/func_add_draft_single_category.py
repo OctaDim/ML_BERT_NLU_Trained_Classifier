@@ -4,10 +4,10 @@ from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.enums import DRAFT_STATUS
 from configs.settings import (
     BERT_OPTIONS, ALCHEMY_OPTIONS)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
 from db_postgres.postgres_queries.qry_find_create_customer import (
@@ -37,8 +37,8 @@ async def add_draft_single_category(
     log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
     print("DB Postgres Getting current category-label dictionary:")
-    pgs_conn = PostgresConnection()
-    async with PostgresSession(async_engine=pgs_conn.engine,
+    pgs_conn = PgsAsyncConnection()
+    async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                log_good_ops=log_pgs_good_ops
                                ) as pgs_session:
         pgs_cat_lab_dict = await get_label_category_dict_qry(
@@ -101,8 +101,8 @@ async def add_draft_single_category(
 
     try:
         print("DB Postgres Getting current draft categories list:")
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine,
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             draft_categories_list = await get_draft_category_list_qry(
@@ -134,8 +134,8 @@ async def add_draft_single_category(
                                f"active: {active_val}, "
                                f"new draft category: {new_draft_cat_info}")
         print("DB Postgres Saving single category to draft db data:")
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine,
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             customer_id = await find_create_customer_qry(

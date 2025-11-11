@@ -4,11 +4,11 @@
 
 async def test_connection():
     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    from db_postgres.postgres_async_conn.postgres_async_session import PostgresSession
-    from db_postgres.postgres_async_conn.pgs_async_connection import (
-        PostgresConnection)
-    pgs_conn = PostgresConnection()
-    async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+    from db_postgres.postgres_conn_async.postgres_async_session import PgsAsyncSession
+    from db_postgres.postgres_conn_async.pgs_async_connection import (
+        PgsAsyncConnection)
+    pgs_conn = PgsAsyncConnection()
+    async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
         print(f"pgs_conn: {pgs_session}")
     print(f"pgs_conn", {await pgs_conn.db_health_check()})
     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")

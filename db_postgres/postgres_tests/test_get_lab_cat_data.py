@@ -3,14 +3,14 @@
 
 
 if __name__ == "__main__":
-    from db_postgres.postgres_async_conn.pgs_async_connection import PostgresConnection
-    from db_postgres.postgres_async_conn.postgres_async_session import PostgresSession
+    from db_postgres.postgres_conn_async.pgs_async_connection import PgsAsyncConnection
+    from db_postgres.postgres_conn_async.postgres_async_session import PgsAsyncSession
     import asyncio
     from db_postgres.postgres_queries.qry_get_label_category_dict import get_label_category_dict_qry
 
 
-    pgs_conn = PostgresConnection()
-    async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+    pgs_conn = PgsAsyncConnection()
+    async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
         label_category_records = asyncio.run(
             main=get_label_category_dict_qry(
                 ongoing_session=pgs_session,

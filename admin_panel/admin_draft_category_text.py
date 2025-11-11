@@ -6,10 +6,10 @@ from starlette.responses import HTMLResponse
 from ML_BERT_classifier.init_bert import get_global_bert_model_inst
 from configs.enums import DRAFT_STATUS
 from configs.labels_messages import LABELS, MESSAGES
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
 from db_postgres.postgres_queries.qry_get_id_draft_dict_by_ids_list import (
@@ -213,8 +213,8 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
         selected_ids_int_list = [int(ids_str) for ids_str in selected_ids_str_list]
         print("selected_ids_int_list: ", selected_ids_int_list)
 
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine
                                    ) as pgs_session:
             id_draft_dicts_dict = await get_id_draft_dict_by_ids_list_qry(
                 ongoing_session=pgs_session,
@@ -280,8 +280,8 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
             else:
                 drafts_skipped_list.append(cur_draft_id)
 
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
             for cur_added_draft_id in drafts_added_list:
                 await save_new_model_data_qry(
                     ModelClassORM=DraftCategoryTextModel,

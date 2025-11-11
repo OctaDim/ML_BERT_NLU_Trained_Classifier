@@ -9,10 +9,10 @@ from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_MODEL_NAMES, BERT_OPTIONS)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from db_postgres.postgres_queries.qry_get_direct_category_by_text import (
@@ -56,8 +56,8 @@ async def bert_predict_single_text(
         datetime_start = datetime.now()
 
         print("Postgres DB Check direct category prediction availability:")
-        pgs_conn = PostgresConnection()
-        async with PostgresSession(async_engine=pgs_conn.engine) as pgs_session:
+        pgs_conn = PgsAsyncConnection()
+        async with PgsAsyncSession(async_engine=pgs_conn.engine) as pgs_session:
             pgs_direct_category = await get_direct_category_by_text(
                 ongoing_session=pgs_session,
                 account_id=account_data.account_id,

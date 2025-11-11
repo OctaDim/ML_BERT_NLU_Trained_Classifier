@@ -9,10 +9,10 @@ from fastapi import HTTPException, status
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.settings import (
     BASE_DIR, BERT_OPTIONS, ALCHEMY_OPTIONS)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
     cache_unique_lab_cat_dict_qry)
 from db_postgres.postgres_queries.qry_find_create_customer import (
@@ -256,8 +256,8 @@ async def add_save_single_category(
 
         if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
             print("Postgres DB Single saving label-category data in data base:")
-            pgs_conn = PostgresConnection()
-            async with PostgresSession(async_engine=pgs_conn.engine,
+            pgs_conn = PgsAsyncConnection()
+            async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 creation_reason = (f"single category added: "

@@ -10,10 +10,10 @@ from fastapi import HTTPException, status
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.settings import (
     BERT_OPTIONS, ALCHEMY_OPTIONS, BASE_DIR)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
     cache_unique_lab_cat_dict_qry)
 from db_postgres.postgres_queries.qry_find_create_customer import (
@@ -427,8 +427,8 @@ async def add_save_multi_text_category_file(
                 upd_direct_text_cat_dicts_list.append(cur_direct_cat_text_dict)
             print(f"upd_direct_text_cat_dicts_list: {upd_direct_text_cat_dicts_list[:2]}")  # Too long
 
-            pgs_conn = PostgresConnection()
-            async with PostgresSession(async_engine=pgs_conn.engine,
+            pgs_conn = PgsAsyncConnection()
+            async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 creation_reason = (f"uploaded file: {file_name}, "

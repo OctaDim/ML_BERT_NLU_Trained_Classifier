@@ -5,10 +5,10 @@ from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import (
     BERT_OPTIONS, BERT_TRAIN_OPTIONS, ALCHEMY_OPTIONS)
-from db_postgres.postgres_async_conn.pgs_async_connection import (
-    PostgresConnection)
-from db_postgres.postgres_async_conn.postgres_async_session import (
-    PostgresSession)
+from db_postgres.postgres_conn_async.pgs_async_connection import (
+    PgsAsyncConnection)
+from db_postgres.postgres_conn_async.postgres_async_session import (
+    PgsAsyncSession)
 from db_postgres.postgres_models.trained_bert_model import (
     TrainedBertModel)
 from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
@@ -225,8 +225,8 @@ async def init_and_start_bert_model():
 
         if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
             print("Postgres DB saving lab-cat, lab-text file data:")
-            pgs_conn = PostgresConnection()
-            async with PostgresSession(async_engine=pgs_conn.engine,
+            pgs_conn = PgsAsyncConnection()
+            async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 creation_reason = (f"service restarted, csv file: "
@@ -268,8 +268,8 @@ async def init_and_start_bert_model():
         last_saved_model_dir_path = pgs_bert_model_data["model_dir_path"]
 
         if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
-            pgs_conn = PostgresConnection()
-            async with PostgresSession(async_engine=pgs_conn.engine,
+            pgs_conn = PgsAsyncConnection()
+            async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 creation_reason = (f"service restarted, pgs data: "
@@ -325,8 +325,8 @@ async def init_and_start_bert_model():
               f"last_saved_model_dir_path: {last_saved_model_dir_path}\n")
 
         if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
-            pgs_conn = PostgresConnection()
-            async with PostgresSession(async_engine=pgs_conn.engine,
+            pgs_conn = PgsAsyncConnection()
+            async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                        log_good_ops=log_pgs_good_ops
                                        ) as pgs_session:
                 creation_reason = (f"service restart init: "
@@ -363,8 +363,8 @@ async def init_and_start_bert_model():
 
         if not model_load_error_log:
             if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
-                pgs_conn = PostgresConnection()
-                async with PostgresSession(async_engine=pgs_conn.engine,
+                pgs_conn = PgsAsyncConnection()
+                async with PgsAsyncSession(async_engine=pgs_conn.engine,
                                            log_good_ops=log_pgs_good_ops
                                            ) as pgs_session:
                     if not pgs_all_data_flag:
