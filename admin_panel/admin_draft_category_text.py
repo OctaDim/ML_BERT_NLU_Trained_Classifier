@@ -4,7 +4,7 @@ from sqladmin import ModelView, action
 from starlette.responses import HTMLResponse
 
 from ML_BERT_classifier.init_bert import get_global_bert_model_inst
-from admin_panel.custom_override_classes import (
+from admin_panel.custom_classes.custom_override_classes import (
     CustomBooleanFilter, CustomStaticValuesFilter)
 from configs.enums import DRAFT_STATUS
 from configs.labels_messages import LABELS, MESSAGES
@@ -14,15 +14,15 @@ from db_postgres.postgres_conn_async.pgs_async_connection import (
 from db_postgres.postgres_conn_async.postgres_async_session import (
     PgsAsyncSession)
 from db_postgres.postgres_conn_sync.pgs_sync_connection import (
-    PostgresSyncConn)
+    PgsSyncConnection)
 from db_postgres.postgres_conn_sync.postgres_sync_session import (
     PgsSyncSession)
 from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
-from db_postgres.postgres_queries.qry_get_id_draft_dict_by_ids_list import (
-    get_id_draft_dict_by_ids_list_qry)
 from db_postgres.postgres_queries.qry_get_draft_active_data_tuples_sync import (
     get_sync_active_drafts_data)
+from db_postgres.postgres_queries.qry_get_id_draft_dict_by_ids_list import (
+    get_id_draft_dict_by_ids_list_qry)
 from db_postgres.postgres_queries.qry_save_new_model_data import (
     save_new_model_data_qry)
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
@@ -83,7 +83,7 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
 
     @property
     def column_filters(self):
-        pgs_sync_conn = PostgresSyncConn()
+        pgs_sync_conn = PgsSyncConnection()
         with PgsSyncSession(
                 engine=pgs_sync_conn.engine,
                 log_good_ops=ALCHEMY_OPTIONS.ALCHEMY_ORM_RAW_SQL_LOGS

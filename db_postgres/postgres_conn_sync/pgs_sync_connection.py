@@ -12,7 +12,7 @@ from meta_classes.singlton_meta import SingletonMeta
 Base = declarative_base()
 
 
-class PostgresSyncConn(metaclass=SingletonMeta):
+class PgsSyncConnection(metaclass=SingletonMeta):
     def __init__(
             self,
             user: str = None,
@@ -75,5 +75,5 @@ class PostgresSyncConn(metaclass=SingletonMeta):
 
 
 def close_all_db_connections():
-    pgs_conn = PostgresSyncConn()
+    pgs_conn = PgsSyncConnection()
     pgs_conn.dispose_connection()
