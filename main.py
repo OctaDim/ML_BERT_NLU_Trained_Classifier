@@ -8,8 +8,8 @@ from starlette.applications import Starlette
 from starlette.middleware.sessions import SessionMiddleware
 
 from ML_BERT_classifier.init_bert import init_and_start_bert_model
-from admin_panel.admin_auth_role import AdminAuthRoleAuthBackend
-from admin_panel.admin_draft_category_text import DraftCategoryTextAdmin
+from admin_panel.model_views.admin_auth_role import AdminAuthRoleAuthBackend
+from admin_panel.model_views.admin_draft_category_text import DraftCategoryTextAdmin
 from configs.labels_messages import LABELS
 from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS, ALCHEMY_OPTIONS, FASTAPI_SESSION_KEY
 from db_postgres.postgres_conn_async.pgs_async_connection import close_all_db_connections, PgsAsyncConnection
