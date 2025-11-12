@@ -120,7 +120,8 @@ def setup_admin_panel(
         favicon_url=None,
         middlewares=None,
         debug=False,
-        templates_dir="templates")
+        templates_dir="admin_panel/custom_templates",  # Custom templates, origin SQLAdmin value = "templates"
+    )
     for cur_admin_view in admin_panel_views:
         admin.add_view(cur_admin_view)
     return admin
