@@ -3,9 +3,9 @@
 
 
 async def get_records():
-    from db_postgres.postgres_conn_async.pgs_async_connection import (
+    from db_postgres.postgres_conn.pgs_connection import (
         PgsAsyncConnection)
-    from db_postgres.postgres_conn_async.postgres_async_session import (
+    from db_postgres.postgres_conn.postgres_session import (
         PgsAsyncSession)
     from db_postgres.postgres_models.label_category_model import (
         LabelCategoryModel)

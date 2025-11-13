@@ -4,9 +4,9 @@ from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.enums import DRAFT_STATUS
 from configs.settings import (
     BERT_OPTIONS, ALCHEMY_OPTIONS)
-from db_postgres.postgres_conn_async.pgs_async_connection import (
+from db_postgres.postgres_conn.pgs_connection import (
     PgsAsyncConnection)
-from db_postgres.postgres_conn_async.postgres_async_session import (
+from db_postgres.postgres_conn.postgres_session import (
     PgsAsyncSession)
 from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
@@ -234,7 +234,7 @@ async def add_draft_text_category_pair(
                 dataset_existing_text = None
                 new_draft_cat_info = f"draft category exists in dataset: {update_category}"  # Just return info
                 new_draft_text_info = f"new draft text: {update_text}"  # Just return info
-                current_status = DRAFT_STATUS.DRAFT_ADDED
+                current_status = DRAFT_STATUS.NEW_TEXT_DRAFT_ADDED
                 active_val = True
                 creation_reason = (
                     f"cat-text pair: {update_category}-{update_text[:15]}, "
@@ -260,7 +260,7 @@ async def add_draft_text_category_pair(
                 new_draft_cat_info = f"new draft category: {update_category}"  # Just return info
                 new_draft_text_info = f"new draft text: {update_text}"  # Just return info
                 if dataset_existing_cat:
-                    current_status = DRAFT_STATUS.DRAFT_ADDED
+                    current_status = DRAFT_STATUS.NEW_TEXT_DRAFT_ADDED
                     active_val = True
                 else:
                     current_status = DRAFT_STATUS.NEW_TEXT_CLASS_DRAFT_ADDED

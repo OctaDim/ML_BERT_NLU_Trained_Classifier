@@ -8,7 +8,7 @@ from sqlalchemy.orm import InstrumentedAttribute, Session
 from starlette import status
 
 from configs.settings import ALCHEMY_OPTIONS
-from db_postgres.postgres_conn_async.pgs_async_connection import Base
+from db_postgres.postgres_init.declarative_base_model import Base
 from db_postgres.postgres_queries_utils.create_order_partial_query import (
     create_order_for_partial_query)
 from db_postgres.postgres_queries_utils.create_where_partial_query import (

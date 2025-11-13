@@ -6,9 +6,9 @@ from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.enums import DRAFT_STATUS
 from configs.settings import (
     BERT_OPTIONS, ALCHEMY_OPTIONS)
-from db_postgres.postgres_conn_async.pgs_async_connection import (
+from db_postgres.postgres_conn.pgs_connection import (
     PgsAsyncConnection)
-from db_postgres.postgres_conn_async.postgres_async_session import (
+from db_postgres.postgres_conn.postgres_session import (
     PgsAsyncSession)
 from db_postgres.postgres_queries.qry_find_create_customer import (
     find_create_customer_qry)
@@ -271,7 +271,7 @@ async def add_draft_multi_text_category_file(
                     dataset_existing_text = None
                     new_draft_cat_info = f"draft category exists in dataset: {cur_upd_cat}"  # Just return info
                     new_draft_text_info = f"new draft text: {cur_upd_text}"  # Just return info
-                    current_status = DRAFT_STATUS.DRAFT_ADDED
+                    current_status = DRAFT_STATUS.NEW_TEXT_DRAFT_ADDED
                     active_val = True
                     draft_creation_reason = (
                         f"cat-text file: {cur_upd_cat}-{cur_upd_text[:15]}, "
@@ -298,7 +298,7 @@ async def add_draft_multi_text_category_file(
                     new_draft_text_info = f"new draft text: {cur_upd_text}"  # Just return info
                     if dataset_existing_cat:
                         active_val = True
-                        current_status = DRAFT_STATUS.DRAFT_ADDED
+                        current_status = DRAFT_STATUS.NEW_TEXT_DRAFT_ADDED
                     else:
                         current_status = DRAFT_STATUS.NEW_TEXT_CLASS_DRAFT_ADDED
                         active_val = False  # Not allowed new text - new cat/class, only existing cat/class (tech task)

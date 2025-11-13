@@ -2,9 +2,9 @@ from typing import Tuple
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db_postgres.postgres_conn_async.pgs_async_connection import (
+from db_postgres.postgres_conn.pgs_connection import (
     PgsAsyncConnection)
-from db_postgres.postgres_conn_async.postgres_async_session import (
+from db_postgres.postgres_conn.postgres_session import (
     PgsAsyncSession)
 from db_postgres.postgres_models.dataset_model import DatasetModel
 from db_postgres.postgres_queries_utils.get_model_records_flex_query import (

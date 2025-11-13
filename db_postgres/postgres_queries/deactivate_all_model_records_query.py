@@ -4,7 +4,7 @@ from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeMeta
 
-from db_postgres.postgres_conn_async.pgs_async_connection import Base
+from db_postgres.postgres_init.declarative_base_model import Base
 
 
 async def deactivate_all_model_records_qry(

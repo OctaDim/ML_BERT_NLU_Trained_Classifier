@@ -3,9 +3,9 @@
 
 
 async def update_model_object_test():
-    from db_postgres.postgres_conn_async.postgres_async_session import PgsAsyncSession
+    from db_postgres.postgres_conn.postgres_session import PgsAsyncSession
     from db_postgres.postgres_queries_utils.merge_obj_ongoing_session import merge_obj_to_ongoing_session
-    from db_postgres.postgres_conn_async.pgs_async_connection import PgsAsyncConnection
+    from db_postgres.postgres_conn.pgs_connection import PgsAsyncConnection
     from db_postgres.postgres_models.trained_bert_model import TrainedBertModel
     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     pgs_conn = PgsAsyncConnection()

@@ -4,13 +4,13 @@ if __name__ == "__main__":
             get_bert_model_instance_dep)
         from ML_BERT_classifier.init_bert import init_and_start_bert_model
         from db_postgres.postgres_init.db_tables_initialization import (
-            initialize_db_tables)
+            sync_initialize_db_tables)
         from fast_api.app_account_data.scheme_account_data import (
             AccountDataBert)
         from fast_api.app_add_single_category.func_add_single_category import (
             add_save_single_category)
 
-        await initialize_db_tables()
+        await sync_initialize_db_tables()
         await init_and_start_bert_model()
 
         bert_model_inst = await get_bert_model_instance_dep()

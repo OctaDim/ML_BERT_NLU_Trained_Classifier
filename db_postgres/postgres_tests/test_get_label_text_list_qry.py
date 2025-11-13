@@ -1,7 +1,7 @@
 if __name__ == "__main__":
-    from db_postgres.postgres_conn_async.pgs_async_connection import (
+    from db_postgres.postgres_conn.pgs_connection import (
         PgsAsyncConnection)
-    from db_postgres.postgres_conn_async.postgres_async_session import (
+    from db_postgres.postgres_conn.postgres_session import (
         PgsAsyncSession)
     import asyncio
     from db_postgres.postgres_queries.qry_get_direct_category_text_dicts_list import get_direct_cat_text_dicts_list_qry
