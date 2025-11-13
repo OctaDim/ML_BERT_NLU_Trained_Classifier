@@ -9,9 +9,9 @@ from fastapi import HTTPException, status
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.settings import (
     BASE_DIR, BERT_OPTIONS, ALCHEMY_OPTIONS)
-from db_postgres.postgres_conn_async.pgs_async_connection import (
+from db_postgres.postgres_conn.pgs_connection import (
     PgsAsyncConnection)
-from db_postgres.postgres_conn_async.postgres_async_session import (
+from db_postgres.postgres_conn.postgres_session import (
     PgsAsyncSession)
 from db_postgres.postgres_queries.qry_find_cache_label_categ_dict import (
     cache_unique_lab_cat_dict_qry)

@@ -9,9 +9,9 @@ from fastapi.responses import JSONResponse
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_MODEL_NAMES, BERT_OPTIONS
-from db_postgres.postgres_conn_async.pgs_async_connection import (
+from db_postgres.postgres_conn.pgs_connection import (
     PgsAsyncConnection)
-from db_postgres.postgres_conn_async.postgres_async_session import (
+from db_postgres.postgres_conn.postgres_session import (
     PgsAsyncSession)
 from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)

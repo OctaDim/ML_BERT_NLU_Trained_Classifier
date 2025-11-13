@@ -4,9 +4,9 @@ from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.enums import DRAFT_STATUS
 from configs.settings import (
     BERT_OPTIONS, ALCHEMY_OPTIONS)
-from db_postgres.postgres_conn_async.pgs_async_connection import (
+from db_postgres.postgres_conn.pgs_connection import (
     PgsAsyncConnection)
-from db_postgres.postgres_conn_async.postgres_async_session import (
+from db_postgres.postgres_conn.postgres_session import (
     PgsAsyncSession)
 from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
