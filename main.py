@@ -11,9 +11,10 @@ from ML_BERT_classifier.init_bert import init_and_start_bert_model
 from admin_panel.model_views.admin_auth_role import AdminAuthRoleAuthBackend
 from admin_panel.model_views.admin_draft_category_text import DraftCategoryTextAdmin
 from configs.labels_messages import LABELS
-from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS, ALCHEMY_OPTIONS, FASTAPI_SESSION_KEY
-from db_postgres.postgres_conn_async.pgs_async_connection import close_all_db_connections, PgsAsyncConnection
-from db_postgres.postgres_init.db_tables_initialization import initialize_db_tables
+from configs.settings import API_HOST, API_PORT, FASTAPI_OPTIONS, FASTAPI_SESSION_KEY
+from db_postgres.postgres_conn.pgs_connection import (
+    close_all_async_pgs_connections, PgsAsyncConnection, close_all_sync_pgs_connections)
+from db_postgres.postgres_init.db_tables_initialization import sync_initialize_db_tables
 from fast_api.app_add_single_category.router_add_single_category import router_bert_add_single_category
 from fast_api.app_add_text_category.router_add_text_category import router_bert_add_text_category
 from fast_api.app_add_texts_categories_file.router_add_texts_categories_file import router_bert_add_text_category_file
@@ -70,6 +71,10 @@ admin_panel_views = [
 ]
 
 
+def initialize_postgres_db_tables():
+    sync_initialize_db_tables()
+
+
 def run_redis():
     # TODO: Check Redis is available and start Redis if not
     print("TODO: Check Redis is available and start Redis if not")
@@ -86,14 +91,13 @@ async def lifespan_on_startup():
     print(">>>>>>> FastAPI Lifespan (startup):")
     run_redis()
     run_postgres()
-    if ALCHEMY_OPTIONS.USE_POSTGRES_DATABASE:
-        await initialize_db_tables()  # Creating postgres db tables
     await init_and_start_bert_model()  # Initializing Bert model
 
 
 async def lifespan_on_shutdown():
     print(">>>>>>> FastAPI Lifespan (shutdown):")
-    await close_all_db_connections()
+    await close_all_async_pgs_connections()
+    close_all_sync_pgs_connections()
 
 
 @asynccontextmanager
@@ -162,4 +166,5 @@ def run_uvicorn_fastapi_server():
 
 
 if __name__ == "__main__":
+    initialize_postgres_db_tables()
     run_uvicorn_fastapi_server()
