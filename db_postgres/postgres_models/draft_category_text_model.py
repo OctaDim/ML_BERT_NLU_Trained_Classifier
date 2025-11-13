@@ -4,8 +4,8 @@ from sqlalchemy import ForeignKey, Enum
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
 
-from configs.enums import DRAFT_STATUS
-from db_postgres.postgres_conn_async.pgs_async_connection import Base
+from configs.enums import DRAFT_STATUS, NEW_STATUS
+from db_postgres.postgres_init.declarative_base_model import Base
 from db_postgres.postgres_models.orm_models_fields_mixins import (
     ActiveMix, CreateUpdateMix, CreateReasonMix)
 
@@ -27,10 +27,17 @@ class DraftCategoryTextModel(Base, ActiveMix,
 
     current_status: Mapped[DRAFT_STATUS] = mapped_column(
         Enum(DRAFT_STATUS, values_callable=lambda obj: [e.value for e in obj]),
-        default=DRAFT_STATUS.DRAFT_ADDED)
-
+        default=DRAFT_STATUS.NEW_TEXT_DRAFT_ADDED)
     # current_status: Mapped[DRAFT_STATUS] = mapped_column(
-    #     default=DRAFT_STATUS.DRAFT_ADDED)
+    #     default=DRAFT_STATUS.NEW_TEXT_DRAFT_ADDED)
+
+    # new_category: Mapped[Optional[NEW_STATUS]] = mapped_column(
+    #     Enum(NEW_STATUS, values_callable=lambda obj: [e.value for e in obj]),
+    #     default=NEW_STATUS.NEW_RECORD)
+    #
+    # new_text: Mapped[Optional[NEW_STATUS]] = mapped_column(
+    #     Enum(NEW_STATUS, values_callable=lambda obj: [e.value for e in obj]),
+    #     default=NEW_STATUS.NEW_RECORD)
 
     @hybrid_property
     def account_data(self):
