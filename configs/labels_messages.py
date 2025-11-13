@@ -22,6 +22,18 @@ class LABELS:
     ALLOWED_RECS = "Разрешённые ✅"
     NOT_ALLOWED_RECS = "Неразрешённые ❌"
     ALL_RECS = "Все"
+    NEW_RECS = "Новые записи"
+    NEW_CLASS_ONLY = "Класс новый"
+    NEW_TEXT_ONLY = "Текст новый"
+    NEW_CLASS_AND_TEXT = "Класс и Текст новый"
+    FILTER_ALLOWED = "РАЗРЕШЁННЫЕ"
+    FILTER_NEW_DRAFT = "НОВЫЕ ЧЕРНОВИКИ"
+    FILTER_ACCOUNT_DATA = "АККАУНТ"
+    FILTER_ACCOUNT_ID = "АККАУНТ ID"
+    FILTER_ACCOUNT_USERNAME = "АККАУНТ USERNAME"
+    FILTER_DRAFT_CATEGORY = "КЛАСС"
+    FILTER_DRAFT_TEXT = "ТЕКСТ"
+
 
 @dataclass(frozen=True)
 class MESSAGES:
