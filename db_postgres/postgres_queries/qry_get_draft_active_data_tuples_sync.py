@@ -13,13 +13,13 @@ def get_sync_active_drafts_data(ongoing_sync_session: Session
     filter_fields = ["draft_category",
                      "draft_text",
                      "account_id",
-                     "account_username"]
+                     "account_username", ]
 
     pgs_active_drafts_objs = get_sync_model_rows_flex_query(
         orm_model_class=DraftCategoryTextModel,
         ongoing_session=ongoing_sync_session,
         selected_fields=filter_fields,
-        fields_values_filter={"active": False},
+        fields_values_filter={"active": True},
         order_by_fields=None,
         return_scalars=False)
 
@@ -27,29 +27,37 @@ def get_sync_active_drafts_data(ongoing_sync_session: Session
     drafts_text_set = set()
     drafts_acc_id_set = set()
     drafts_username_set = set()
+    drafts_acc_data_set = set()
     for cur_rec in pgs_active_drafts_objs:
         cur_category = cur_rec.draft_category
         cur_text = cur_rec.draft_text
         cur_acc_id = cur_rec.account_id
         cur_username = cur_rec.account_username
+        cur_acc_data = f"{cur_username} / {cur_acc_id}"
+
         drafts_cat_set.add(cur_category) if cur_category else None
         drafts_text_set.add(cur_text) if cur_text else None
         drafts_acc_id_set.add(cur_acc_id) if cur_acc_id else None
         drafts_username_set.add(cur_username) if cur_username else None
+        drafts_acc_data_set.add(cur_acc_data) if cur_acc_data else None
 
     drafts_cat_set = sorted(drafts_cat_set)
     drafts_text_set = sorted(drafts_text_set)
     drafts_acc_id_set = sorted(drafts_acc_id_set)
     drafts_username_set = sorted(drafts_username_set)
+    drafts_acc_data_set = sorted(drafts_acc_data_set)
 
     filter_cat_values = [(cat, cat) for cat in drafts_cat_set]
     filter_text_values = [(txt, txt) for txt in drafts_text_set]
     filter_acc_id_values = [(acc_id, acc_id) for acc_id in drafts_acc_id_set]
     filter_username_values = [(acc_un, acc_un) for acc_un in drafts_username_set]
+    filter_acc_data_values = [(acc_dt, acc_dt) for acc_dt in drafts_acc_data_set]
 
     active_drafts_data = {
-        "filter_cat_values": filter_cat_values,
-        "filter_text_values": filter_text_values,
-        "filter_acc_id_values": filter_acc_id_values,
-        "filter_username_values": filter_username_values, }
+        "category_values": filter_cat_values,
+        "text_values": filter_text_values,
+        "acc_id_values": filter_acc_id_values,
+        "acc_username_values": filter_username_values,
+        "acc_data_values": filter_acc_data_values,
+    }
     return active_drafts_data
