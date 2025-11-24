@@ -47,7 +47,7 @@ class AdminAuthRoleAuthBackend(AuthenticationBackend):
             compare_not_hashed=True)
 
         if password_is_valid:
-            auth_role = auth_role_obj.auth_role.value
+            auth_role = auth_role_obj.auth_role
             request.session.update({"session_token": "auth-token",  # Temporary
                                     "auth_role": auth_role})
             print(f"Admin Panel: Admin authorised [OK]: "
