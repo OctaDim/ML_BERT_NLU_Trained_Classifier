@@ -51,7 +51,7 @@ async def bert_add_single_category(
 
     try:
         datetime_start = datetime.now()
-        if BERT_OPTIONS.BERT_DATASET_VIA_DRAFT_SINGLE_CATEGORY:  # Adding single category to db draft only (not csv)
+        if BERT_OPTIONS.BERT_FORM_DATASET_VIA_DRAFTS_TABLE:  # Adding single category to db draft only (not csv)
             new_csv_files_data = await add_draft_single_category(
                 account_data=account_data,
                 update_category=upd_single_category,

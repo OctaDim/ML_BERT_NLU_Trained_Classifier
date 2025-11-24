@@ -121,7 +121,7 @@ async def bert_add_text_category_file(
 
     try:
         datetime_start = datetime.now()
-        if BERT_OPTIONS.BERT_DATASET_VIA_DRAFT_CATEG_TEXT_FILE:  # Adding multi text-category file to db draft only (not csv)
+        if BERT_OPTIONS.BERT_FORM_DATASET_VIA_DRAFTS_TABLE:  # Adding multi text-category file to db draft only (not csv)
             new_csv_files_data = await add_draft_multi_text_category_file(
                 account_data=account_data,
                 update_text_category_data=update_data_list,

@@ -53,7 +53,7 @@ async def bert_add_text_category(
 
     try:
         datetime_start = datetime.now()
-        if BERT_OPTIONS.BERT_DATASET_VIA_DRAFT_CATEGORY_TEXT:  # Adding text-category pair to db draft only (not csv)
+        if BERT_OPTIONS.BERT_FORM_DATASET_VIA_DRAFTS_TABLE:  # Adding text-category pair to db draft only (not csv)
             new_csv_files_data = await add_draft_text_category_pair(
                 account_data=account_data,
                 update_text=update_text,

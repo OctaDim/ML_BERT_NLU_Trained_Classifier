@@ -206,10 +206,7 @@ class BERT_OPTIONS:
     BERT_LAST_SAVED_DATASET_INI_FILE_PATH: str = "WORKING_DATA/last_saved_dataset_ini_file/last_saved_dataset_dir_path.ini"
     BERT_BEFORE_REINIT_MODEL_TEMP_PATH: str = "WORKING_DATA/temp_saved_model_prior_init_train"
     # DATASET OPTIONS
-    BERT_DATASET_VIA_DRAFT_SINGLE_CATEGORY: bool = True
-    BERT_DATASET_VIA_DRAFT_CATEGORY_TEXT: bool = True
-    BERT_DATASET_VIA_DRAFT_CATEG_TEXT_FILE: bool = True
-
+    BERT_FORM_DATASET_VIA_DRAFTS_TABLE: bool = True
     # CHECKSETS OPTIONS
     BERT_CHECKSET_NAME_REDIS_PREFIX: str = "test_checkset"
     BERT_CONFUSION_MATRICES_IMAGES_PATH: str = "WORKING_DATA/confusion_matrices_images"
