@@ -111,8 +111,11 @@ sudo journalctl -u bert_micro_auto_daemon -f --all
         systemctl status <PID>
             - В выводе Loaded: ищем название <имя_службы>.service
 
-- Перезапуск службы-димона:
+- Перезапуск службы-димона (долго):
 sudo systemctl restart bert_micro_auto_daemon
+
+- Перезагрузка службы-димона (быстро):
+sudo systemctl reload bert_micro_auto_daemon
 
 - Остановка службы-димона:
 sudo systemctl stop bert_micro_auto_daemon
