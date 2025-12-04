@@ -36,7 +36,7 @@ class API_CONFIG_NAMES:
     API_TEST_DEXP_IP = "API_dexp_ip_192_168_0_117_8000"
 
 
-api_ini_full_path = os.path.join(BASE_DIR, ".configs_api.ini")
+api_ini_full_path = os.path.join(BASE_DIR, ".configs_bert_api.ini")
 api_ini_normal_path = os.path.normpath(api_ini_full_path)
 api_conf_parser = ConfigParser()
 api_conf_parser.read(filenames=api_ini_normal_path)
