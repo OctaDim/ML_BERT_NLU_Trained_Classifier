@@ -18,7 +18,7 @@ from db_postgres.postgres_conn.pgs_connection import (
     PgsAsyncConnection)
 from db_postgres.postgres_conn.postgres_session import (
     PgsAsyncSession)
-from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+from fast_api.fast_api_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
     get_last_saved_model_dir_qry)

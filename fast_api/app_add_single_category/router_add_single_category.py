@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.console_colors import CONSOLE_COLORS
 from configs.settings import BERT_OPTIONS
-from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+from fast_api.fast_api_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
 from fast_api.app_add_single_category.func_add_single_category import (

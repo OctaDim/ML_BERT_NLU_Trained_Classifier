@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 
 from ML_BERT_classifier.class_bert import ClassifierBERT
 from configs.settings import BERT_OPTIONS
-from db_postgres.postgres_dependencies.dep_get_bert_model_instance import (
+from fast_api.fast_api_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
