@@ -15,7 +15,7 @@ from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
 from db_postgres.postgres_queries.qry_get_id_draft_dict_by_ids_list import (
     get_id_draft_dict_by_ids_list_qry)
-from db_postgres.postgres_queries.qry_save_new_model_data import (
+from db_postgres.postgres_queries_utils.save_new_model_data import (
     save_new_model_data_qry)
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
 from fast_api.app_add_single_category.func_add_single_category import (

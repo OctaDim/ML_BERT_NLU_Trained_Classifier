@@ -16,7 +16,7 @@ from db_postgres.postgres_queries.qry_get_draft_category_list import (
     get_draft_category_list_qry)
 from db_postgres.postgres_queries.qry_get_label_category_dict import (
     get_label_category_dict_qry)
-from db_postgres.postgres_queries.qry_save_new_model_data import (
+from db_postgres.postgres_queries_utils.save_new_model_data import (
     save_new_model_data_qry)
 from fast_api.app_account_data.scheme_account_data import (
     AccountDataBert)

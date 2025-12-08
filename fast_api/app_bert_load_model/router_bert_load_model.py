@@ -33,7 +33,7 @@ from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
     get_last_saved_model_dir_qry)
 from db_postgres.postgres_queries.qry_save_direct_categ_text_dicts_list import (
     save_direct_cat_text_dicts_list_qry)
-from db_postgres.postgres_queries.qry_save_new_model_data import (
+from db_postgres.postgres_queries_utils.save_new_model_data import (
     save_new_model_data_qry)
 from fast_api.app_account_data.scheme_account_data import (
     AccountDataBert)

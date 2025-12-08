@@ -28,7 +28,7 @@ from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
 from db_postgres.postgres_queries.qry_get_last_dataset_name_and_dir import (
     get_last_dataset_name_and_dir_qry)
-from db_postgres.postgres_queries.qry_save_new_model_data import (
+from db_postgres.postgres_queries_utils.save_new_model_data import (
     save_new_model_data_qry)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
     redis_save_key_mapping_dict)
