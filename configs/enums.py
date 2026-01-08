@@ -15,7 +15,7 @@ class DRAFT_STATUS(Enum):
     NEW_TEXT_DRAFT_ADDED: str = "ЧЕРНОВИК с НОВЫМ ТЕКСТОМ"
     NEW_CLASS_DRAFT_ADDED = "ЧЕРНОВИК с НОВЫМ КЛАССОМ"
     OVERRIDING_DRAFT_ADDED = "черновик с перекрытием класса"
-    NEW_TEXT_CLASS_DRAFT_ADDED = "черновик с новым текстом/классом"
+    NEW_TEXT_CLASS_DRAFT_ADDED = "ЧЕРНОВИК С НОВЫМ ТЕКСТОМ/КЛАССОМ"  # "черновик с новым текстом/классом"
     DRAFT_INACTIVE: str = "неактивный черновик"
     NEW_TEXT_DATASET_ADDED: str = "текст перенесен в датасет"
     NEW_CLASS_DATASET_ADDED: str = "класс перенесен в датасет"
