@@ -1,0 +1,31 @@
+-- ----------------------------------------------------------
+-- ----------------------------------------------------------
+-- ВАРИАНТ 1: C СОХРАНЕНИЕМ СТАРОГО ENUM И ДОБАВЛЕНИЕМ НОВОГО
+-- ----------------------------------------------------------
+-- ----------------------------------------------------------
+
+
+-- 1. Сначала добавим новое значение в ENUM
+-- (DBeaver cursor set here and execute SQL query)
+
+ALTER TYPE public."draft_status"
+ADD VALUE 'ЧЕРНОВИК С НОВЫМ ТЕКСТОМ/КЛАССОМ';
+
+
+
+-- 2. Сначала найдем все таблицы с этим типом:
+-- (DBeaver cursor set here and execute SQL query)
+
+SELECT
+    table_name,
+    column_name
+FROM information_schema.columns
+WHERE udt_name = 'draft_status';
+
+
+
+-- 2. Обновим все записи, которые используют старое значение (ВАЖНО: ЕСЛИ НУЖНО!!!)
+-- (DBeaver cursor set here and execute SQL query)
+UPDATE public.draft_category_text
+SET current_status = 'ЧЕРНОВИК С НОВЫМ ТЕКСТОМ/КЛАССОМ'
+WHERE current_status = 'черновик с новым текстом/классом';

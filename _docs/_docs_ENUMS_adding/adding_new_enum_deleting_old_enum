@@ -1,0 +1,71 @@
+-- ----------------------------------------------------------
+-- ----------------------------------------------------------
+-- ВАРИАНТ 2: C УДАЛЕНИЕМ СТАРОГО ENUM И ДОБАВЛЕНИЕМ НОВОГО
+-- ----------------------------------------------------------
+-- ----------------------------------------------------------
+
+
+-- 1. Создаем новый тип с исправленными значениями
+-- (DBeaver cursor set here and execute SQL query)
+
+CREATE TYPE public."draft_status_new" AS ENUM (
+    'ЧЕРНОВИК с НОВЫМ ТЕКСТОМ',
+    'ЧЕРНОВИК с НОВЫМ КЛАССОМ',
+    'черновик с перекрытием класса',
+    'ЧЕРНОВИК С НОВЫМ ТЕКСТОМ/КЛАССОМ',  -- новое значение
+    'неактивный черновик',
+    'текст перенесен в датасет',
+    'класс перенесен в датасет',
+    'уже есть в черновике',
+    'уже есть в датасете'
+);
+
+
+
+-- 2. Сначала найдем все таблицы с этим типом:
+-- (DBeaver cursor set here and execute SQL query)
+
+SELECT
+    table_name,
+    column_name
+FROM information_schema.columns
+WHERE udt_name = 'draft_status';
+
+
+
+-- 3A. Назначаем существующему типу резервное название
+-- (DBeaver cursor set here and execute SQL query)
+
+ALTER TYPE public.draft_status RENAME TO "draft_status_backup";
+
+
+
+-- 3Б. Назначаем новому типу старое существующее название
+-- (DBeaver cursor set here and execute SQL query)
+
+ALTER TYPE public.draft_status_new RENAME TO "draft_status";
+
+
+
+-- 4. Обновим все записи, которые используют старое значение (ВАЖНО: ЕСЛИ НУЖНО!!!)
+-- (DBeaver cursor set here and execute SQL query)
+
+UPDATE public.draft_category_text
+SET current_status = 'ЧЕРНОВИК С НОВЫМ ТЕКСТОМ/КЛАССОМ'
+WHERE current_status = 'черновик с новым текстом/классом';
+
+
+
+-- 5. Для каждой таблицы меняем тип (ВАЖНО: Если хотим ссылаться на новый тип!!!):
+-- (DBeaver cursor set here and execute SQL query)
+
+--ALTER TABLE public.draft_category_text
+--ALTER COLUMN current_status
+--TYPE public."draft_status"
+--USING current_status::text::public."draft_status";
+
+
+
+-- 5. Удаляем старый тип (ВАЖНО: ЕСЛИ ОЧЕНЬ УВЕРЕНЫ!!!)
+
+-- DROP TYPE public."draft_status_backup";
