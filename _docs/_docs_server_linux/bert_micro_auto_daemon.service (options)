@@ -1,0 +1,63 @@
+### With checking Redis installed, comparing minimal required Redis version,
+### auto-installing or auto-updating Redis, auto-starting Redis and starting
+### the service itself
+### NOTE: script uncommented and working
+[Unit]
+Description=ML_BERT_NLU_Training_Classifier
+After=network.target redis-server.service
+Requires=redis-server.service
+[Service]
+User=octadim
+WorkingDirectory=/usr/local/ML_BERT_NLU_Training_Classifier
+ExecStartPre=/bin/bash -c '/usr/local/ML_BERT_NLU_Training_Classifier/db_redis/check_version_auto_install_redis.sh'
+ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /usr/local/ML_BERT_NLU_Training_Classifier/main.py
+Restart=always
+RestartSec=180
+Type=simple
+StandardOutput=journal
+StandardError=journal
+LogLevelMax=debug
+[Install]
+WantedBy=multi-user.target
+
+
+### With checking Redis server started and starting the service itself
+### NOTE: script commented
+#[Unit]
+#Description=ML_BERT_NLU_Training_Classifier
+#After=network.target redis-server.service
+#Requires=redis-server.service
+#[Service]
+#User=octadim
+#WorkingDirectory=/usr/local/ML_BERT_NLU_Training_Classifier
+###ExecStartPre=/bin/bash -c '/usr/local/ML_BERT_NLU_Training_Classifier/db_redis/check_version_auto_install_redis.sh'
+#ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /usr/local/ML_BERT_NLU_Training_Classifier/main.py
+#Restart=always
+#RestartSec=180
+#Type=simple
+#StandardOutput=journal
+#StandardError=journal
+#LogLevelMax=debug
+#[Install]
+#WantedBy=multi-user.target
+
+
+### Without checking Redis server started and starting the service itself
+### NOTE: script commented
+#[Unit]
+#Description=ML_BERT_NLU_Training_Classifier
+#After=network.target
+###After=network.target redis-server.service
+#[Service]
+#User=octadim
+#WorkingDirectory=/usr/local/ML_BERT_NLU_Training_Classifier
+###ExecStartPre=/bin/bash -c '/usr/local/ML_BERT_NLU_Training_Classifier/db_redis/check_version_auto_install_redis.sh'
+#ExecStart=/usr/local/ML_BERT_NLU_Training_Classifier/.venv3135/bin/python3.13 /usr/local/ML_BERT_NLU_Training_Classifier/main.py
+#Restart=always
+#RestartSec=180
+#Type=simple
+#StandardOutput=journal
+#StandardError=journal
+#LogLevelMax=debug
+#[Install]
+#WantedBy=multi-user.target
