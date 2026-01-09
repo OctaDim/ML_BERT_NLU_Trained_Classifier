@@ -64,7 +64,7 @@ API_USERNAME: str = api_conf_parser.get(section=api_conf_name, option="API_USERN
 API_PASSWORD: str = api_conf_parser.get(section=api_conf_name, option="API_PASSWORD")
 
 
-# GETTING SQLADMIN INI CONFIGS #########################################
+# GETTING FASTAPI INI CONFIGS #########################################
 @dataclass(frozen=True)
 class FASTAPI_CONFIG_NAMES:
     FASTAPI_PRODUCT_ANY_IP = "FastAPI_any_ip_prod_configs"
@@ -165,6 +165,16 @@ class ALCHEMY_OPTIONS:
     ALCHEMY_TEMP_CONN_MAX_OVERFLOW: int = 30
     ALCHEMY_POOL_RECYCLE: int = 600  # seconds
     ALCHEMY_POOL_TIMEOUT: int = 30  # seconds
+
+
+@dataclass(frozen=True)
+class SQLADMIN_OPTIONS:
+    ADMIN_DEFAULT_DRAFT_ACCOUNT_ID = "api_admin"
+    ADMIN_DEFAULT_DRAFT_ACCOUNT_USERNAME = "api_admin"
+    SQLADMIN_PANEL_BASE_URL: str = "/admin_panel"
+    SQLADMIN_CUSTOM_TEMPLATES_DIR: str = "admin_panel/custom_templates"
+    # CREATE_DEFAULT_ADMIN_SUPERADMIN: bool = True
+    # CREATE_DEBUG_ADMIN_SUPERADMIN: bool = True
 
 
 @dataclass(frozen=True)

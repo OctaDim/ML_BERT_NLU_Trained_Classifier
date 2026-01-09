@@ -5,7 +5,9 @@ from dataclasses import dataclass
 class LABELS:
     ADMIN_PANEL = "АДМИН-ПАНЕЛЬ"
     DRAFT_CATEGORY_TEXT = "ЧЕРНОВИК:"
-    DRAFTS_CATEGORY_TEXT = "ЧЕРНОВИКИ:"
+    DRAFTS_CATEGORIES_TEXT = "ЧЕРНОВИКИ:"
+    DIRECT_PREDICT_TEXT = "ПРЯМОЕ ПРЕДСКАЗАНИЕ"
+    DIRECT_PREDICTS_TEXT = "ПРЯМЫЕ ПРЕДСКАЗАНИЯ"
     ICON = "ℹ️"
     ID = "ID"
     ACCOUNT_DATA = "АККАУНТ"

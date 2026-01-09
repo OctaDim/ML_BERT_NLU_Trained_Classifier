@@ -1,11 +1,19 @@
-from sqladmin import ModelView
+from typing import Any
 
-from admin_panel.custom_actions.drafts_category_text_actions import custom_drafts_action_func
+from sqladmin import ModelView
+from sqladmin._queries import Query
+from starlette.requests import Request
+from wtforms import widgets
+from wtforms.fields import SelectField
+
+from admin_panel.custom_actions.drafts_category_text_actions import (
+    custom_drafts_action_func)
 from admin_panel.custom_classes.custom_override_classes import (
     CustomBooleanFilter, CustomStaticValuesFilter, CustAccountDataFilter,
     CustomCurrentStatusFilter)
+from configs.enums import DRAFT_STATUS
 from configs.labels_messages import LABELS
-from configs.settings import ALCHEMY_OPTIONS
+from configs.settings import ALCHEMY_OPTIONS, SQLADMIN_OPTIONS
 from db_postgres.postgres_conn.pgs_connection import (
     PgsSyncConnection)
 from db_postgres.postgres_conn.postgres_session import (
@@ -18,12 +26,14 @@ from db_postgres.postgres_queries.qry_get_draft_active_data_tuples_sync import (
 
 class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
     name = LABELS.DRAFT_CATEGORY_TEXT
-    name_plural = LABELS.DRAFTS_CATEGORY_TEXT
+    name_plural = LABELS.DRAFTS_CATEGORIES_TEXT
     icon = LABELS.ICON
     page_size = 200
-    page_size_options = [25, 50, 100, 200]
-    can_create = False
-    can_delete = False
+    page_size_options = [25, 50, 100, 200, 500, 1000]
+    can_create = True
+    can_delete = True
+
+    # form=CustomDraftCategoryTextForm
 
     column_list = [
         DraftCategoryTextModel.id,
@@ -174,6 +184,7 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
     #     DraftCategoryTextModel.updated_at, ]
 
     form_columns = [
+        # Work if not overridden by form=CustomDraftCategoryTextForm above
         DraftCategoryTextModel.account_id,
         DraftCategoryTextModel.account_username,
         DraftCategoryTextModel.ds_existing_category,
@@ -186,6 +197,45 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
 
     form_include_pk = True
 
+    form_overrides = {
+        # Work if not overridden by form=CustomDraftCategoryTextForm above
+        "current_status": SelectField,
+        "active": SelectField,  # SelectField with widget CheckboxInput
+    }
+
+    form_args = {
+        # Work if not overridden by form=CustomDraftCategoryTextForm above
+        "account_id": {
+            "default": SQLADMIN_OPTIONS.ADMIN_DEFAULT_DRAFT_ACCOUNT_ID},
+        "account_username": {
+            "default": SQLADMIN_OPTIONS.ADMIN_DEFAULT_DRAFT_ACCOUNT_USERNAME},
+        "current_status": {
+            "default": DRAFT_STATUS.ADMIN_DRAFT_CLASS_ADDED,
+            # choices=[(status.value, status.name) for status in DRAFT_STATUS],  #  For ordinal enums and custom names
+            "choices": [(status.value, status.value) for status in DRAFT_STATUS], },  # For enums embedded in Postgres
+        "active": {
+            "choices": [("True", "ДА"), ("False", "НЕТ")],
+            "default": "True", },
+    }
+
+    async def insert_model(self, request: Request, data: dict) -> None:
+        new_category_form_field = data.get("draft_category")
+        active_form_field = data.get("active")
+        if new_category_form_field:
+            data["current_status"] = DRAFT_STATUS.ADMIN_DRAFT_CLASS_ADDED
+            data["account_id"] = SQLADMIN_OPTIONS.ADMIN_DEFAULT_DRAFT_ACCOUNT_ID
+            data["account_username"] = SQLADMIN_OPTIONS.ADMIN_DEFAULT_DRAFT_ACCOUNT_USERNAME
+            data["active"] = True if active_form_field == "True" else False  # Because data from SelectField is string
+        return await Query(self).insert(data, request)
+
+    async def delete_model(self, request: Request, pk: Any) -> None:
+        # Define custom logic if necessary
+        await Query(self).delete(pk, request)
+
+    async def update_model(self, request: Request, pk: str, data: dict) -> Any:
+        # Define custom logic or custom data if necessary
+        return await Query(self).update(pk, data, request)
+
     # async def update_model(self, request: Request, pk: str, data: dict) -> None:
     #     stmt = select(self.model).where(self.model.id == int(pk))
     #     result = await request.state.session.execute(stmt)
@@ -193,17 +243,28 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
     #     data["account_id"] = current_model.account_id
     #     return await super().update_model(request, pk, data)
 
+    async def on_model_delete(self, model: Any, request: Request) -> None:
+        """Perform some actions before a model is deleted. By default does nothing"""
+        # Define custom logic if necessary
+
+    async def after_model_delete(self, model: Any, request: Request) -> None:
+        """Perform some actions after a model is deleted. By default do nothing"""
+        # Define custom logic if necessary
+
     # TODO: Display readonly ENUM fields
     form_widget_args = {
-        "account_id": {"readonly": True},
-        "account_username": {"readonly": True},
-        "ds_existing_category": {"readonly": True},
-        "draft_category": {"readonly": True},
-        "ds_existing_text": {"readonly": True},
-        "draft_text": {"readonly": True},
+        # Work if not overridden by form=CustomDraftCategoryTextForm above
+        "account_id": {"readonly": False, "disabled": False},
+        "account_username": {"readonly": False, "disabled": False},
+        "ds_existing_category": {"readonly": True, "disabled": True},
+        "draft_category": {"readonly": False},
+        "ds_existing_text": {"readonly": True, "disabled": True},
+        "draft_text": {"readonly": True, "disabled": True},
         # TODO: Settle issue with disabled field error in SQLAdmin
-        # "current_status": {"readonly": True, "disabled": True},
-        "created_at": {"readonly": True}, }
+        "current_status": {"readonly": False, "disabled": False},
+        "created_at": {"readonly": True, "disabled": True},
+        "active": {"widget": widgets.CheckboxInput()},
+    }
 
     # form_excluded_columns = [  # If form_columns not defined
     #     "id",
