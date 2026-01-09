@@ -2,15 +2,19 @@ from fastapi import Request
 from fastapi.responses import RedirectResponse
 from sqladmin import ModelView, action
 
-from configs.labels_messages import MESSAGES
+from configs.labels_messages import MESSAGES, LABELS
 from db_postgres.postgres_models.direct_predict_model import (
     DirectPredictModel)
 
 
 class DirectPredictAdmin(ModelView, model=DirectPredictModel):
-    name = "DIRECT PREDICT"
-    name_plural = "DIRECT PREDICTS"
-    icon = "octadim"
+    name = LABELS.DIRECT_PREDICT_TEXT
+    name_plural = LABELS.DIRECT_PREDICTS_TEXT
+    icon = LABELS.ICON
+    page_size = 200
+    page_size_options = [25, 50, 100, 200, 500, 1000]
+    can_create = False
+    can_delete = False
 
     column_list = [
         DirectPredictModel.id,
