@@ -1,10 +1,10 @@
+from wtforms.fields import SelectField
 from wtforms.fields.simple import StringField, BooleanField
 from wtforms.form import Form
-from wtforms.fields import SelectField
 
 from configs.enums import DRAFT_STATUS
 from configs.labels_messages import LABELS
-from configs.settings import FASTAPI_CONFIG_NAMES, SQLADMIN_OPTIONS
+from configs.settings import SQLADMIN_OPTIONS
 
 
 class CustomDraftCategoryTextForm(Form):
@@ -24,7 +24,7 @@ class CustomDraftCategoryTextForm(Form):
         # choices=[(status.value, status.name) for status in DRAFT_STATUS],  #  For ordinal enums and custom names
         choices=[(status.value, status.value) for status in DRAFT_STATUS],  # For enums embedded on the Postgres level
         default=DRAFT_STATUS.ADMIN_DRAFT_CLASS_ADDED.value,
-        coerce=str, ) # set int if field is int
+        coerce=str, )  # set int if field is int
 
     active = BooleanField(
         label=LABELS.ACTIVE_STATUS,

@@ -199,7 +199,7 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
 
     form_overrides = {
         # Work if not overridden by form=CustomDraftCategoryTextForm above
-        "current_status": SelectField,
+        # "current_status": SelectField,  # if SelectField, form_args={"current_status": {"default"=...}} not displayed
         "active": SelectField,  # SelectField with widget CheckboxInput
     }
 
