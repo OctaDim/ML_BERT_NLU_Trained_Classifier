@@ -8,7 +8,7 @@ from wtforms.fields import SelectField
 
 from admin_panel.custom_actions.drafts_category_text_actions import (
     custom_drafts_action_func)
-from admin_panel.custom_classes.custom_override_classes import (
+from admin_panel.custom_classes.custom_filters import (
     CustomBooleanFilter, CustomStaticValuesFilter, CustAccountDataFilter,
     CustomCurrentStatusFilter)
 from configs.enums import DRAFT_STATUS
