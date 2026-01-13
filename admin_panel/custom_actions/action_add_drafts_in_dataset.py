@@ -1,37 +1,31 @@
-from fastapi import Request
-from fastapi.responses import RedirectResponse
-from sqladmin import action
-from starlette.responses import HTMLResponse
+from sqladmin import ModelView
+from starlette.requests import Request
+from starlette.responses import HTMLResponse, RedirectResponse
 
 from ML_BERT_classifier.init_bert import get_global_bert_model_inst
 from configs.enums import DRAFT_STATUS
 from configs.labels_messages import MESSAGES
-from configs.settings import ALCHEMY_OPTIONS
-from db_postgres.postgres_conn.pgs_connection import (
-    PgsAsyncConnection)
-from db_postgres.postgres_conn.postgres_session import (
-    PgsAsyncSession)
+from configs.settings import (
+    ALCHEMY_OPTIONS)
+from db_postgres.postgres_conn.pgs_connection import PgsAsyncConnection
+from db_postgres.postgres_conn.postgres_session import PgsAsyncSession
 from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
 from db_postgres.postgres_queries.qry_get_id_draft_dict_by_ids_list import (
     get_id_draft_dict_by_ids_list_qry)
 from db_postgres.postgres_queries_utils.save_new_model_data import (
     save_new_model_data_qry)
-from fast_api.app_account_data.scheme_account_data import AccountDataBert
+from fast_api.app_account_data.scheme_account_data import (
+    AccountDataBert)
 from fast_api.app_add_single_category.func_add_single_category import (
     add_save_single_category)
 from fast_api.app_add_text_category.func_add_save_text_category import (
     add_save_single_text_category)
 
 
-@action(name="custom_action",
-        label=MESSAGES.DATASET_ACTION_NAME,
-        confirmation_message=MESSAGES.DATASET_CONFIRM_MSG,
-        add_in_list=True,
-        add_in_detail=True,
-        include_in_schema=True)
-async def custom_drafts_action_func(
-        self, request: Request
+async def custom_add_drafts_in_dataset_func(
+        self: ModelView,  # current AdminModel
+        request: Request,
 ) -> RedirectResponse | HTMLResponse:
     referer = request.headers.get("referer", "/admin")
     request_selected_ids_str = request.query_params.get("pks")
