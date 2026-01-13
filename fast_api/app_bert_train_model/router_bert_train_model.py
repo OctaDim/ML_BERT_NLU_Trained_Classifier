@@ -1,5 +1,6 @@
 # import asyncio
 # from functools import partial
+import asyncio
 import os
 import uuid
 from datetime import datetime, timedelta
@@ -18,8 +19,6 @@ from db_postgres.postgres_conn.pgs_connection import (
     PgsAsyncConnection)
 from db_postgres.postgres_conn.postgres_session import (
     PgsAsyncSession)
-from fast_api.fast_api_dependencies.dep_get_bert_model_instance import (
-    get_bert_model_instance_dep)
 from db_postgres.postgres_models.before_reinit_bert_model import (
     BeforeReinitBertModel)
 from db_postgres.postgres_queries.qry_find_create_customer import (
@@ -44,6 +43,8 @@ from fast_api.app_bert_train_model.func_train_save_model_background import (
     background_train_save_model)
 from fast_api.app_bert_train_model.scheme_bert_train_model import (
     TrainModelDataBert)
+from fast_api.fast_api_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
 from utils_common.normalized_path import (
     get_full_file_normal_path, get_full_dir_normal_path)
 from utils_specific.class_csv_labels_categories import CsvLabelCategory
@@ -56,9 +57,10 @@ from utils_specific.get_last_saved_dataset_path import (
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
 router_bert_train_model = APIRouter(prefix=f"/{bert_base_url_name}",
                                     tags=["BERT"])
+bert_train_model_url = "/bert_train_model/"
 
 
-@router_bert_train_model.post(path="/bert_train_model/",
+@router_bert_train_model.post(path=bert_train_model_url,
                               # TODO: Describe responses here
                               response_model=None)
 async def bert_train_model(
@@ -364,15 +366,32 @@ async def bert_train_model(
             print(redis_error)
 
         print("####### BEFORE BACKGROUND TRAIN AND SAVE MODEL")
-        background_tasks.add_task(background_train_save_model,
-                                  auth_data,
-                                  account_data,
-                                  train_model_data,
-                                  new_train_dataset,
-                                  dataset_name,
-                                  train_text_lab_csv_path,
-                                  creating_dataset_time,
-                                  bert_model_inst)
+        # Option 1. If router is called only via http, not directly.
+        # background_tasks.add_task(background_train_save_model,
+        #                           auth_data,
+        #                           account_data,
+        #                           train_model_data,
+        #                           new_train_dataset,
+        #                           dataset_name,
+        #                           train_text_lab_csv_path,
+        #                           creating_dataset_time,
+        #                           bert_model_inst)
+
+        def async_task_finished(finished_task_info):
+            print(f"\n******* ASYNCIO CREATED TASK FINISHED [OK] *******\n"
+                  f"finished_task_info: {finished_task_info}\n")
+
+        task = asyncio.create_task(
+            background_train_save_model(
+                auth_data,
+                account_data,
+                train_model_data,
+                new_train_dataset,
+                dataset_name,
+                train_text_lab_csv_path,
+                creating_dataset_time,
+                bert_model_inst))
+        task.add_done_callback(async_task_finished)
         print("####### AFTER START BACKGROUND TRAIN AND SAVE MODEL")
 
         json_response = JSONResponse(

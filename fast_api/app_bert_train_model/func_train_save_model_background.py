@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta
 
 from torch.utils.data import TensorDataset
@@ -52,6 +53,7 @@ async def background_train_save_model(
         print("***** MODEL TRAINING TEMPORARY SWITCHED OFF (end) *****")
     else:
         print("********* MODEL TRAINING SWITCHED ON (start) **********")
+        await asyncio.sleep(3)
         await bert_model_inst.train(
             train_dataset=new_train_dataset,
             max_training_epochs=BERT_TRAIN_OPTIONS.BERT_TRAIN_MAX_EPOCHS_NUMBER,
