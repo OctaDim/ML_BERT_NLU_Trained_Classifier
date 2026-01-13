@@ -169,21 +169,22 @@ class ALCHEMY_OPTIONS:
 
 @dataclass(frozen=True)
 class SQLADMIN_OPTIONS:
-    ADMIN_DEFAULT_DRAFT_ACCOUNT_ID = "api_admin"
-    ADMIN_DEFAULT_DRAFT_ACCOUNT_USERNAME = "api_admin"
+    ADMIN_DEFAULT_DRAFT_ACCOUNT_ID: str = "api_admin"
+    ADMIN_DEFAULT_DRAFT_ACCOUNT_USERNAME: str = "api_admin"
     SQLADMIN_PANEL_BASE_URL: str = "/admin_panel"
     SQLADMIN_CUSTOM_TEMPLATES_DIR: str = "admin_panel/custom_templates"
     # CREATE_DEFAULT_ADMIN_SUPERADMIN: bool = True
     # CREATE_DEBUG_ADMIN_SUPERADMIN: bool = True
+    TRAIN_MODEL_ACTION_TIMEOUT: int = 60  # seconds
 
 
 @dataclass(frozen=True)
 class REDIS_OPTIONS:
-    DECODE_RESPONSES = True
-    SOCKET_CONNECTION_TIMEOUT = 5
-    SOCKET_KEEPALIVE = True
-    STATUSES_EXPIRY_DAYS = 90
-    CHECKSET_TESTS_EXPIRY_DAYS = 90
+    DECODE_RESPONSES: bool = True
+    SOCKET_CONNECTION_TIMEOUT: int = 5
+    SOCKET_KEEPALIVE: bool = True
+    STATUSES_EXPIRY_DAYS: int = 90
+    CHECKSET_TESTS_EXPIRY_DAYS: int = 90
 
 
 @dataclass(frozen=True)
@@ -240,7 +241,7 @@ class BERT_TRAIN_OPTIONS:
     str: "np" - returns NumPy arrays
     None - returns lists"""
     BERT_TEMPORARY_SKIP_TRAINING = False
-    BERT_TRAIN_MAX_EPOCHS_NUMBER: int = 100
+    BERT_TRAIN_MAX_EPOCHS_NUMBER: int = 5
     CONTINUOUS_100PERC_EPOCHS: int = 5
     BERT_TRAIN_BATCH_SUZE: int = 8
     BERT_TRAIN_LEARNING_RATE: int = 5e-5

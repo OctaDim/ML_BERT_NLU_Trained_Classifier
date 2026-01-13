@@ -45,3 +45,6 @@ class MESSAGES:
     DRAFTS_NOT_ALLOWED = "ВЫБРАНЫ НЕРАЗРЕШЁННЫЕ ЧЕРНОВИКИ"
     DRAFTS_ADDED_SUCCESS = "ЧЕРНОВИКИ ДОБАВЛЕНЫ УСПЕШНО"
     DRAFTS_SKIPPED = "ЧЕРНОВИКИ ПРОПУЩЕНЫ"
+    TRAIN_MODEL_ACTION = "ЗАПУСТИТЬ ТРЕНИРОВКУ МОДЕЛИ"
+    TRAIN_MODEL_CONFIRM_MSG = "ТРЕНИРОВКА МОДЕЛИ ЗАНИМАЕТ ДЛИТЕЛЬНОЕ ВРЕМЯ. ПОДТВЕРТИДЕ ЗАПУСК ТРЕНИРОВКИ МОДЕЛИ ⁉️"
+    TRAIN_MODEL_START_PROCESS_MSG = "ТРЕНИРОВКА МОДЕЛИ ЗАПУЩЕНА....."
