@@ -74,3 +74,5 @@ alembic==1.16.5
 async-timeout==5.0.1
 sqladmin==0.21.0
 bcrypt==4.3.0
+WTForms==3.1.2
+httpx==0.28.1
