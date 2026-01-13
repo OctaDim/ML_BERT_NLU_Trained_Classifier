@@ -1,18 +1,20 @@
 from typing import Any
 
-from sqladmin import ModelView
+from sqladmin import ModelView, action
 from sqladmin._queries import Query
 from starlette.requests import Request
 from wtforms import widgets
 from wtforms.fields import SelectField
 
-from admin_panel.custom_actions.drafts_category_text_actions import (
-    custom_drafts_action_func)
+from admin_panel.custom_actions.action_add_drafts_in_dataset import (
+    custom_add_drafts_in_dataset_func)
+from admin_panel.custom_actions.action_start_train_model import (
+    custom_start_train_model_func)
 from admin_panel.custom_classes.custom_filters import (
-    CustomBooleanFilter, CustomStaticValuesFilter, CustAccountDataFilter,
-    CustomCurrentStatusFilter)
+    CustomBooleanFilter, CustomStaticValuesFilter,
+    CustAccountDataFilter, CustomCurrentStatusFilter)
 from configs.enums import DRAFT_STATUS
-from configs.labels_messages import LABELS
+from configs.labels_messages import LABELS, MESSAGES
 from configs.settings import ALCHEMY_OPTIONS, SQLADMIN_OPTIONS
 from db_postgres.postgres_conn.pgs_connection import (
     PgsSyncConnection)
@@ -304,4 +306,22 @@ class DraftCategoryTextAdmin(ModelView, model=DraftCategoryTextModel):
     # def can_delete(self, request: Request) -> bool:
     #     return False
 
-    custom_action_process = custom_drafts_action_func  # Custom drafts actions defined in separate func
+    # Custom drafts actions defined in separate func
+
+    @action(name="custom_add_drafts_in_dataset_action",
+            label=MESSAGES.DATASET_ACTION_NAME,
+            confirmation_message=MESSAGES.DATASET_CONFIRM_MSG,
+            add_in_list=True,
+            add_in_detail=True,
+            include_in_schema=True)
+    async def custom_action_add_drafts_in_dataset(self, request: Request):
+        return await custom_add_drafts_in_dataset_func(self, request)
+
+    @action(name="custom_start_train_model_action",
+            label=MESSAGES.TRAIN_MODEL_ACTION,
+            confirmation_message=MESSAGES.TRAIN_MODEL_CONFIRM_MSG,
+            add_in_list=True,
+            add_in_detail=False,
+            include_in_schema=True)
+    async def custom_action_start_train_model(self, request: Request):
+        return await custom_start_train_model_func(self, request)
