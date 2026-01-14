@@ -18,6 +18,8 @@ from db_postgres.postgres_queries.qry_get_label_category_dict import (
     get_label_category_dict_qry)
 from db_postgres.postgres_queries.qry_get_label_text_dict import (
     get_label_text_dict_qry)
+from db_postgres.postgres_queries.qry_get_renamed_classes_by_customer_list import (
+    get_renamed_classes_by_customer)
 from db_postgres.postgres_queries.qry_save_draft_categ_text_dicts_list import (
     save_draft_cat_text_dicts_list_qry)
 from fast_api.app_account_data.scheme_account_data import (
@@ -197,6 +199,25 @@ async def add_draft_multi_text_category_file(
             print("Checking update text already exists in dataset:")
             ds_text_exists_flag = cur_upd_text in cur_text_lab_dict
             print(f"ds_text_exists_flag: {ds_text_exists_flag}")
+
+            if BERT_OPTIONS.REPLACE_ORIG_CATEGORY_WITH_RENAMED_CLASS:
+                print("Postgres DB Getting origin-renamed customer classes list:")
+                orig_renamed_classes_list = await get_renamed_classes_by_customer(
+                    ongoing_session=pgs_session,
+                    customer_id=customer_id)
+
+                print("Replacing file category with original model category"
+                      "in cur_upd_cat (if class was renamed by customer):")
+                for cur_classes in orig_renamed_classes_list:
+                    cur_original_class = cur_classes["model_class_name"]
+                    cur_renamed_class = cur_classes["renamed_class_name"]
+                    orig_upd_cat = cur_upd_cat
+                    if cur_upd_cat == cur_renamed_class:
+                        cur_upd_cat = cur_original_class
+                        print(f"orig_upd_cat: {orig_upd_cat}")
+                        print(f"cur_renamed_class: {cur_renamed_class}")
+                        print(f"cur_original_class: {cur_original_class}")
+                        print(f"cur_upd_cat: {cur_upd_cat}")
 
             print("Checking update category already exists in dataset by text:")
             dataset_label_by_text = cur_text_lab_dict.get(cur_upd_text)
