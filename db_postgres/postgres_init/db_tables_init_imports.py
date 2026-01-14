@@ -11,6 +11,7 @@ from db_postgres.postgres_models.before_reinit_bert_model import BeforeReinitBer
 from db_postgres.postgres_models.direct_predict_model import DirectPredictModel
 from db_postgres.postgres_models.auth_role_model import AuthRoleModel
 from db_postgres.postgres_models.draft_category_text_model import DraftCategoryTextModel
+from db_postgres.postgres_models.renamed_class_model import RenamedCustomerClassModel
 
 # ######################################################################
 # ############ DON'T AUTO FORMAT, COMMIT OR REMOVE IMPORTS #############
