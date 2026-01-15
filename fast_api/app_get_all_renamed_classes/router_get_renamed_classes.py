@@ -27,14 +27,14 @@ from fast_api.fast_api_dependencies.dep_get_bert_model_instance import (
     get_bert_model_instance_dep)
 
 bert_base_url_name = BERT_OPTIONS.BERT_API_URL_BASE_NAME
-router_get_customer_renamed_classes = APIRouter(prefix=f"/{bert_base_url_name}",
-                                                tags=["BERT"])
+router_get_all_renamed_classes = APIRouter(prefix=f"/{bert_base_url_name}",
+                                           tags=["BERT"])
 
 
-@router_get_customer_renamed_classes.post(path="/get_customer_renamed_classes_list/",
-                                          # TODO: Describe responses here
-                                          response_model=None)
-async def get_renamed_classes_list(
+@router_get_all_renamed_classes.post(path="/get_all_renamed_classes_list/",
+                                     # TODO: Describe responses here
+                                     response_model=None)
+async def get_all_renamed_classes_list(
         auth_data: AuthDataBert,
         account_data: AccountDataBert,
         bert_model_inst: Annotated[
