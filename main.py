@@ -56,6 +56,8 @@ from fast_api.app_last_dataset_name.router_last_dataset_name import (
 from fast_api.app_predict_text.router_predict_single_text import (
     router_bert_predict_single_text)
 from fast_api.app_root_url.router_main import router_root_url
+from fast_api.app_save_renamed_class.router_save_renamed_class import (
+    router_save_renamed_class_data)
 from fast_api.app_test_endpoint.router_test_endpoint import (
     router_develop_test_endpoint)
 from fast_api.app_tests.test_router_categorise import (
@@ -90,6 +92,7 @@ routers_list = [
     router_bert_get_confusion_matrix,
     router_bert_create_unique_learn_file,
     router_get_all_renamed_classes,
+    router_save_renamed_class_data,
 
     # Test end-point (debug time)
     router_develop_test_endpoint,
