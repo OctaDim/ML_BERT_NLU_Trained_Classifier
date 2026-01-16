@@ -9,6 +9,8 @@ async def merge_obj_to_ongoing_session(object_to_merge: DeclarativeBase,
                                        new_update_data: dict,
                                        ongoing_session: AsyncSession
                                        ) -> None:
+    """The record will be updated if the primary key value is added in
+    new_update_data and the record with that primary key exists"""
     update_model_obj_no_commit(orm_model_object=object_to_merge,
                                new_update_data=new_update_data)
     try:

@@ -57,7 +57,9 @@ async def get_all_renamed_classes_list(
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             print("Postgres DB Finding-creating customer id:")
-            creation_reason = "getting customer renamed classes"
+            creation_reason = (f"getting customer renamed classes: "
+                               f"account_id: {account_id}, "
+                               f"account_username: {account_username}")
             customer_id = await find_create_customer_qry(
                 ongoing_session=pgs_session,
                 account_username=account_username,
