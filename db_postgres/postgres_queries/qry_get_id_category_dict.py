@@ -1,3 +1,5 @@
+from typing import Dict
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db_postgres.postgres_models.label_category_model import (
@@ -9,7 +11,7 @@ from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
 async def get_id_category_dict_qry(
         ongoing_session: AsyncSession,
         reversed_category_id_dict: bool = False,
-) -> dict[int, str] | dict[str, int]:
+) -> Dict[int, str] | Dict[str, int]:
     pgs_lab_cat_objs = await get_model_rows_flex_query(
         orm_model_class=LabelCategoryModel,
         ongoing_session=ongoing_session,
