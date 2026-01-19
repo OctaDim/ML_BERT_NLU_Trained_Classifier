@@ -242,7 +242,7 @@ class BERT_TRAIN_OPTIONS:
     str: "np" - returns NumPy arrays
     None - returns lists"""
     BERT_TEMPORARY_SKIP_TRAINING = False
-    BERT_TRAIN_MAX_EPOCHS_NUMBER: int = 5
+    BERT_TRAIN_MAX_EPOCHS_NUMBER: int = 100
     CONTINUOUS_100PERC_EPOCHS: int = 5
     BERT_TRAIN_BATCH_SUZE: int = 8
     BERT_TRAIN_LEARNING_RATE: int = 5e-5
