@@ -209,8 +209,8 @@ async def add_draft_multi_text_category_file(
                 print("Replacing file category with original model category"
                       "in cur_upd_cat (if class was renamed by customer):")
                 for cur_classes in orig_renamed_classes_list:
-                    cur_original_class = cur_classes["model_class_name"]
-                    cur_renamed_class = cur_classes["renamed_class_name"]
+                    cur_original_class = cur_classes["model_class_name"].strip().lower()
+                    cur_renamed_class = cur_classes["renamed_class_name"].strip().lower()
                     orig_upd_cat = cur_upd_cat
                     if cur_upd_cat == cur_renamed_class:
                         cur_upd_cat = cur_original_class
