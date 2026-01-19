@@ -33,7 +33,7 @@ from fast_api.app_bert_save_model.router_bert_save_model import (
     router_bert_save_model)
 from fast_api.app_bert_train_model.router_bert_train_model import (
     router_bert_train_model)
-from fast_api.app_checkset_model_test.router_checkset_model_test import (
+from fast_api.app_checkset_model_test.router_run_checkset_model_test import (
     router_bert_checkset_model_test)
 from fast_api.app_create_unique_learn_file.router_create_unique_learn_file import (
     router_bert_create_unique_learn_file)

@@ -21,7 +21,7 @@ from fast_api.app_account_data.scheme_account_data import (
 from fast_api.app_auth.scheme_auth import AuthDataBert
 
 
-async def background_checkset_test_model(
+async def background_direct_predict_checkset_test(
         auth_data: AuthDataBert,
         account_data: AccountDataBert,
         checkset_data_list: List[Tuple[str, str]],
@@ -32,13 +32,13 @@ async def background_checkset_test_model(
     cur_func_name = inspect.currentframe().f_code.co_name
 
     print("@" * 65)
-    print("BERT background checkset model test start:")
+    print("BERT background direct predict check-set model test start:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.CHECKSET_TESTS_EXPIRY_DAYS)
     log_pgs_good_ops = ALCHEMY_OPTIONS.ALCHEMY_SESSION_OK_ACTIONS_LOGS
 
     redis_update = {
         "checkset_status": STATUSES.STATUS_CHECKSET_TEST_PROCESS_EN,
-        "step_t3_model_checkset_testing_in_process": "[OK]", }
+        "step_t3_model_direct_predict_checkset_testing_in_process": "[OK]", }
     redis_error = await redis_save_key_mapping_dict(
         key_name=checkset_redis_name,
         mapping_dict=redis_update,
@@ -64,7 +64,7 @@ async def background_checkset_test_model(
                                    log_good_ops=log_pgs_good_ops
                                    ) as pgs_session:
             direct_predicted_category = await get_direct_category_by_text(
-                ongoing_session= pgs_session,
+                ongoing_session=pgs_session,
                 account_id=account_data.account_id,
                 account_username=account_data.account_username,
                 direct_text=cur_test_text)
@@ -115,7 +115,7 @@ async def background_checkset_test_model(
         "accuracy": accuracy,
         "testing_time_str": testing_time_str,
         "testing_time_str_ru": testing_time_str_ru,
-        "step_t4_model_checkset_testing_finished": "[OK]", }
+        "step_t4_model_direct_predict_checkset_testing_finished": "[OK]", }
     redis_error = await redis_save_key_mapping_dict(
         key_name=checkset_redis_name,
         mapping_dict=redis_update,
@@ -125,7 +125,8 @@ async def background_checkset_test_model(
 
     blue_color = CONSOLE_COLORS.BRIGHT_BLUE
     reset_color = CONSOLE_COLORS.RESET
-    print(f"message: BERT model check-set testing finished [OK]\n"
+    print(f"message: BERT model direct predict check-set testing finished [OK]\n"
+          f"cur_func_name: {cur_func_name}\n"
           f"username: {auth_data.username}\n"
           f"model init: {BERT_OPTIONS.BERT_MODEL_INIT}\n"
           f"model name: {BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED}\n"

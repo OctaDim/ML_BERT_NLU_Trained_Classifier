@@ -18,7 +18,7 @@ from db_postgres.postgres_conn.postgres_session import (
 from db_postgres.postgres_queries.qry_find_create_customer import (
     find_create_customer_qry)
 from db_postgres.postgres_queries.qry_get_renamed_classes_by_customer_list import (
-    get_renamed_classes_by_customer)
+    get_renamed_classes_by_customer_list)
 from fast_api.app_account_data.scheme_account_data import (
     AccountDataBert)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
@@ -67,7 +67,7 @@ async def get_all_renamed_classes_list(
                 creation_reason=creation_reason)
 
             print("Postgres DB Getting origin-renamed customer classes list:")
-            orig_renamed_classes_list = await get_renamed_classes_by_customer(
+            orig_renamed_classes_list = await get_renamed_classes_by_customer_list(
                 ongoing_session=pgs_session,
                 customer_id=customer_id)
 

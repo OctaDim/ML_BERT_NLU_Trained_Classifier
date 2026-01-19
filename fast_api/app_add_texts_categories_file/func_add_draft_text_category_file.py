@@ -19,7 +19,7 @@ from db_postgres.postgres_queries.qry_get_label_category_dict import (
 from db_postgres.postgres_queries.qry_get_label_text_dict import (
     get_label_text_dict_qry)
 from db_postgres.postgres_queries.qry_get_renamed_classes_by_customer_list import (
-    get_renamed_classes_by_customer)
+    get_renamed_classes_by_customer_list)
 from db_postgres.postgres_queries.qry_save_draft_categ_text_dicts_list import (
     save_draft_cat_text_dicts_list_qry)
 from fast_api.app_account_data.scheme_account_data import (
@@ -202,7 +202,7 @@ async def add_draft_multi_text_category_file(
 
             if BERT_OPTIONS.REPLACE_ORIG_CATEGORY_WITH_RENAMED_CLASS:
                 print("Postgres DB Getting origin-renamed customer classes list:")
-                orig_renamed_classes_list = await get_renamed_classes_by_customer(
+                orig_renamed_classes_list = await get_renamed_classes_by_customer_list(
                     ongoing_session=pgs_session,
                     customer_id=customer_id)
 
