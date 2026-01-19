@@ -1,6 +1,7 @@
 # import asyncio
 # from functools import partial
 import asyncio
+import inspect
 import os
 import uuid
 from datetime import datetime, timedelta
@@ -71,6 +72,8 @@ async def bert_train_model(
         bert_model_inst: Annotated[
             ClassifierBERT, Depends(get_bert_model_instance_dep)]
 ) -> JSONResponse:
+    cur_func_name = inspect.currentframe().f_code.co_name
+
     verify_prod_username_password(username=auth_data.username,
                                   password=auth_data.password)
 
@@ -366,6 +369,7 @@ async def bert_train_model(
             print(redis_error)
 
         print("####### BEFORE BACKGROUND TRAIN AND SAVE MODEL")
+
         # Option 1. If router is called only via http, not directly.
         # background_tasks.add_task(background_train_save_model,
         #                           auth_data,
@@ -377,9 +381,10 @@ async def bert_train_model(
         #                           creating_dataset_time,
         #                           bert_model_inst)
 
-        def async_task_finished(finished_task_info):
-            print(f"\n******* ASYNCIO CREATED TASK FINISHED [OK] *******\n"
-                  f"finished_task_info: {finished_task_info}\n")
+        def async_task_finished(finished_async_task_info):
+            print(f"\n******* ASYNCIO CREATED TASK FINISHED [OK]:\n"
+                  f"parent router cur_func_name: {cur_func_name}\n"
+                  f"finished_async_task_info: {finished_async_task_info}\n")
 
         task = asyncio.create_task(
             background_train_save_model(

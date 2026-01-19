@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 from datetime import datetime, timedelta
 
 from torch.utils.data import TensorDataset
@@ -31,6 +32,8 @@ async def background_train_save_model(
         creating_dataset_time: float,
         bert_model_inst: ClassifierBERT
 ) -> None:
+    cur_func_name = inspect.currentframe().f_code.co_name
+
     print("#" * 65)
     print("BERT model background training start:")
     REDIS_KEY_EXPIRE_TIME = timedelta(days=REDIS_OPTIONS.STATUSES_EXPIRY_DAYS)
@@ -84,6 +87,7 @@ async def background_train_save_model(
     blue_color = CONSOLE_COLORS.BRIGHT_BLUE
     reset_color = CONSOLE_COLORS.RESET
     print(f"message: BERT model trained [OK]\n"
+          f"cur_func_name: {cur_func_name}\n"
           f"username: {auth_data.username}\n"
           f"model init: {BERT_OPTIONS.BERT_MODEL_INIT}\n"
           f"model name: {BERT_MODEL_NAMES.BERT_BASE_MULTILINGUAL_CASED}\n"
