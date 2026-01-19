@@ -1,5 +1,7 @@
 # import asyncio
 # from functools import partial
+import asyncio
+import inspect
 import os
 import uuid
 from datetime import timedelta
@@ -18,8 +20,6 @@ from db_postgres.postgres_conn.pgs_connection import (
     PgsAsyncConnection)
 from db_postgres.postgres_conn.postgres_session import (
     PgsAsyncSession)
-from fast_api.fast_api_dependencies.dep_get_bert_model_instance import (
-    get_bert_model_instance_dep)
 from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
     get_last_saved_model_dir_qry)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
@@ -27,8 +27,12 @@ from db_redis.redis_funcs.func_redis_save_key_mapping import (
 from fast_api.app_account_data.scheme_account_data import AccountDataBert
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
 from fast_api.app_auth.scheme_auth import AuthDataBert
-from fast_api.app_checkset_model_test.func_checkset_model_test_background import (
-    background_checkset_test_model)
+from fast_api.app_checkset_model_test.func_direct_predict_checkset_background import \
+    background_direct_predict_checkset_test
+from fast_api.app_checkset_model_test.func_renamed_classes_checkset_background import \
+    background_renamed_classes_checkset_test
+from fast_api.fast_api_dependencies.dep_get_bert_model_instance import (
+    get_bert_model_instance_dep)
 from utils_common.class_file_validate_read import FileValidateRead
 from utils_specific.get_initial_model_dir_path import (
     get_initial_model_dir_path)
@@ -53,6 +57,8 @@ async def bert_start_checkset_model_test(
             ClassifierBERT, Depends(get_bert_model_instance_dep)],
         background_tasks: BackgroundTasks  # FastAPI Class for background tasks
 ) -> JSONResponse:
+    cur_func_name = inspect.currentframe().f_code.co_name
+
     verify_prod_username_password(username=username,
                                   password=password)
 
@@ -218,14 +224,54 @@ async def bert_start_checkset_model_test(
                                  password=password)
         account_data = AccountDataBert(account_id=account_id,
                                        account_username=account_username)
-        background_tasks.add_task(background_checkset_test_model,
-                                  auth_data,
-                                  account_data,
-                                  checkset_data_list,
-                                  checkset_file_name,
-                                  bert_model_inst,
-                                  checkset_redis_name)
-        print("####### AFTER BACKGROUND CHECK-SET MODEL TEST")
+
+        def log_async_task_finished(finished_async_task_info):
+            print(f"\n******* ASYNCIO CREATED TASK FINISHED [OK]:\n"
+                  f"parent router cur_func_name: {cur_func_name}\n"
+                  f"finished_async_task_info: {finished_async_task_info}\n")
+
+        if BERT_OPTIONS.BERT_FORM_DATASET_VIA_DRAFTS_TABLE:
+            # Option 1. If router is called only via http, not directly.
+            # background_tasks.add_task(
+            #     background_renamed_classes_checkset_test,
+            #     auth_data,
+            #     account_data,
+            #     checkset_data_list,
+            #     checkset_file_name,
+            #     bert_model_inst,
+            #     checkset_redis_name)
+
+            task = asyncio.create_task(
+                background_renamed_classes_checkset_test(
+                    auth_data,
+                    account_data,
+                    checkset_data_list,
+                    checkset_file_name,
+                    bert_model_inst,
+                    checkset_redis_name))
+            task.add_done_callback(log_async_task_finished)
+            print("####### AFTER BACKGROUND CHECK-SET TEST VIA RENAMED CLASSES")
+        else:
+            # # Option 1. If router is called only via http, not directly.
+            # background_tasks.add_task(
+            #     background_direct_predict_checkset_test,
+            #     auth_data,
+            #     account_data,
+            #     checkset_data_list,
+            #     checkset_file_name,
+            #     bert_model_inst,
+            #     checkset_redis_name)
+
+            task = asyncio.create_task(
+                background_direct_predict_checkset_test(
+                    auth_data,
+                    account_data,
+                    checkset_data_list,
+                    checkset_file_name,
+                    bert_model_inst,
+                    checkset_redis_name))
+            task.add_done_callback(log_async_task_finished)
+            print("####### AFTER BACKGROUND CHECK-SET TEST VIA DIRECT PREDICT")
 
         json_content = {
             "message": "BERT model check-set testing start [OK]",
