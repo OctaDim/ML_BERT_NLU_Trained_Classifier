@@ -5,13 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db_postgres.postgres_queries.qry_get_id_category_dict import (
     get_id_category_dict_qry)
 from db_postgres.postgres_queries.qry_get_renamed_class_category_id_dict import (
-    get_renamed_class_category_id_dict)
+    get_renamed_class_cat_id_dict)
 
 
-async def get_renamed_classes_by_customer(
+async def get_renamed_classes_by_customer_list(
         ongoing_session: AsyncSession,
         customer_id: int | None,
-) -> List[Dict[str, str]] | None:
+) -> List[Dict[str, str]]:
     """Returns list of dicts with all model classes taking into account
     customer renamed classes"""
 
@@ -22,7 +22,7 @@ async def get_renamed_classes_by_customer(
     print(f"####### type(id_category_dict): {type(id_category_dict)}")
     print(f"####### len(id_category_dict): {len(id_category_dict)}")
 
-    cat_id_renamed_class_dict = await get_renamed_class_category_id_dict(
+    cat_id_renamed_class_dict = await get_renamed_class_cat_id_dict(
         ongoing_session=ongoing_session,
         customer_id=customer_id,
         reversed_cat_id_renamed_class_dict=True)

@@ -8,7 +8,7 @@ from db_postgres.postgres_queries_utils.get_model_records_flex_query import (
     get_model_rows_flex_query)
 
 
-async def get_renamed_class_category_id_dict(
+async def get_renamed_class_cat_id_dict(
         ongoing_session: AsyncSession,
         customer_id: int | None,
         reversed_cat_id_renamed_class_dict: bool = False
