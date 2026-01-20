@@ -65,23 +65,23 @@ async def background_renamed_classes_checkset_test(
     checkset_test_results = []
     right_categories_counter = 0
     step_counter = 1
-    for cur_test_text, cur_test_category in checkset_data_list:
-        predicted_category = bert_model_inst.predict(cur_test_text)
 
-        pgs_conn = PgsAsyncConnection()
-        async with PgsAsyncSession(engine=pgs_conn.engine,
-                                   log_good_ops=log_pgs_good_ops
-                                   ) as pgs_session:
-            customer_creation_reason = (
-                f"checkset test model: {checkset_file_name}, "
-                f"account_id: {account_id}, "
-                f"account_username: {account_username}")
-            customer_id = await find_create_customer_qry(
-                ongoing_session=pgs_session,
-                account_id=account_id,
-                account_username=account_username,
-                creation_reason=customer_creation_reason)
+    pgs_conn = PgsAsyncConnection()
+    async with PgsAsyncSession(engine=pgs_conn.engine,
+                               log_good_ops=log_pgs_good_ops
+                               ) as pgs_session:
+        customer_creation_reason = (
+            f"checkset test model: {checkset_file_name}, "
+            f"account_id: {account_id}, "
+            f"account_username: {account_username}")
+        customer_id = await find_create_customer_qry(
+            ongoing_session=pgs_session,
+            account_id=account_id,
+            account_username=account_username,
+            creation_reason=customer_creation_reason)
 
+        for cur_test_text, cur_test_category in checkset_data_list:
+            predicted_category = bert_model_inst.predict(cur_test_text)
             category_id_dict = await get_id_category_dict_qry(
                 ongoing_session=pgs_session,
                 reversed_category_id_dict=True)
@@ -91,37 +91,38 @@ async def background_renamed_classes_checkset_test(
                 customer_id=customer_id,
                 reversed_cat_id_renamed_class_dict=True)
 
-        predicted_cat_id = category_id_dict[predicted_category]  # Some PyCharm bug. Annotation and variable value is ok
+            predicted_cat_id = category_id_dict[predicted_category]  # Some PyCharm bug. Annotation and variable value is ok
 
-        renamed_class = cat_id_renamed_class_dict.get(predicted_cat_id)
+            renamed_class = cat_id_renamed_class_dict.get(predicted_cat_id)
 
-        if renamed_class:
-            result_category = renamed_class
-        else:
-            result_category = predicted_category
+            if renamed_class:
+                result_category = renamed_class
+            else:
+                result_category = predicted_category
 
-        cur_result_dict = {"checkset_text": cur_test_text,
-                           "checkset_category": cur_test_category,
-                           "predicted_category": result_category}
+            cur_result_dict = {"checkset_text": cur_test_text,
+                               "checkset_category": cur_test_category,
+                               "predicted_category": result_category}
 
-        if result_category == cur_test_category:
-            cur_result_dict["checkset_result"] = "OK"
-            result_str = f"{green_color}[OK]{reset_color}"
-            right_categories_counter += 1
-        else:
-            cur_result_dict["checkset_result"] = "ERROR"
-            result_str = f"{red_color}[ERROR]{reset_color}"
+            if result_category == cur_test_category:
+                cur_result_dict["checkset_result"] = "OK"
+                result_str = f"{green_color}[OK]{reset_color}"
+                right_categories_counter += 1
+            else:
+                cur_result_dict["checkset_result"] = "ERROR"
+                result_str = f"{red_color}[ERROR]{reset_color}"
 
-        checkset_test_results.append(cur_result_dict)
-        step_counter += 1
-        category_str = f"{result_category} -".ljust(
-            categories_max_len + 2, "-")
-        order_str = f"{step_counter}/{all_texts_total}".ljust(9)
-        print(f"{order_str} {category_str} {cur_test_text} {result_str}")
-    accuracy = round((right_categories_counter / all_texts_total) * 100)
-    print("#" * 65)
-    print(f"Right Categories: {right_categories_counter}/{all_texts_total} "
-          f"[{accuracy} %]\n")
+            checkset_test_results.append(cur_result_dict)
+            step_counter += 1
+            category_str = f"{result_category} -".ljust(
+                categories_max_len + 2, "-")
+            order_str = f"{step_counter}/{all_texts_total}".ljust(9)
+            print(f"{order_str} {category_str} {cur_test_text} {result_str}")
+
+            accuracy = round((right_categories_counter / all_texts_total) * 100)
+            print("#" * 65)
+            print(f"Right Categories: {right_categories_counter}/{all_texts_total} "
+                  f"[{accuracy} %]\n")
 
     testing_time = (datetime.now() - datetime_start).total_seconds()
     hours, remainder = [int(el) for el in divmod(testing_time, 3600)]
