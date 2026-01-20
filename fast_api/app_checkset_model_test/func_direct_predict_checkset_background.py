@@ -59,6 +59,7 @@ async def background_direct_predict_checkset_test(
     right_categories_counter = 0
     step_counter = 1
     for cur_test_text, cur_test_category in checkset_data_list:
+        # TODO: Transfer session outside the loop to reduce db load and session pool
         pgs_conn = PgsAsyncConnection()
         async with PgsAsyncSession(engine=pgs_conn.engine,
                                    log_good_ops=log_pgs_good_ops
