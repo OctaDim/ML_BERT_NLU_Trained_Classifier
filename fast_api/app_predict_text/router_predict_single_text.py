@@ -68,7 +68,7 @@ async def bert_predict_single_text(
                 predicted_category = renamed_class
             else:
                 print("Model predicted category used, no customer renamed class")
-                predicted_category = renamed_class
+                predicted_category = model_predicted_category
         else:
             print("Check customer direct category prediction availability:")
             pgs_direct_category = await direct_predict_predict_single_text(
