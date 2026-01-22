@@ -13,8 +13,8 @@ from db_postgres.postgres_models.draft_category_text_model import (
     DraftCategoryTextModel)
 from db_postgres.postgres_queries.qry_get_id_draft_dict_by_ids_list import (
     get_id_draft_dict_by_ids_list_qry)
-from db_postgres.postgres_queries_utils.save_new_model_data import (
-    save_new_model_data_qry)
+from db_postgres.postgres_queries_utils.save_new_model_object import (
+    save_new_model_object_qry)
 from fast_api.app_account_data.scheme_account_data import (
     AccountDataBert)
 from fast_api.app_add_single_category.func_add_single_category import (
@@ -114,7 +114,7 @@ async def custom_add_drafts_in_dataset_func(
                     # "new_category": None,
                     # "new_text": None,
                     "active": False}
-                await save_new_model_data_qry(
+                await save_new_model_object_qry(
                     ModelClassORM=DraftCategoryTextModel,
                     ongoing_session=pgs_session,
                     new_data=update_data)
@@ -134,11 +134,11 @@ async def custom_add_drafts_in_dataset_func(
                     # "new_category": None,
                     # "new_text": None,
                     "active": False}
-                await save_new_model_data_qry(
+                await save_new_model_object_qry(
                     ModelClassORM=DraftCategoryTextModel,
                     ongoing_session=pgs_session,
                     new_data=update_data)
-            await save_new_model_data_qry(
+            await save_new_model_object_qry(
                 ModelClassORM=DraftCategoryTextModel,
                 ongoing_session=pgs_session,
                 new_data=update_data)
@@ -153,7 +153,7 @@ async def custom_add_drafts_in_dataset_func(
     #             "current_status": DRAFT_STATUS.NEW_TEXT_DATASET_ADDED,
     #             "active": False}
     #
-    #         await save_new_model_data_qry(
+    #         await save_new_model_obj_data_qry(
     #             ModelClassORM=DraftCategoryTextModel,
     #             ongoing_session=pgs_session,
     #             new_data=update_data)

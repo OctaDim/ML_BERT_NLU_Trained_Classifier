@@ -33,8 +33,8 @@ from db_postgres.postgres_queries.qry_get_last_saved_model_dir import (
     get_last_saved_model_dir_qry)
 from db_postgres.postgres_queries.qry_save_direct_categ_text_dicts_list import (
     save_direct_cat_text_dicts_list_qry)
-from db_postgres.postgres_queries_utils.save_new_model_data import (
-    save_new_model_data_qry)
+from db_postgres.postgres_queries_utils.save_new_model_object import (
+    save_new_model_object_qry)
 from fast_api.app_account_data.scheme_account_data import (
     AccountDataBert)
 from fast_api.app_auth.funcs_auth import verify_prod_username_password
@@ -314,7 +314,7 @@ async def bert_load_model(
                 "dataset_name": dataset_save_new_name,
                 "model_directory": model_save_rand_path,
                 "creation_reason": creation_reason}
-            await save_new_model_data_qry(
+            await save_new_model_object_qry(
                 ModelClassORM=TrainedBertModel,
                 ongoing_session=pgs_session,
                 new_data=trained_model_upd_data)

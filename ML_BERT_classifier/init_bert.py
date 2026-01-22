@@ -19,8 +19,8 @@ from db_postgres.postgres_queries.qry_save_direct_categ_text_dicts_list import (
     save_direct_cat_text_dicts_list_qry)
 from db_postgres.postgres_queries.qry_save_label_text_dicts_list import (
     save_label_text_dicts_list_qry)
-from db_postgres.postgres_queries_utils.save_new_model_data import (
-    save_new_model_data_qry)
+from db_postgres.postgres_queries_utils.save_new_model_object import (
+    save_new_model_object_qry)
 from db_postgres.postgres_queries_helpers.hpr_get_bert_model_data import (
     get_postgres_bert_model_data_hpr)
 from utils_common.exec_time_decorator import execution_time_decorator
@@ -343,7 +343,7 @@ async def init_and_start_bert_model():
                     "dataset_name": start_init_dataset_name,
                     "model_directory": initial_model_dir_path,
                     "creation_reason": creation_reason}
-                await save_new_model_data_qry(
+                await save_new_model_object_qry(
                     ModelClassORM=TrainedBertModel,
                     ongoing_session=pgs_session,
                     new_data=new_trained_model_data)
@@ -385,7 +385,7 @@ async def init_and_start_bert_model():
                         "dataset_name": start_init_dataset_name,
                         "model_directory": last_saved_model_dir_path,
                         "creation_reason": creation_reason}
-                    await save_new_model_data_qry(
+                    await save_new_model_object_qry(
                         ModelClassORM=TrainedBertModel,
                         ongoing_session=pgs_session,
                         new_data=new_trained_model_data)

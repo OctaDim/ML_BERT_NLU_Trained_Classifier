@@ -28,8 +28,8 @@ from db_postgres.postgres_queries.qry_find_create_dataset import (
     find_create_dataset_qry)
 from db_postgres.postgres_queries.qry_get_last_dataset_name_and_dir import (
     get_last_dataset_name_and_dir_qry)
-from db_postgres.postgres_queries_utils.save_new_model_data import (
-    save_new_model_data_qry)
+from db_postgres.postgres_queries_utils.save_new_model_object import (
+    save_new_model_object_qry)
 from db_redis.redis_funcs.func_redis_save_key_mapping import (
     redis_save_key_mapping_dict)
 from fast_api.app_account_data.scheme_account_data import (
@@ -268,7 +268,7 @@ async def bert_save_model(
                 "dataset_name": dataset_name,
                 "model_directory": model_save_path,
                 "creation_reason": creation_reason}
-            await save_new_model_data_qry(
+            await save_new_model_object_qry(
                 ModelClassORM=TrainedBertModel,
                 ongoing_session=pgs_session,
                 new_data=trained_model_upd_data)

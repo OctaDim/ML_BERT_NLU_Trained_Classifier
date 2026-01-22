@@ -18,8 +18,8 @@ from db_postgres.postgres_queries.qry_get_label_category_dict import (
     get_label_category_dict_qry)
 from db_postgres.postgres_queries.qry_get_label_text_dict import (
     get_label_text_dict_qry)
-from db_postgres.postgres_queries_utils.save_new_model_data import (
-    save_new_model_data_qry)
+from db_postgres.postgres_queries_utils.save_new_model_object import (
+    save_new_model_object_qry)
 from fast_api.app_account_data.scheme_account_data import (
     AccountDataBert)
 from utils_common.normalized_path import get_full_file_normal_path
@@ -295,7 +295,7 @@ async def add_draft_text_category_pair(
                 "active": active_val,
                 "creation_reason": creation_reason}
 
-            await save_new_model_data_qry(
+            await save_new_model_object_qry(
                 ModelClassORM=DraftCategoryTextModel,
                 ongoing_session=pgs_session,
                 new_data=new_draft_data)

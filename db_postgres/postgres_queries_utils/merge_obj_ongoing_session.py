@@ -1,3 +1,6 @@
+from typing import Tuple, Any
+
+from sqlalchemy import Row, RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
@@ -5,12 +8,12 @@ from db_postgres.postgres_queries_utils.model_object_attrs_update import (
     update_model_obj_no_commit)
 
 
-async def merge_obj_to_ongoing_session(object_to_merge: DeclarativeBase,
-                                       new_update_data: dict,
-                                       ongoing_session: AsyncSession
-                                       ) -> None:
-    """The record will be updated if the primary key value is added in
-    new_update_data and the record with that primary key exists"""
+async def merge_obj_to_ongoing_session(
+        ongoing_session: AsyncSession,
+        object_to_merge: DeclarativeBase | Row[Tuple[Any, ...]] |
+                         Row | RowMapping,
+        new_update_data: dict,
+) -> None:
     update_model_obj_no_commit(orm_model_object=object_to_merge,
                                new_update_data=new_update_data)
     try:

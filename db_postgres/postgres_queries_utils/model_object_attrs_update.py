@@ -3,10 +3,19 @@ from typing import Dict
 from sqlalchemy.orm import DeclarativeBase
 
 
-def update_model_obj_no_commit(orm_model_object: DeclarativeBase,
-                               new_update_data: Dict[str, any]):
+def update_model_obj_no_commit(
+        orm_model_object: DeclarativeBase,
+        new_update_data: Dict[str, any],
+        log_update_data: bool = False
+) -> DeclarativeBase:
     invalid_attributes = []
     model_class_name = orm_model_object.__class__.__name__
+
+    if log_update_data:
+        print(f"\nmodel_class_name: {model_class_name}")
+        for cur_attr, cur_value in new_update_data.items():
+            print(f"{cur_attr} = {cur_value}")
+        print(f"\n")
 
     for attr_name in new_update_data.keys():
         if not hasattr(orm_model_object, attr_name):
