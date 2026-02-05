@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from utils_common.get_cur_ip_address import (
     get_cur_external_ip_via_google_dns, get_cur_internal_ip)
+from utils_common.normalized_path import get_full_file_normal_path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -62,6 +63,33 @@ API_HOST: str = api_conf_parser.get(section=api_conf_name, option="API_HOST")
 API_PORT: int = int(api_conf_parser.get(section=api_conf_name, option="API_PORT"))
 API_USERNAME: str = api_conf_parser.get(section=api_conf_name, option="API_USERNAME")
 API_PASSWORD: str = api_conf_parser.get(section=api_conf_name, option="API_PASSWORD")
+
+
+# GETTING SQLADMIN INI CONFIGS #########################################
+@dataclass(frozen=True)
+class SQLADMIN_CONFIG_NAMES:
+    SQLADMIN_PRODUCT_ANY_IP = "SQLADMIN_any_ip_prod"
+
+
+sqladmin_ini_normal_path = get_full_file_normal_path(
+    all_dir_str_parts=[BASE_DIR],
+    file_name_with_ext=".configs_sqladmin.ini")
+sqladmin_conf_parser = ConfigParser()
+sqladmin_conf_parser.read(filenames=sqladmin_ini_normal_path)
+
+if cur_external_ip == "___.___.___.___":
+    sqladmin_conf_name = SQLADMIN_CONFIG_NAMES.SQLADMIN_PRODUCT_ANY_IP  # Certain configs can be defined
+else:
+    sqladmin_conf_name = SQLADMIN_CONFIG_NAMES.SQLADMIN_PRODUCT_ANY_IP
+
+SQLADMIN_SUPERADMIN_USERNAME = sqladmin_conf_parser.get(
+    section=sqladmin_conf_name, option="SQLADMIN_SUPERADMIN_USERNAME")
+SQLADMIN_ADMIN_PASSWORD = sqladmin_conf_parser.get(
+    section=sqladmin_conf_name, option="SQLADMIN_ADMIN_PASSWORD")
+SQLADMIN_ADMIN_USERNAME = sqladmin_conf_parser.get(
+    section=sqladmin_conf_name, option="SQLADMIN_ADMIN_USERNAME")
+SQLADMIN_SUPERADMIN_PASSWORD = sqladmin_conf_parser.get(
+    section=sqladmin_conf_name, option="SQLADMIN_SUPERADMIN_PASSWORD")
 
 
 # GETTING FASTAPI INI CONFIGS #########################################
@@ -173,9 +201,9 @@ class SQLADMIN_OPTIONS:
     ADMIN_DEFAULT_DRAFT_ACCOUNT_USERNAME: str = "api_admin"
     SQLADMIN_PANEL_BASE_URL: str = "/admin_panel"
     SQLADMIN_CUSTOM_TEMPLATES_DIR: str = "admin_panel/custom_templates"
-    # CREATE_DEFAULT_ADMIN_SUPERADMIN: bool = True
-    # CREATE_DEBUG_ADMIN_SUPERADMIN: bool = True
-    TRAIN_MODEL_ACTION_TIMEOUT: int = 60  # seconds
+    CREATE_DEFAULT_ADMIN_SUPERADMIN: bool = True
+    CREATE_DEBUG_ADMIN_SUPERADMIN: bool = True
+    # TRAIN_MODEL_ACTION_TIMEOUT: int = 60  # seconds
 
 
 @dataclass(frozen=True)

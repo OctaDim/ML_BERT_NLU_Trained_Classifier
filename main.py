@@ -19,6 +19,8 @@ from configs.settings import (
 from db_postgres.postgres_conn.pgs_connection import (
     close_all_async_pgs_connections, PgsAsyncConnection,
     close_all_sync_pgs_connections)
+from db_postgres.postgres_init.db_create_sqladmin_users import (
+    create_default_sqladmin_users)
 from db_postgres.postgres_init.db_tables_initialization import (
     sync_initialize_db_tables)
 from fast_api.app_add_single_category.router_add_single_category import (
@@ -43,14 +45,14 @@ from fast_api.app_get_all_categories_texts.router_get_all_categories_texts impor
     router_bert_get_all_categories_texts)
 from fast_api.app_get_all_checkset_results.router_all_checkset_results import (
     router_bert_all_checksets_results)
+from fast_api.app_get_all_renamed_classes.router_get_renamed_classes import (
+    router_get_all_renamed_classes)
 from fast_api.app_get_all_train_tasks_list.router_all_train_tasks_list import (
     router_bert_get_train_tasks_list)
 from fast_api.app_get_checkset_result.router_get_checkset_result import (
     router_bert_single_checkset_result)
 from fast_api.app_get_confusion_matrix.router_get_confusion_matrix import (
     router_bert_get_confusion_matrix)
-from fast_api.app_get_all_renamed_classes.router_get_renamed_classes import (
-    router_get_all_renamed_classes)
 from fast_api.app_last_dataset_name.router_last_dataset_name import (
     router_bert_last_dataset_name)
 from fast_api.app_predict_text.router_predict_single_text import (
@@ -125,6 +127,7 @@ async def lifespan_on_startup():
     run_redis()
     run_postgres()
     await init_and_start_bert_model()  # Initializing Bert model
+    await create_default_sqladmin_users()  # Creating default sqladmin users
 
 
 async def lifespan_on_shutdown():
