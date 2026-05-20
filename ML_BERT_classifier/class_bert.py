@@ -91,10 +91,10 @@ class ClassifierBERT:
                                  attention_mask=attention_mask)
             logits = outputs.logits
             prediction = torch.argmax(logits, dim=1).item()
-        print(f"{'@' * 65}\n"
-              f"prediction => {prediction}\n"
-              f"self.labels[prediction] => {self.labels[prediction]}\n"
-              f"self.labels => {self.labels}\n")
+        # print(f"{'@' * 65}\n"
+        #       f"prediction => {prediction}\n"
+        #       f"self.labels[prediction] => {self.labels[prediction]}\n"
+        #       f"self.labels => {self.labels}\n")
         return self.labels[prediction]
 
     def create_train_dataset(
@@ -116,11 +116,11 @@ class ClassifierBERT:
         "tf" returns TensorFlow tensors, "np" returns NumPy arrays,
         None returns lists"""
 
-        print(f"####### texts_list: {texts_list[:5]}.......\n"
-              f"####### labels_list: {labels_list}\n"
-              f"####### truncation: {truncation}\n"
-              f"####### padding: {padding}\n"
-              f"####### return_tensors: {return_tensors}\n")
+        # print(f"####### texts_list: {texts_list[:5]}.......\n"
+        #       f"####### labels_list: {labels_list}\n"
+        #       f"####### truncation: {truncation}\n"
+        #       f"####### padding: {padding}\n"
+        #       f"####### return_tensors: {return_tensors}\n")
 
         input_ids = []
         attention_masks = []
@@ -156,11 +156,11 @@ class ClassifierBERT:
         :param batch_size: int: Batch size, depends on memory size (8, 16, 32, ...)
         :param learning_rate: float: Learning speed. The slower, the more accurate
         """
-        print(f"train_dataset: {train_dataset}\n"
-              f"max_training_epochs: {max_training_epochs}\n"
-              f"max_cont_100perc_epochs: {max_cont_100perc_epochs}\n"
-              f"batch_size: {batch_size}\n"
-              f"learning_rate: {learning_rate}\n")
+        # print(f"train_dataset: {train_dataset}\n"
+        #       f"max_training_epochs: {max_training_epochs}\n"
+        #       f"max_cont_100perc_epochs: {max_cont_100perc_epochs}\n"
+        #       f"batch_size: {batch_size}\n"
+        #       f"learning_rate: {learning_rate}\n")
 
         if not train_dataset:
             print(f"TrainDataset [ERROR]: execute method .create_train_dataset() "
@@ -373,26 +373,26 @@ class ClassifierBERT:
         but adjusts the model's classification head to accommodate the new number of labels.
         arg: new_labels_categories: dict[str: int]: e.g. {0: 'wish', 1: 'cancel', 3: 'rudeness'}"""
         try:
-            print(f"*** BEFORE MODEL REINITIALIZING:\n"
-                  f"*** self: {self}\n"
-                  f"*** hash(self): {hash(self)}\n"
-                  f"*** self.model: {self.model}\n"
-                  f"*** hash(self.model): {hash(self.model)}\n"
-                  f"*** self.model.config.num_labels: {self.model.config.num_labels}\n"
-                  f"*** self.labels [{len(self.labels)}]: {self.labels}\n"
-                  f"*** new_labels_categories {new_labels_categories}\n"
-                  f"*** len(new_labels_categories): {len(new_labels_categories)}\n")
+            # print(f"*** BEFORE MODEL REINITIALIZING:\n"
+            #       f"*** self: {self}\n"
+            #       f"*** hash(self): {hash(self)}\n"
+            #       f"*** self.model: {self.model}\n"
+            #       f"*** hash(self.model): {hash(self.model)}\n"
+            #       f"*** self.model.config.num_labels: {self.model.config.num_labels}\n"
+            #       f"*** self.labels [{len(self.labels)}]: {self.labels}\n"
+            #       f"*** new_labels_categories {new_labels_categories}\n"
+            #       f"*** len(new_labels_categories): {len(new_labels_categories)}\n")
             self.model = self.__get_bert_for_sequence_classification(new_labels_categories)
             self.labels = new_labels_categories  # Update the labels number
-            print(f"### AFTER MODEL REINITIALIZING:\n"
-                  f"### self: {self}\n"
-                  f"### hash(self): {hash(self)}\n"
-                  f"### self.model: {self.model}\n"
-                  f"### hash(self.model): {hash(self.model)}\n"
-                  f"### self.model.config.num_labels: {self.model.config.num_labels}\n"
-                  f"### self.labels [{len(self.labels)}]: {self.labels}\n"
-                  f"### new_labels_categories {new_labels_categories}\n"
-                  f"### len(new_labels_categories): {len(new_labels_categories)}\n")
+            # print(f"### AFTER MODEL REINITIALIZING:\n"
+            #       f"### self: {self}\n"
+            #       f"### hash(self): {hash(self)}\n"
+            #       f"### self.model: {self.model}\n"
+            #       f"### hash(self.model): {hash(self.model)}\n"
+            #       f"### self.model.config.num_labels: {self.model.config.num_labels}\n"
+            #       f"### self.labels [{len(self.labels)}]: {self.labels}\n"
+            #       f"### new_labels_categories {new_labels_categories}\n"
+            #       f"### len(new_labels_categories): {len(new_labels_categories)}\n")
         except Exception as error:
             error_log = f"BERT Model reinitialising [ERROR]: error: {error}"
             print(error_log)
