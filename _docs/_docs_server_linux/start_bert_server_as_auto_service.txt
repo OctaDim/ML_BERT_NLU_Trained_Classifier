@@ -119,3 +119,6 @@ sudo systemctl reload bert_micro_auto_daemon
 
 - Остановка службы-димона:
 sudo systemctl stop bert_micro_auto_daemon
+
+- Убрать из автозагрузки службу-димона:
+sudo systemctl disable bert_micro_auto_daemon
