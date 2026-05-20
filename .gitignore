@@ -240,13 +240,10 @@ stt_VOSK/models_vosk/*
 stt_WHISPER/models_whisper/*
 ML_BERT_classifier/model_bert_pretrained/*
 data_outgoing/*
-.configs_bert_api.ini
-.configs_bert_api.ini
+.configs_api.ini
 .configs_redis.ini
 .configs_sqlalchemy.ini
 .configs_postgres.ini
-.configs_fastapi.ini
-.*.ini
 
 zBackUp/main_extra_train_backup.py
 
@@ -260,3 +257,5 @@ ML_BERT_models/MODELS_BACKUP/*
 
 ML_BERT_train_datasets/DATASETS_BACKUP/
 ML_BERT_train_datasets/DATASETS_BACKUP/*
+
+.configs*.ini
